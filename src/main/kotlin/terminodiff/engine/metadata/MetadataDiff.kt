@@ -19,7 +19,7 @@ data class MetadataDiff(
 
     abstract class MetadataDiffItem<T>(
         val label: LocalizedStrings.() -> String,
-        private val instanceGetter: CodeSystem.() -> T?,
+        val instanceGetter: CodeSystem.() -> T?,
         val expectDifferences: Boolean = false
     ) {
         abstract fun compareNonNull(left: T, right: T): MetadataDiffItemResult
@@ -78,7 +78,8 @@ data class MetadataDiff(
             left: List<CodeableConcept>,
             right: List<CodeableConcept>
         ): MetadataDiffItemResult {
-            TODO()
+            //TODO()
+            return MetadataDiffItemResult.DIFFERENT
         }
 
     }
@@ -96,7 +97,7 @@ data class MetadataDiff(
     }
 
     companion object {
-        fun generateDiffItems(fhirContext: FhirContext) = listOf(
+        fun generateDiffItems(@Suppress("UNUSED_PARAMETER") fhirContext: FhirContext) = listOf(
             MetadataStringDiffItem({ id }, { id }, true),
             MetadataStringDiffItem({ canonicalUrl }, { url }),
             MetadataListDiffItem({ identifiers }, { identifier }),

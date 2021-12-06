@@ -1,21 +1,24 @@
 package terminodiff.i18n
 
+import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult
+
 abstract class LocalizedStrings(
-    val language: String,
-    val terminoDiff: String = "TerminoDiff",
     val canonicalUrl: String,
-    val version: String = "Version",
-    val title: String,
-    val name: String = "Name",
+    val contact: String,
+    val date: String,
+    val description: String,
+    val experimental: String,
     val id: String = "ID",
     val identifiers: String,
-    val status: String = "Status",
-    val experimental: String,
-    val date: String,
+    val jurisdiction: String,
+    val language: String,
+    val metadataDiffResults: (MetadataDiffItemResult) -> String,
+    val name: String = "Name",
     val publisher: String,
-    val contact: String,
-    val description: String,
-    val jurisdiction: String
+    val status: String = "Status",
+    val terminoDiff: String = "TerminoDiff",
+    val title: String,
+    val version: String = "Version",
 )
 
 enum class SupportedLocale {
@@ -28,29 +31,49 @@ enum class SupportedLocale {
 }
 
 class GermanStrings : LocalizedStrings(
-    language = "de",
     canonicalUrl = "Kanonische URL",
-    title = "Titel",
-    identifiers = "IDs",
-    experimental = "Experimentell?",
-    date = "Datum",
-    publisher = "Herausgeber",
     contact = "Kontakt",
+    date = "Datum",
     description = "Beschreibung",
-    jurisdiction = "Jurisdiktion"
+    experimental = "Experimentell?",
+    identifiers = "IDs",
+    jurisdiction = "Jurisdiktion",
+    language = "de",
+    metadataDiffResults = {
+        when (it) {
+            MetadataDiffItemResult.BOTH_EMPTY -> "beide leer"
+            MetadataDiffItemResult.DIFFERENT -> "unterschiedlich"
+            MetadataDiffItemResult.IDENTICAL -> "identisch"
+            MetadataDiffItemResult.DIFFERENT_COUNT -> "unterschiedliche Anzahl"
+            MetadataDiffItemResult.BOTH_NULL -> "beide Null"
+            MetadataDiffItemResult.DIFFERENT_TEXT -> "unterschiedlicher Text"
+        }
+    },
+    publisher = "Herausgeber",
+    title = "Titel",
 )
 
 class EnglishStrings : LocalizedStrings(
-    language = "en",
     canonicalUrl = "Canonical URL",
-    title = "Title",
-    identifiers = "Identifiers",
-    experimental = "Experimental?",
-    date = "Date",
-    publisher = "Publisher",
     contact = "Contact",
+    date = "Date",
     description = "Description",
-    jurisdiction = "Jurisdiction"
+    experimental = "Experimental?",
+    identifiers = "Identifiers",
+    jurisdiction = "Jurisdiction",
+    language = "en",
+    metadataDiffResults = {
+        when (it) {
+            MetadataDiffItemResult.BOTH_EMPTY -> "both empty"
+            MetadataDiffItemResult.DIFFERENT -> "different"
+            MetadataDiffItemResult.IDENTICAL -> "identical"
+            MetadataDiffItemResult.DIFFERENT_COUNT -> "different count"
+            MetadataDiffItemResult.BOTH_NULL -> "both null"
+            MetadataDiffItemResult.DIFFERENT_TEXT -> "different text"
+        }
+    },
+    publisher = "Publisher",
+    title = "Title",
 )
 
 val defaultStrings = getStrings()
