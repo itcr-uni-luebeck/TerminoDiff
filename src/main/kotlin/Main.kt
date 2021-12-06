@@ -9,11 +9,10 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.ui.text.intl.Locale
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import com.google.gson.Gson
-import terminodiff.i18n.Strings
+import terminodiff.i18n.LocalizedStrings
 import terminodiff.i18n.SupportedLocale
 import terminodiff.i18n.getStrings
 
@@ -35,10 +34,11 @@ fun App() {
 }
 
 @Composable
-fun LocalizedApp(strings: Strings, onLocaleChange: () -> Unit) {
+fun LocalizedApp(strings: LocalizedStrings, onLocaleChange: () -> Unit) {
     MaterialTheme {
         Column {
             Text(Gson().toJson(strings))
+            Text(strings.language)
             Button(onClick = { onLocaleChange() }) {
                 Text(strings.terminoDiff)
             }

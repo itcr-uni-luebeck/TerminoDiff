@@ -6,17 +6,15 @@ import terminodiff.engine.concepts.ConceptDiff
 import terminodiff.engine.metadata.MetadataDiff
 import terminodiff.engine.metadata.MetadataDiffBuilder
 
-class CodeSystemDiff(
+data class CodeSystemDiff(
     val metadata: MetadataDiff,
     val concepts: ConceptDiff,
-) {
-
-}
+)
 
 class CodeSystemDiffBuilder(
-    val fhirContext: FhirContext,
-    val cs1: CodeSystem,
-    val cs2: CodeSystem
+    private val fhirContext: FhirContext,
+    private val cs1: CodeSystem,
+    private val cs2: CodeSystem
 ) {
     fun build(): CodeSystemDiff {
         val metadataDiff = MetadataDiffBuilder(fhirContext, cs1, cs2).build()
