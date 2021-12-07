@@ -4,6 +4,7 @@ import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult
 
 abstract class LocalizedStrings(
     val canonicalUrl: String,
+    val changeLanguage: String,
     val contact: String,
     val date: String,
     val description: String,
@@ -12,6 +13,8 @@ abstract class LocalizedStrings(
     val identifiers: String,
     val jurisdiction: String,
     val language: String,
+    val loadLeftFile: String,
+    val loadRightFile: String,
     val metadataDiffResults: (MetadataDiffItemResult) -> String,
     val name: String = "Name",
     val publisher: String,
@@ -39,6 +42,8 @@ class GermanStrings : LocalizedStrings(
     identifiers = "IDs",
     jurisdiction = "Jurisdiktion",
     language = "de",
+    loadLeftFile = "Linke Datei laden",
+    loadRightFile = "Rechte Datei laden",
     metadataDiffResults = {
         when (it) {
             MetadataDiffItemResult.BOTH_EMPTY -> "beide leer"
@@ -51,6 +56,7 @@ class GermanStrings : LocalizedStrings(
     },
     publisher = "Herausgeber",
     title = "Titel",
+    changeLanguage = "Sprache wechseln"
 )
 
 class EnglishStrings : LocalizedStrings(
@@ -61,6 +67,8 @@ class EnglishStrings : LocalizedStrings(
     experimental = "Experimental?",
     identifiers = "Identifiers",
     jurisdiction = "Jurisdiction",
+    loadLeftFile = "Load left file",
+    loadRightFile = "Load right file",
     language = "en",
     metadataDiffResults = {
         when (it) {
@@ -74,6 +82,7 @@ class EnglishStrings : LocalizedStrings(
     },
     publisher = "Publisher",
     title = "Title",
+    changeLanguage = "Change Language"
 )
 
 val defaultStrings = getStrings()
