@@ -3,6 +3,7 @@ package terminodiff.ui
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
@@ -14,8 +15,6 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.TextStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
 import org.hl7.fhir.r4.model.CodeSystem
@@ -23,7 +22,6 @@ import terminodiff.engine.metadata.MetadataDiff
 import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult.*
 import terminodiff.engine.metadata.MetadataDiffBuilder
 import terminodiff.i18n.LocalizedStrings
-import javax.swing.border.Border
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -32,7 +30,7 @@ fun MetadataDiffPanel(
     fhirContext: FhirContext,
     leftCs: CodeSystem,
     rightCs: CodeSystem,
-    localizedStrings: LocalizedStrings
+    localizedStrings: LocalizedStrings,
 ) {
     val builder by remember { mutableStateOf(MetadataDiffBuilder(fhirContext, leftCs, rightCs)) }
     val diff by remember { mutableStateOf(builder.build()) }
@@ -40,9 +38,9 @@ fun MetadataDiffPanel(
     LazyVerticalGrid(
         cells = GridCells.Adaptive(384.dp),
         state = listState,
+        modifier = Modifier.padding(top = 8.dp),
         contentPadding = PaddingValues(
             start = 12.dp,
-            top = 16.dp,
             end = 12.dp,
             bottom = 16.dp
         ),

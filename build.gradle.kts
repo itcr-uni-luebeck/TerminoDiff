@@ -20,6 +20,9 @@ repositories {
 
 val hapiVersion = "5.6.0"
 val slf4jVersion = "1.7.32"
+val graphStreamVersion = "2.0"
+val jGraphTVersion = "1.5.1"
+val jGraphXVersion = "v3.9.3"
 
 dependencies {
     testImplementation(kotlin("test"))
@@ -29,8 +32,14 @@ dependencies {
     //implementation("ca.uhn.hapi.fhir:hapi-fhir-client-okhttp:$hapiVersion")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-validation:$hapiVersion")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:$hapiVersion")
-    implementation("org.slf4j:slf4j-api:${slf4jVersion}")
-    implementation("org.slf4j:slf4j-simple:${slf4jVersion}")
+    implementation("org.slf4j:slf4j-api:$slf4jVersion")
+    implementation("org.slf4j:slf4j-simple:$slf4jVersion")
+    implementation("org.graphstream:gs-core:$graphStreamVersion")
+    implementation("org.graphstream:gs-core:$graphStreamVersion")
+    implementation("org.graphstream:gs-ui-swing:$graphStreamVersion")
+    implementation("org.jgrapht:jgrapht-core:$jGraphTVersion")
+    implementation("org.jgrapht:jgrapht-ext:$jGraphTVersion")
+    implementation("com.github.jgraph:jgraphx:$jGraphXVersion")
 }
 
 tasks.test {

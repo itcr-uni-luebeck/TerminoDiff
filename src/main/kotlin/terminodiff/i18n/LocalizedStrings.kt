@@ -15,6 +15,7 @@ abstract class LocalizedStrings(
     val language: String,
     val loadLeftFile: String,
     val loadRightFile: String,
+    val graphsOpenInOtherWindows: String,
     val metadataDiffResults: (MetadataDiffItemResult) -> String,
     val name: String = "Name",
     val publisher: String,
@@ -22,6 +23,9 @@ abstract class LocalizedStrings(
     val terminoDiff: String = "TerminoDiff",
     val title: String,
     val version: String = "Version",
+    val viewGraphTitle: String,
+    val showLeftGraphButton: String,
+    val showRightGraphButton: String
 )
 
 enum class SupportedLocale {
@@ -35,10 +39,12 @@ enum class SupportedLocale {
 
 class GermanStrings : LocalizedStrings(
     canonicalUrl = "Kanonische URL",
+    changeLanguage = "Sprache wechseln",
     contact = "Kontakt",
     date = "Datum",
     description = "Beschreibung",
     experimental = "Experimentell?",
+    graphsOpenInOtherWindows = "Graphen öffnen sich in einem neuen Fenster.",
     identifiers = "IDs",
     jurisdiction = "Jurisdiktion",
     language = "de",
@@ -55,17 +61,21 @@ class GermanStrings : LocalizedStrings(
         }
     },
     publisher = "Herausgeber",
+    showLeftGraphButton = "Linken Graphen zeigen",
+    showRightGraphButton = "Rechten Graphen zeigen",
     title = "Titel",
-    changeLanguage = "Sprache wechseln"
+    viewGraphTitle = "Graph anzeigen"
 )
 
 class EnglishStrings : LocalizedStrings(
     canonicalUrl = "Canonical URL",
+    changeLanguage = "Change Language",
     contact = "Contact",
     date = "Date",
     description = "Description",
     experimental = "Experimental?",
-    identifiers = "Identifiers",
+    graphsOpenInOtherWindows = "Graphs open in another window."
+    ,identifiers = "Identifiers",
     jurisdiction = "Jurisdiction",
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
@@ -81,8 +91,10 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     publisher = "Publisher",
+    showLeftGraphButton = "Show left graph",
+    showRightGraphButton = "Show right graph",
     title = "Title",
-    changeLanguage = "Change Language"
+    viewGraphTitle = "View graph"
 )
 
 val defaultStrings = getStrings()
