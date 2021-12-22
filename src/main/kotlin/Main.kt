@@ -2,85 +2,70 @@
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.material.MaterialTheme
 import androidx.compose.material.Scaffold
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.window.*
+import androidx.compose.ui.window.ApplicationScope
+import androidx.compose.ui.window.Window
+import androidx.compose.ui.window.application
 import ca.uhn.fhir.context.FhirContext
 import org.hl7.fhir.r4.model.CodeSystem
-import org.hl7.fhir.r4.model.Enumerations
-import org.hl7.fhir.r4.model.Identifier
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.i18n.SupportedLocale
 import terminodiff.i18n.getStrings
-import terminodiff.ui.TerminoDiffTopAppBar
 import terminodiff.ui.MetadataDiffPanel
 import terminodiff.ui.ShowGraphsPanel
+import terminodiff.ui.TerminoDiffTopAppBar
+import terminodiff.ui.theme.TerminoDiffTheme
 import java.io.File
+import java.util.*
 
-const val baseFhirSystem = "https://fhir.example.org"
-const val identifierSystem = "$baseFhirSystem/Identifier"
-val root = LoggerFactory.getILoggerFactory().getLogger("terminodiff")
+val logger: Logger = LoggerFactory.getILoggerFactory().getLogger("terminodiff")
 
 class TestContainer {
     companion object {
         val fhirContext: FhirContext = FhirContext.forR4()
 
-        val cs1 = CodeSystem().apply {
-            url = "$baseFhirSystem/CodeSystem/example"
-            title = "Example CodeSystem for TerminoloDiff version 1.0.0"
-            version = "1.0.0"
-            name = "example-code-system-terminologodiff"
-            id = "ex-cs-terminologodiff-v1"
-            status = Enumerations.PublicationStatus.ACTIVE
-            experimental = true
-            identifier = listOf(Identifier().apply {
-                url = "$identifierSystem/1"
-                value = "ID1"
-            })
-        }
-
-        val oncotree: CodeSystem = fhirContext.newJsonParser().parseResource(
+        private fun loadCsByName(filename: String): CodeSystem = fhirContext.newJsonParser().parseResource(
             CodeSystem::class.java,
-            File("src/main/resources/oncotree.json").readText(),
+            File("src/main/resources/testresources/$filename").readText(),
         )
 
-        val cs2 = cs1.copy().apply {
-            title = "Example CodeSystem for TerminoloDiff version 2.0.0"
-            version = "2.0.0"
-            id = "ex-cs-terminologodiff-v2"
-            experimental = false
-            identifier = listOf(Identifier().apply {
-                url = "$identifierSystem/2"
-                value = "ID2"
-            })
-        }
+        val cs1 = loadCsByName("simple-left.json")
+        val cs2 = loadCsByName("simple-right.json")
+
+        val oncotreeLeft = loadCsByName("oncotree_2020_10_01.json")
+        val oncotreeRight = loadCsByName("oncotree_2021_11_02.json")
+
     }
 }
+
 
 @Composable
 fun AppWindow(applicationScope: ApplicationScope) {
     var locale by remember { mutableStateOf(SupportedLocale.getDefaultLocale()) }
     var strings by remember { mutableStateOf(getStrings(locale)) }
     val scrollState = rememberScrollState()
+    var useDarkTheme by remember { mutableStateOf(false) }
     Window(onCloseRequest = { applicationScope.exitApplication() }) {
         this.window.title = strings.terminoDiff
-        LocalizedAppWindow(strings, scrollState) {
+
+        LocalizedAppWindow(strings = strings, scrollState = scrollState, useDarkTheme = useDarkTheme, onLocaleChange = {
             locale = when (locale) {
                 SupportedLocale.DE -> SupportedLocale.EN
                 SupportedLocale.EN -> SupportedLocale.DE
             }
             strings = getStrings(locale)
-            root.info("changed locale to ${locale.name}")
-        }
+            logger.info("changed locale to ${locale.name}")
+        }, onChangeDarkTheme = {
+            useDarkTheme = !useDarkTheme
+        })
     }
 }
 
@@ -88,27 +73,38 @@ fun AppWindow(applicationScope: ApplicationScope) {
 fun LocalizedAppWindow(
     strings: LocalizedStrings,
     scrollState: ScrollState,
+    useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
+    onChangeDarkTheme: () -> Unit
 ) {
-    MaterialTheme {
+    TerminoDiffTheme(useDarkTheme = useDarkTheme) {
         Scaffold(
             topBar = {
                 TerminoDiffTopAppBar(
                     localizedStrings = strings,
                     onLocaleChange = onLocaleChange,
                     onLoadLeftFile = {},
-                    onLoadRightFile = {})
-            }
+                    onLoadRightFile = {},
+                    onChangeDarkTheme = onChangeDarkTheme
+                )
+            },
+            backgroundColor = MaterialTheme.colorScheme.background
         ) {
             Column(
-                modifier = Modifier.scrollable(scrollState, Orientation.Vertical)
+                modifier = Modifier.scrollable(scrollState, Orientation.Vertical),
             ) {
-                ShowGraphsPanel(TestContainer.fhirContext, TestContainer.oncotree, TestContainer.oncotree, strings)
-                MetadataDiffPanel(
+                ShowGraphsPanel(
                     TestContainer.fhirContext,
-                    TestContainer.cs1,
-                    TestContainer.oncotree,
+                    TestContainer.oncotreeLeft,
+                    TestContainer.oncotreeLeft,
                     strings
+                )
+                MetadataDiffPanel(
+                    fhirContext = TestContainer.fhirContext,
+                    leftCs = TestContainer.oncotreeLeft,
+                    rightCs = TestContainer.oncotreeRight,
+                    localizedStrings = strings,
+                    useDarkTheme = useDarkTheme
                 )
             }
         }

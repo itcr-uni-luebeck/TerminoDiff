@@ -3,11 +3,17 @@ package terminodiff.ui
 import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
-import androidx.compose.material.*
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material.Card
+import androidx.compose.material.OutlinedTextField
+import androidx.compose.material.TextFieldColors
+import androidx.compose.material.TextFieldDefaults
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -22,6 +28,9 @@ import terminodiff.engine.metadata.MetadataDiff
 import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult.*
 import terminodiff.engine.metadata.MetadataDiffBuilder
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.ui.theme.DiffColors
+import terminodiff.ui.theme.customGreen
+import terminodiff.ui.theme.getDiffColors
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -31,10 +40,12 @@ fun MetadataDiffPanel(
     leftCs: CodeSystem,
     rightCs: CodeSystem,
     localizedStrings: LocalizedStrings,
+    useDarkTheme: Boolean
 ) {
     val builder by remember { mutableStateOf(MetadataDiffBuilder(fhirContext, leftCs, rightCs)) }
     val diff by remember { mutableStateOf(builder.build()) }
     val listState = rememberLazyListState()
+
     LazyVerticalGrid(
         cells = GridCells.Adaptive(384.dp),
         state = listState,
@@ -51,12 +62,15 @@ fun MetadataDiffPanel(
                 is MetadataDiff.MetadataListDiffItem -> res.diffItem.instanceGetter.invoke(cs)?.joinToString(",")
                 else -> "not yet implemented"
             }
+
+            val diffColors = getDiffColors(useDarkTheme = useDarkTheme)
             MetadataItem(
-                res.diffItem.label,
-                itemGetter(leftCs),
-                itemGetter(rightCs),
-                res,
-                localizedStrings = localizedStrings
+                label = res.diffItem.label,
+                valueLeft = itemGetter(leftCs),
+                valueRight = itemGetter(rightCs),
+                comparisonResult = res,
+                localizedStrings = localizedStrings,
+                diffColors = diffColors
             )
         }
     }
@@ -68,23 +82,29 @@ fun MetadataItem(
     valueLeft: String?,
     valueRight: String?,
     comparisonResult: MetadataDiff.MetadataComparisonResult,
-    localizedStrings: LocalizedStrings
+    localizedStrings: LocalizedStrings,
+    diffColors: DiffColors
 ) {
     Card(
         modifier = Modifier
             .padding(4.dp)
             .defaultMinSize(minHeight = 220.dp),
         elevation = 8.dp,
+        backgroundColor = MaterialTheme.colorScheme.surfaceVariant,
+        contentColor = MaterialTheme.colorScheme.onSurface
     ) {
         Column(
-            modifier = Modifier.padding(4.dp).fillMaxSize().border(BorderStroke(1.dp, Color.Red)),
+            modifier = Modifier.padding(4.dp).fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(text = label.invoke(localizedStrings), style = MaterialTheme.typography.h6)
-            //Column(modifier = Modifier().border(BorderStroke(1.dp, Color.Green)), verticalArrangement = Arrangement.Center) {
-            Box(Modifier.fillMaxHeight().border(BorderStroke(1.dp, Color.Green))) {
+            Text(
+                text = label.invoke(localizedStrings),
+                style = MaterialTheme.typography.headlineSmall,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
+            Box(Modifier.fillMaxHeight()) {
                 Column(
-                    modifier = Modifier.fillMaxSize().align(Alignment.Center).border(BorderStroke(1.dp, Color.Blue)),
+                    modifier = Modifier.fillMaxSize().align(Alignment.Center),
                     verticalArrangement = Arrangement.Center,
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -92,9 +112,11 @@ fun MetadataItem(
                         value = valueLeft,
                         label = label.invoke(localizedStrings)
                     )
+                    val (backgroundColor, foregroundColor) = colorForResult(comparisonResult, diffColors)
                     Chip(
                         text = localizedStrings.metadataDiffResults.invoke(comparisonResult.result),
-                        color = colorForResult(comparisonResult)
+                        backgroundColor = backgroundColor,
+                        textColor = foregroundColor
                     )
                     readOnlyTextField(
                         value = valueRight,
@@ -107,9 +129,12 @@ fun MetadataItem(
     }
 }
 
-fun colorForResult(comparisonResult: MetadataDiff.MetadataComparisonResult) = when (comparisonResult.result) {
-    DIFFERENT_TEXT, DIFFERENT, DIFFERENT_COUNT -> if (comparisonResult.expected) Color.Yellow else Color.Red
-    else -> Color.Green
+fun colorForResult(
+    comparisonResult: MetadataDiff.MetadataComparisonResult,
+    diffColors: DiffColors
+): Pair<Color, Color> = when (comparisonResult.result) {
+    DIFFERENT_TEXT, DIFFERENT, DIFFERENT_COUNT -> if (comparisonResult.expected) diffColors.yellowPair else diffColors.redPair
+    else -> diffColors.greenPair
 }
 
 @Composable
@@ -123,6 +148,7 @@ fun readOnlyTextField(
         modifier = modifier.fillMaxWidth(),
         onValueChange = {},
         readOnly = true,
+        colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = MaterialTheme.colorScheme.secondary)
     )
 
 @Preview
@@ -130,19 +156,20 @@ fun readOnlyTextField(
 fun Chip(
     modifier: Modifier = Modifier,
     text: String,
-    color: Color,
+    backgroundColor: Color,
+    textColor: Color
 ) {
     Surface(
         modifier = modifier.padding(4.dp),
-        elevation = 8.dp,
-        shape = MaterialTheme.shapes.medium,
-        color = color
+        color = backgroundColor,
+        tonalElevation = 4.dp,
+        shape = RoundedCornerShape(8.dp)
     ) {
         Row {
             Text(
                 text = text,
-                style = MaterialTheme.typography.body2,
-                color = Color.White,
+                style = MaterialTheme.typography.bodyMedium,
+                color = textColor,
                 modifier = Modifier.padding(8.dp)
             )
         }

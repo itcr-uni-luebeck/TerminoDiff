@@ -25,7 +25,8 @@ abstract class LocalizedStrings(
     val version: String = "Version",
     val viewGraphTitle: String,
     val showLeftGraphButton: String,
-    val showRightGraphButton: String
+    val showRightGraphButton: String,
+    val toggleDarkTheme: String
 )
 
 enum class SupportedLocale {
@@ -44,12 +45,12 @@ class GermanStrings : LocalizedStrings(
     date = "Datum",
     description = "Beschreibung",
     experimental = "Experimentell?",
-    graphsOpenInOtherWindows = "Graphen öffnen sich in einem neuen Fenster.",
     identifiers = "IDs",
     jurisdiction = "Jurisdiktion",
     language = "de",
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
+    graphsOpenInOtherWindows = "Graphen öffnen sich in einem neuen Fenster.",
     metadataDiffResults = {
         when (it) {
             MetadataDiffItemResult.BOTH_EMPTY -> "beide leer"
@@ -61,10 +62,11 @@ class GermanStrings : LocalizedStrings(
         }
     },
     publisher = "Herausgeber",
+    title = "Titel",
+    viewGraphTitle = "Graph anzeigen",
     showLeftGraphButton = "Linken Graphen zeigen",
     showRightGraphButton = "Rechten Graphen zeigen",
-    title = "Titel",
-    viewGraphTitle = "Graph anzeigen"
+    toggleDarkTheme = "Helles/Dunkles Thema"
 )
 
 class EnglishStrings : LocalizedStrings(
@@ -74,12 +76,13 @@ class EnglishStrings : LocalizedStrings(
     date = "Date",
     description = "Description",
     experimental = "Experimental?",
-    graphsOpenInOtherWindows = "Graphs open in another window."
-    ,identifiers = "Identifiers",
+    identifiers = "Identifiers"
+    ,
     jurisdiction = "Jurisdiction",
+    language = "en",
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
-    language = "en",
+    graphsOpenInOtherWindows = "Graphs open in another window.",
     metadataDiffResults = {
         when (it) {
             MetadataDiffItemResult.BOTH_EMPTY -> "both empty"
@@ -91,10 +94,11 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     publisher = "Publisher",
+    title = "Title",
+    viewGraphTitle = "View graph",
     showLeftGraphButton = "Show left graph",
     showRightGraphButton = "Show right graph",
-    title = "Title",
-    viewGraphTitle = "View graph"
+    toggleDarkTheme = "Toggle dark theme"
 )
 
 val defaultStrings = getStrings()

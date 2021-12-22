@@ -1,0 +1,48 @@
+{
+  "resourceType": "CodeSystem",
+  "url": "http://example.org/fhir/CodeSystem/terminodiff",
+  "title": "Example CodeSystem for TerminoDiff version 1.0.0",
+  "version": "1.0.0",
+  "name": "example-codesystem-terminodiff",
+  "id": "ex-cs-terminodiff-v100",
+  "status": "active",
+  "experimental": true,
+  "identifier": [
+    {
+      "system": "http://example.org/fhir/Identifier/1",
+      "value": "ID1"
+    }
+  ],
+  "hierarchyMeaning": "is-a",
+  "content": "complete",
+  "concept": [
+    {
+      "code": "A",
+      "display": "Left A"
+    },
+    {
+      "code": "B",
+      "display": "Left B",
+      "property": [{
+        "code": "parent",
+        "valueCode": "A"
+      }]
+    },
+    {
+      "code": "C",
+      "display": "Left C",
+      "property": [{
+        "code": "parent",
+        "valueCode": "A"
+      }]
+    },
+    {
+      "code": "D",
+      "display": "Left D",
+      "property": [{
+        "code": "parent",
+        "valueCode": "C"
+      }]
+    }
+  ]
+}

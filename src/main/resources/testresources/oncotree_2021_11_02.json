@@ -1,41 +1,5 @@
 {
-  "resourceType": "CodeSystem",
-  "id": "oncotree-2020-10-01",
-  "meta": {
-    "versionId": "1",
-    "lastUpdated": "2021-10-07T09:55:40.239+00:00"
-  },
-  "url": "http://oncotree.mskcc.org/fhir/CodeSystem",
-  "version": "20201001",
-  "name": "oncotree",
-  "title": "OncoTree",
-  "status": "draft",
-  "date": "2020-10-01",
-  "valueSet": "http://oncotree.mskcc.org/fhir/ValueSet",
-  "hierarchyMeaning": "is-a",
-  "content": "complete",
-  "property": [
-    {
-      "code": "color",
-      "description": "Color in the Oncotree Visualisation",
-      "type": "string"
-    },
-    {
-      "code": "level",
-      "description": "Level in the Oncotree hierarchy",
-      "type": "integer"
-    },
-    {
-      "code": "umls",
-      "description": "Linked UMLS concept",
-      "type": "string"
-    },
-    {
-      "code": "nci",
-      "description": "Linked NCI concept",
-      "type": "string"
-    }
-  ],
+  "id": "oncotree-2021-11-02",
   "concept": [
     {
       "code": "MMB",
@@ -838,32 +802,6 @@
       ]
     },
     {
-      "code": "ADRENAL_GLAND",
-      "display": "Adrenal Gland",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Purple"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0001625"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12666"
-        }
-      ]
-    },
-    {
       "code": "WM",
       "display": "Waldenstrom Macroglobulinemia",
       "property": [
@@ -1152,6 +1090,32 @@
       ]
     },
     {
+      "code": "PENIS",
+      "display": "Penis",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Blue"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0030851"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12409"
+        }
+      ]
+    },
+    {
       "code": "OPHSC",
       "display": "Oropharynx Squamous Cell Carcinoma",
       "property": [
@@ -1277,7 +1241,7 @@
       "property": [
         {
           "code": "level",
-          "valueInteger": 3
+          "valueInteger": 4
         },
         {
           "code": "color",
@@ -1806,32 +1770,6 @@
       ]
     },
     {
-      "code": "CERVIX",
-      "display": "Cervix",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Teal"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0007874"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12311"
-        }
-      ]
-    },
-    {
       "code": "SIC",
       "display": "Small Intestinal Carcinoma",
       "property": [
@@ -2011,7 +1949,7 @@
       "property": [
         {
           "code": "level",
-          "valueInteger": 3
+          "valueInteger": 4
         },
         {
           "code": "color",
@@ -2200,6 +2138,32 @@
       ]
     },
     {
+      "code": "LIVER",
+      "display": "Liver",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "MediumSeaGreen"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0023884"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12392"
+        }
+      ]
+    },
+    {
       "code": "MLNFGFR1",
       "display": "Myeloid/Lymphoid Neoplasms with FGFR1 Rearrangement",
       "property": [
@@ -2240,6 +2204,50 @@
         {
           "code": "nci",
           "valueString": "C40038"
+        }
+      ]
+    },
+    {
+      "code": "MBLWNT",
+      "display": "Medulloblastoma, WNT Subtype",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "MBL"
+        }
+      ]
+    },
+    {
+      "code": "SOFT_TISSUE",
+      "display": "Soft Tissue",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "LightYellow"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0225317"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12471"
         }
       ]
     },
@@ -2306,6 +2314,32 @@
       ]
     },
     {
+      "code": "HEAD_NECK",
+      "display": "Head and Neck",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "DarkRed"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0460004"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12418"
+        }
+      ]
+    },
+    {
       "code": "NETNOS",
       "display": "Neuroendocrine Tumor, NOS",
       "property": [
@@ -2338,32 +2372,6 @@
         {
           "code": "parent",
           "valueCode": "PACT"
-        }
-      ]
-    },
-    {
-      "code": "AMPULLA_OF_VATER",
-      "display": "Ampulla of Vater",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Purple"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0042425"
-        },
-        {
-          "code": "nci",
-          "valueString": "C13011"
         }
       ]
     },
@@ -2422,6 +2430,32 @@
       ]
     },
     {
+      "code": "BONE",
+      "display": "Bone",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "White"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0262950"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12366"
+        }
+      ]
+    },
+    {
       "code": "EATL",
       "display": "Enteropathy-Associated T-Cell Lymphoma",
       "property": [
@@ -2436,32 +2470,6 @@
         {
           "code": "parent",
           "valueCode": "MTNN"
-        }
-      ]
-    },
-    {
-      "code": "BLADDER",
-      "display": "Bladder/Urinary Tract",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Yellow"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0005682"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12414"
         }
       ]
     },
@@ -2958,32 +2966,6 @@
       ]
     },
     {
-      "code": "PERITONEUM",
-      "display": "Peritoneum",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Green"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0031153"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12770"
-        }
-      ]
-    },
-    {
       "code": "NECNOS",
       "display": "Neuroendocrine Carcinoma, NOS",
       "property": [
@@ -3108,6 +3090,32 @@
       ]
     },
     {
+      "code": "CERVIX",
+      "display": "Cervix",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Teal"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0007874"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12311"
+        }
+      ]
+    },
+    {
       "code": "OSGCT",
       "display": "Osteoclastic Giant Cell Tumor",
       "property": [
@@ -3162,6 +3170,24 @@
         {
           "code": "umls",
           "valueString": "C0279662"
+        }
+      ]
+    },
+    {
+      "code": "DMBLSHH",
+      "display": "Desmoplastic/Nodular Medulloblastoma, SHH Subtype",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "DMBL"
         }
       ]
     },
@@ -3316,6 +3342,32 @@
         {
           "code": "parent",
           "valueCode": "BLLRGA"
+        }
+      ]
+    },
+    {
+      "code": "VULVA",
+      "display": "Vulva/Vagina",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Purple"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0042993"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12408"
         }
       ]
     },
@@ -4014,6 +4066,32 @@
       ]
     },
     {
+      "code": "KIDNEY",
+      "display": "Kidney",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Orange"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0022646"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12415"
+        }
+      ]
+    },
+    {
       "code": "AGA",
       "display": "Anal Gland Adenocarcinoma",
       "property": [
@@ -4210,6 +4288,24 @@
         {
           "code": "nci",
           "valueString": "C3158"
+        }
+      ]
+    },
+    {
+      "code": "MBENSHH",
+      "display": "Medulloblastoma with Extensive Nodularity, SHH Subtype",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "MBEN"
         }
       ]
     },
@@ -4908,32 +5004,6 @@
       ]
     },
     {
-      "code": "PNS",
-      "display": "Peripheral Nervous System",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Gray"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0206417"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12465"
-        }
-      ]
-    },
-    {
       "code": "ANM",
       "display": "Anaplastic Meningioma",
       "property": [
@@ -5334,6 +5404,32 @@
         {
           "code": "nci",
           "valueString": "C4049"
+        }
+      ]
+    },
+    {
+      "code": "BRAIN",
+      "display": "CNS/Brain",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C3714787"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12438"
         }
       ]
     },
@@ -5902,32 +5998,6 @@
       ]
     },
     {
-      "code": "LYMPH",
-      "display": "Lymphoid",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "LimeGreen"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0024202"
-        },
-        {
-          "code": "nci",
-          "valueString": "C13252"
-        }
-      ]
-    },
-    {
       "code": "LGGNOS",
       "display": "Low-Grade Glioma, NOS",
       "property": [
@@ -6314,6 +6384,50 @@
       ]
     },
     {
+      "code": "DMBLNOS",
+      "display": "Desmoplastic/Nodular Medulloblastoma, NOS",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "DMBL"
+        }
+      ]
+    },
+    {
+      "code": "OTHER",
+      "display": "Other",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Black"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0205394"
+        },
+        {
+          "code": "nci",
+          "valueString": "C17649"
+        }
+      ]
+    },
+    {
       "code": "PRSC",
       "display": "Prostate Squamous Cell Carcinoma",
       "property": [
@@ -6444,32 +6558,6 @@
       ]
     },
     {
-      "code": "EYE",
-      "display": "Eye",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Green"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0015392"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12401"
-        }
-      ]
-    },
-    {
       "code": "ASM",
       "display": "Aggressive Systemic Mastocytosis",
       "property": [
@@ -6510,32 +6598,6 @@
         {
           "code": "nci",
           "valueString": "C7712"
-        }
-      ]
-    },
-    {
-      "code": "CHOL",
-      "display": "Cholangiocarcinoma",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 2
-        },
-        {
-          "code": "color",
-          "valueString": "Green"
-        },
-        {
-          "code": "parent",
-          "valueCode": "BILIARY_TRACT"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0206698"
-        },
-        {
-          "code": "nci",
-          "valueString": "C4436"
         }
       ]
     },
@@ -6638,32 +6700,6 @@
       ]
     },
     {
-      "code": "BOWEL",
-      "display": "Bowel",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "SaddleBrown"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0021853"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12736"
-        }
-      ]
-    },
-    {
       "code": "WT",
       "display": "Wilms' Tumor",
       "property": [
@@ -6682,6 +6718,24 @@
         {
           "code": "umls",
           "valueString": "CL343552"
+        }
+      ]
+    },
+    {
+      "code": "MBLSHH",
+      "display": "Medulloblastoma, SHH Subtype",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "MBL"
         }
       ]
     },
@@ -6966,32 +7020,6 @@
       ]
     },
     {
-      "code": "HEAD_NECK",
-      "display": "Head and Neck",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "DarkRed"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0460004"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12418"
-        }
-      ]
-    },
-    {
       "code": "UDMN",
       "display": "Undifferentiated Malignant Neoplasm",
       "property": [
@@ -7084,6 +7112,32 @@
         {
           "code": "nci",
           "valueString": "C3326"
+        }
+      ]
+    },
+    {
+      "code": "LUNG",
+      "display": "Lung",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Gainsboro"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0024109"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12468"
         }
       ]
     },
@@ -7456,6 +7510,32 @@
       ]
     },
     {
+      "code": "ADRENAL_GLAND",
+      "display": "Adrenal Gland",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Purple"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0001625"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12666"
+        }
+      ]
+    },
+    {
       "code": "OMT",
       "display": "Mature Teratoma",
       "property": [
@@ -7795,7 +7875,7 @@
       "property": [
         {
           "code": "level",
-          "valueInteger": 3
+          "valueInteger": 4
         },
         {
           "code": "color",
@@ -8306,6 +8386,24 @@
       ]
     },
     {
+      "code": "AMBLNWSG3",
+      "display": "Anaplastic Medulloblastoma, Group 3",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 5
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "AMBLNWS"
+        }
+      ]
+    },
+    {
       "code": "EGC",
       "display": "Esophagogastric Adenocarcinoma",
       "property": [
@@ -8628,32 +8726,6 @@
       ]
     },
     {
-      "code": "PROSTATE",
-      "display": "Prostate",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Cyan"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0033572"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12410"
-        }
-      ]
-    },
-    {
       "code": "FTCL",
       "display": "Follicular T-Cell Lymphoma",
       "property": [
@@ -8694,6 +8766,32 @@
         {
           "code": "nci",
           "valueString": "C3099"
+        }
+      ]
+    },
+    {
+      "code": "UTERUS",
+      "display": "Uterus",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "PeachPuff"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0042149"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12405"
         }
       ]
     },
@@ -8918,32 +9016,6 @@
       ]
     },
     {
-      "code": "MYELOID",
-      "display": "Myeloid",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "LightSalmon"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0005767"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12434"
-        }
-      ]
-    },
-    {
       "code": "EMALT",
       "display": "Extranodal Marginal Zone Lymphoma of Mucosa-Associated Lymphoid Tissue (MALT lymphoma)",
       "property": [
@@ -8966,32 +9038,6 @@
         {
           "code": "nci",
           "valueString": "C3898"
-        }
-      ]
-    },
-    {
-      "code": "BONE",
-      "display": "Bone",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "White"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0262950"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12366"
         }
       ]
     },
@@ -9054,32 +9100,6 @@
         {
           "code": "parent",
           "valueCode": "MBN"
-        }
-      ]
-    },
-    {
-      "code": "BILIARY_TRACT",
-      "display": "Biliary Tract",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Green"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0005423"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12678"
         }
       ]
     },
@@ -9580,6 +9600,24 @@
       ]
     },
     {
+      "code": "MBLNOS",
+      "display": "Medulloblastoma, NOS",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "MBL"
+        }
+      ]
+    },
+    {
       "code": "BNNOS",
       "display": "Breast Neoplasm, NOS",
       "property": [
@@ -9672,6 +9710,24 @@
         {
           "code": "nci",
           "valueString": "C4699"
+        }
+      ]
+    },
+    {
+      "code": "MBLG4",
+      "display": "Medulloblastoma, Group 4",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 5
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "MBLNWS"
         }
       ]
     },
@@ -9936,32 +9992,6 @@
         {
           "code": "parent",
           "valueCode": "MGUS"
-        }
-      ]
-    },
-    {
-      "code": "KIDNEY",
-      "display": "Kidney",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Orange"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0022646"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12415"
         }
       ]
     },
@@ -10300,6 +10330,32 @@
       ]
     },
     {
+      "code": "SKIN",
+      "display": "Skin",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Black"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C1123023"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12470"
+        }
+      ]
+    },
+    {
       "code": "VMM",
       "display": "Mucosal Melanoma of the Vulva/Vagina",
       "property": [
@@ -10528,6 +10584,32 @@
       ]
     },
     {
+      "code": "BOWEL",
+      "display": "Bowel",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "SaddleBrown"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0021853"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12736"
+        }
+      ]
+    },
+    {
       "code": "PRCC",
       "display": "Papillary Renal Cell Carcinoma",
       "property": [
@@ -10741,7 +10823,7 @@
       "property": [
         {
           "code": "level",
-          "valueInteger": 3
+          "valueInteger": 4
         },
         {
           "code": "color",
@@ -10946,6 +11028,32 @@
       ]
     },
     {
+      "code": "LYMPH",
+      "display": "Lymphoid",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "LimeGreen"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0024202"
+        },
+        {
+          "code": "nci",
+          "valueString": "C13252"
+        }
+      ]
+    },
+    {
       "code": "CHOM",
       "display": "Chordoid Meningioma",
       "property": [
@@ -10972,32 +11080,6 @@
       ]
     },
     {
-      "code": "LUNG",
-      "display": "Lung",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Gainsboro"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0024109"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12468"
-        }
-      ]
-    },
-    {
       "code": "ALT",
       "display": "Atypical Lipomatous Tumor",
       "property": [
@@ -11012,6 +11094,32 @@
         {
           "code": "parent",
           "valueCode": "SOFT_TISSUE"
+        }
+      ]
+    },
+    {
+      "code": "PANCREAS",
+      "display": "Pancreas",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Purple"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0030274"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12393"
         }
       ]
     },
@@ -11138,6 +11246,32 @@
       ]
     },
     {
+      "code": "OVARY",
+      "display": "Ovary/Fallopian Tube",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "LightBlue"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0029939"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12404"
+        }
+      ]
+    },
+    {
       "code": "CEAIS",
       "display": "Cervical Adenocarcinoma In Situ",
       "property": [
@@ -11186,6 +11320,24 @@
         {
           "code": "nci",
           "valueString": "C8106"
+        }
+      ]
+    },
+    {
+      "code": "AMBLNWSG4",
+      "display": "Anaplastic Medulloblastoma, Group 4",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 5
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "AMBLNWS"
         }
       ]
     },
@@ -11816,6 +11968,32 @@
       ]
     },
     {
+      "code": "GBC",
+      "display": "Gallbladder Cancer",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 3
+        },
+        {
+          "code": "color",
+          "valueString": "Green"
+        },
+        {
+          "code": "parent",
+          "valueCode": "ICPN"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0235782"
+        },
+        {
+          "code": "nci",
+          "valueString": "C3844"
+        }
+      ]
+    },
+    {
       "code": "BLLIL3IGH",
       "display": "B-Lymphoblastic Leukemia/Lymphoma with t(5;14)(q31.1;q32.3) IL3-IGH",
       "property": [
@@ -11830,6 +12008,32 @@
         {
           "code": "parent",
           "valueCode": "BLLRGA"
+        }
+      ]
+    },
+    {
+      "code": "STOMACH",
+      "display": "Esophagus/Stomach",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "LightSkyBlue"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0038351"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12391"
         }
       ]
     },
@@ -12100,32 +12304,6 @@
         {
           "code": "nci",
           "valueString": "C4258"
-        }
-      ]
-    },
-    {
-      "code": "PANCREAS",
-      "display": "Pancreas",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Purple"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0030274"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12393"
         }
       ]
     },
@@ -12476,32 +12654,6 @@
       ]
     },
     {
-      "code": "STOMACH",
-      "display": "Esophagus/Stomach",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "LightSkyBlue"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0038351"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12391"
-        }
-      ]
-    },
-    {
       "code": "BA",
       "display": "Breast Angiosarcoma",
       "property": [
@@ -12528,32 +12680,6 @@
       ]
     },
     {
-      "code": "SKIN",
-      "display": "Skin",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Black"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C1123023"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12470"
-        }
-      ]
-    },
-    {
       "code": "HGNET",
       "display": "High-Grade Neuroepithelial Tumor",
       "property": [
@@ -12572,6 +12698,24 @@
       ]
     },
     {
+      "code": "MBLG3",
+      "display": "Medulloblastoma, Group 3",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 5
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "MBLNWS"
+        }
+      ]
+    },
+    {
       "code": "CELNOS",
       "display": "Chronic Eosinophilic Leukemia, NOS",
       "property": [
@@ -12586,6 +12730,32 @@
         {
           "code": "parent",
           "valueCode": "MPN"
+        }
+      ]
+    },
+    {
+      "code": "PNS",
+      "display": "Peripheral Nervous System",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0206417"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12465"
         }
       ]
     },
@@ -12664,6 +12834,32 @@
         {
           "code": "nci",
           "valueString": "C4031"
+        }
+      ]
+    },
+    {
+      "code": "BILIARY_TRACT",
+      "display": "Biliary Tract",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Green"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0005423"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12678"
         }
       ]
     },
@@ -12772,12 +12968,12 @@
       ]
     },
     {
-      "code": "GBC",
-      "display": "Gallbladder Cancer",
+      "code": "EYE",
+      "display": "Eye",
       "property": [
         {
           "code": "level",
-          "valueInteger": 2
+          "valueInteger": 1
         },
         {
           "code": "color",
@@ -12785,15 +12981,41 @@
         },
         {
           "code": "parent",
-          "valueCode": "BILIARY_TRACT"
+          "valueCode": "TISSUE"
         },
         {
           "code": "umls",
-          "valueString": "C0235782"
+          "valueString": "C0015392"
         },
         {
           "code": "nci",
-          "valueString": "C3844"
+          "valueString": "C12401"
+        }
+      ]
+    },
+    {
+      "code": "AMPULLA_OF_VATER",
+      "display": "Ampulla of Vater",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Purple"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0042425"
+        },
+        {
+          "code": "nci",
+          "valueString": "C13011"
         }
       ]
     },
@@ -12864,32 +13086,6 @@
         {
           "code": "nci",
           "valueString": "C9344"
-        }
-      ]
-    },
-    {
-      "code": "OVARY",
-      "display": "Ovary/Fallopian Tube",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "LightBlue"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0029939"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12404"
         }
       ]
     },
@@ -13108,32 +13304,6 @@
         {
           "code": "nci",
           "valueString": "C7718"
-        }
-      ]
-    },
-    {
-      "code": "LIVER",
-      "display": "Liver",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "MediumSeaGreen"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0023884"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12392"
         }
       ]
     },
@@ -13691,7 +13861,7 @@
       "property": [
         {
           "code": "level",
-          "valueInteger": 3
+          "valueInteger": 4
         },
         {
           "code": "color",
@@ -13862,6 +14032,32 @@
       ]
     },
     {
+      "code": "TESTIS",
+      "display": "Testis",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Red"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0039597"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12412"
+        }
+      ]
+    },
+    {
       "code": "MCHSCNS",
       "display": "Mesenchymal Chondrosarcoma of the CNS",
       "property": [
@@ -13984,6 +14180,50 @@
       ]
     },
     {
+      "code": "PROSTATE",
+      "display": "Prostate",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Cyan"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0033572"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12410"
+        }
+      ]
+    },
+    {
+      "code": "PANEC",
+      "display": "Pancreatic Neuroendocrine Carcinoma",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 2
+        },
+        {
+          "code": "color",
+          "valueString": "Purple"
+        },
+        {
+          "code": "parent",
+          "valueCode": "PANCREAS"
+        }
+      ]
+    },
+    {
       "code": "SAAD",
       "display": "Salivary Adenocarcinoma",
       "property": [
@@ -14006,6 +14246,32 @@
         {
           "code": "nci",
           "valueString": "C8021"
+        }
+      ]
+    },
+    {
+      "code": "PLEURA",
+      "display": "Pleura",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Blue"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0032225"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12469"
         }
       ]
     },
@@ -14404,32 +14670,6 @@
       ]
     },
     {
-      "code": "TESTIS",
-      "display": "Testis",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Red"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0039597"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12412"
-        }
-      ]
-    },
-    {
       "code": "CAEXPA",
       "display": "Carcinoma ex Pleomorphic Adenoma",
       "property": [
@@ -14540,32 +14780,6 @@
         {
           "code": "nci",
           "valueString": "C9161"
-        }
-      ]
-    },
-    {
-      "code": "UTERUS",
-      "display": "Uterus",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "PeachPuff"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0042149"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12405"
         }
       ]
     },
@@ -14698,6 +14912,32 @@
         {
           "code": "nci",
           "valueString": "C3288"
+        }
+      ]
+    },
+    {
+      "code": "MYELOID",
+      "display": "Myeloid",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "LightSalmon"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0005767"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12434"
         }
       ]
     },
@@ -14920,32 +15160,6 @@
       ]
     },
     {
-      "code": "BRAIN",
-      "display": "CNS/Brain",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Gray"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C3714787"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12438"
-        }
-      ]
-    },
-    {
       "code": "PCM",
       "display": "Plasma Cell Myeloma",
       "property": [
@@ -15024,32 +15238,6 @@
       ]
     },
     {
-      "code": "THYROID",
-      "display": "Thyroid",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Teal"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0040132"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12400"
-        }
-      ]
-    },
-    {
       "code": "MPT",
       "display": "Malignant Phyllodes Tumor of the Breast",
       "property": [
@@ -15116,6 +15304,32 @@
         {
           "code": "nci",
           "valueString": "C3757"
+        }
+      ]
+    },
+    {
+      "code": "THYROID",
+      "display": "Thyroid",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Teal"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0040132"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12400"
         }
       ]
     },
@@ -15327,7 +15541,7 @@
       "property": [
         {
           "code": "level",
-          "valueInteger": 3
+          "valueInteger": 4
         },
         {
           "code": "color",
@@ -15534,6 +15748,24 @@
       ]
     },
     {
+      "code": "MBLNWS",
+      "display": "Medulloblastoma, Non-WNT, Non-SHH",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "MBL"
+        }
+      ]
+    },
+    {
       "code": "AMLMD",
       "display": "AML with Minimal Differentiation",
       "property": [
@@ -15684,6 +15916,24 @@
       ]
     },
     {
+      "code": "AMBLSHH",
+      "display": "Anaplastic Medulloblastoma, SHH Subtype",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "AMBL"
+        }
+      ]
+    },
+    {
       "code": "STMYEC",
       "display": "Soft Tissue Myoepithelial Carcinoma",
       "property": [
@@ -15798,32 +16048,6 @@
       ]
     },
     {
-      "code": "SOFT_TISSUE",
-      "display": "Soft Tissue",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "LightYellow"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0225317"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12471"
-        }
-      ]
-    },
-    {
       "code": "PTHC",
       "display": "Parathyroid Carcinoma",
       "property": [
@@ -15864,32 +16088,6 @@
         {
           "code": "nci",
           "valueString": "C4519"
-        }
-      ]
-    },
-    {
-      "code": "THYMUS",
-      "display": "Thymus",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Purple"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0040113"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12433"
         }
       ]
     },
@@ -16216,6 +16414,58 @@
       ]
     },
     {
+      "code": "PERITONEUM",
+      "display": "Peritoneum",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Green"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0031153"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12770"
+        }
+      ]
+    },
+    {
+      "code": "CHOL",
+      "display": "Cholangiocarcinoma",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 3
+        },
+        {
+          "code": "color",
+          "valueString": "Green"
+        },
+        {
+          "code": "parent",
+          "valueCode": "IPN"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0206698"
+        },
+        {
+          "code": "nci",
+          "valueString": "C4436"
+        }
+      ]
+    },
+    {
       "code": "TRCC",
       "display": "Translocation-Associated Renal Cell Carcinoma",
       "property": [
@@ -16352,32 +16602,6 @@
       ]
     },
     {
-      "code": "PLEURA",
-      "display": "Pleura",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Blue"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0032225"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12469"
-        }
-      ]
-    },
-    {
       "code": "VOEC",
       "display": "Embryonal Carcinoma",
       "property": [
@@ -16392,6 +16616,32 @@
         {
           "code": "parent",
           "valueCode": "VGCT"
+        }
+      ]
+    },
+    {
+      "code": "THYMUS",
+      "display": "Thymus",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Purple"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0040113"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12433"
         }
       ]
     },
@@ -16550,32 +16800,6 @@
         {
           "code": "parent",
           "valueCode": "MTNN"
-        }
-      ]
-    },
-    {
-      "code": "OTHER",
-      "display": "Other",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Black"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0205394"
-        },
-        {
-          "code": "nci",
-          "valueString": "C17649"
         }
       ]
     },
@@ -16946,6 +17170,32 @@
       ]
     },
     {
+      "code": "BREAST",
+      "display": "Breast",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "HotPink"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0006141"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12971"
+        }
+      ]
+    },
+    {
       "code": "AMPCA",
       "display": "Ampullary Carcinoma",
       "property": [
@@ -17056,32 +17306,6 @@
         {
           "code": "nci",
           "valueString": "C3070"
-        }
-      ]
-    },
-    {
-      "code": "PENIS",
-      "display": "Penis",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Blue"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0030851"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12409"
         }
       ]
     },
@@ -17410,6 +17634,24 @@
       ]
     },
     {
+      "code": "MBENNOS",
+      "display": "Medulloblastoma with Extensive Nodularity, NOS",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "MBEN"
+        }
+      ]
+    },
+    {
       "code": "CCBOV",
       "display": "Clear Cell Borderline Ovarian Tumor",
       "property": [
@@ -17730,6 +17972,32 @@
         {
           "code": "parent",
           "valueCode": "LGT"
+        }
+      ]
+    },
+    {
+      "code": "BLADDER",
+      "display": "Bladder/Urinary Tract",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 1
+        },
+        {
+          "code": "color",
+          "valueString": "Yellow"
+        },
+        {
+          "code": "parent",
+          "valueCode": "TISSUE"
+        },
+        {
+          "code": "umls",
+          "valueString": "C0005682"
+        },
+        {
+          "code": "nci",
+          "valueString": "C12414"
         }
       ]
     },
@@ -18208,6 +18476,24 @@
       ]
     },
     {
+      "code": "AMBLNOS",
+      "display": "Anaplastic Medulloblastoma, NOS",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "AMBL"
+        }
+      ]
+    },
+    {
       "code": "MF",
       "display": "Myofibroma",
       "property": [
@@ -18476,32 +18762,6 @@
         {
           "code": "nci",
           "valueString": "C3828"
-        }
-      ]
-    },
-    {
-      "code": "BREAST",
-      "display": "Breast",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "HotPink"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0006141"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12971"
         }
       ]
     },
@@ -19182,6 +19442,24 @@
       ]
     },
     {
+      "code": "AMBLNWS",
+      "display": "Anaplastic Medulloblastoma, Non-WNT, Non-SHH",
+      "property": [
+        {
+          "code": "level",
+          "valueInteger": 4
+        },
+        {
+          "code": "color",
+          "valueString": "Gray"
+        },
+        {
+          "code": "parent",
+          "valueCode": "AMBL"
+        }
+      ]
+    },
+    {
       "code": "MPNU",
       "display": "Myeloproliferative Neoplasms, Unclassifiable",
       "property": [
@@ -19664,32 +19942,6 @@
       ]
     },
     {
-      "code": "VULVA",
-      "display": "Vulva/Vagina",
-      "property": [
-        {
-          "code": "level",
-          "valueInteger": 1
-        },
-        {
-          "code": "color",
-          "valueString": "Purple"
-        },
-        {
-          "code": "parent",
-          "valueCode": "TISSUE"
-        },
-        {
-          "code": "umls",
-          "valueString": "C0042993"
-        },
-        {
-          "code": "nci",
-          "valueString": "C12408"
-        }
-      ]
-    },
-    {
       "code": "SSRCC",
       "display": "Signet Ring Cell Carcinoma of the Stomach",
       "property": [
@@ -19943,5 +20195,37 @@
         }
       ]
     }
-  ]
+  ],
+  "content": "complete",
+  "date": "2021-11-02",
+  "hierarchyMeaning": "is-a",
+  "name": "oncotree",
+  "property": [
+    {
+      "code": "color",
+      "description": "Color in the Oncotree Visualisation",
+      "type": "string"
+    },
+    {
+      "code": "level",
+      "description": "Level in the Oncotree hierarchy",
+      "type": "integer"
+    },
+    {
+      "code": "umls",
+      "description": "Linked UMLS concept",
+      "type": "string"
+    },
+    {
+      "code": "nci",
+      "description": "Linked NCI concept",
+      "type": "string"
+    }
+  ],
+  "status": "draft",
+  "title": "OncoTree",
+  "url": "http://oncotree.mskcc.org/fhir/CodeSystem",
+  "valueSet": "http://oncotree.mskcc.org/fhir/ValueSet",
+  "version": "20211102",
+  "resourceType": "CodeSystem"
 }
