@@ -14,25 +14,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
-import com.mxgraph.layout.mxFastOrganicLayout
-import com.mxgraph.swing.mxGraphComponent
 import org.hl7.fhir.r4.model.CodeSystem
-import org.jgrapht.ext.JGraphXAdapter
-import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.engine.graph.CodeSystemRole
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.ui.graphs.SugiyamaLayoutFrame
-import java.awt.BorderLayout
-import java.awt.Dimension
-import javax.swing.JApplet
-import javax.swing.JFrame
 
 @Composable
 fun ShowGraphsPanel(
     fhirContext: FhirContext,
     leftCs: CodeSystem,
     rightCs: CodeSystem,
-    localizedStrings: LocalizedStrings
+    localizedStrings: LocalizedStrings,
+    useDarkTheme: Boolean
 ) {
     Card(
         Modifier.padding(8.dp).fillMaxWidth(),
@@ -56,7 +49,8 @@ fun ShowGraphsPanel(
                         codeSystem = leftCs,
                         codeSystemRole = CodeSystemRole.LEFT,
                         localizedStrings = localizedStrings,
-                        frameTitle = localizedStrings.showLeftGraphButton
+                        frameTitle = localizedStrings.showLeftGraphButton,
+                        useDarkTheme = useDarkTheme
                     )
                 }) {
                 Text(localizedStrings.showLeftGraphButton)
@@ -73,7 +67,8 @@ fun ShowGraphsPanel(
                         codeSystem = rightCs,
                         codeSystemRole = CodeSystemRole.RIGHT,
                         localizedStrings = localizedStrings,
-                        frameTitle = localizedStrings.showRightGraphButton
+                        frameTitle = localizedStrings.showRightGraphButton,
+                        useDarkTheme = useDarkTheme
                     )
                 }) {
                 Text(localizedStrings.showRightGraphButton)
@@ -86,7 +81,8 @@ fun showGraphSwingWindowJUngraphT(
     codeSystem: CodeSystem,
     codeSystemRole: CodeSystemRole,
     localizedStrings: LocalizedStrings,
-    frameTitle: String
+    frameTitle: String,
+    useDarkTheme: Boolean
 ) {
-    SugiyamaLayoutFrame(codeSystem, codeSystemRole, frameTitle)
+    SugiyamaLayoutFrame(codeSystem, codeSystemRole, frameTitle, useDarkTheme)
 }

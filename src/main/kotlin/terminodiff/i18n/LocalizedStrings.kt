@@ -5,9 +5,13 @@ import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult
 abstract class LocalizedStrings(
     val canonicalUrl: String,
     val changeLanguage: String,
+    val conceptDiff: String,
     val contact: String,
     val date: String,
     val description: String,
+    val definition: String = "Definition",
+    val designation: String = "Designation",
+    val display: String = "Display",
     val experimental: String,
     val id: String = "ID",
     val identifiers: String,
@@ -16,9 +20,11 @@ abstract class LocalizedStrings(
     val loadLeftFile: String,
     val loadRightFile: String,
     val graphsOpenInOtherWindows: String,
-    val metadataDiffResults: (MetadataDiffItemResult) -> String,
+    val metadataDiff: String,
+    val `metadataDiffResults$`: (MetadataDiffItemResult) -> String,
     val name: String = "Name",
     val publisher: String,
+    val property: String = "Property",
     val status: String = "Status",
     val terminoDiff: String = "TerminoDiff",
     val title: String,
@@ -41,6 +47,7 @@ enum class SupportedLocale {
 class GermanStrings : LocalizedStrings(
     canonicalUrl = "Kanonische URL",
     changeLanguage = "Sprache wechseln",
+    conceptDiff = "Konzept-Diff",
     contact = "Kontakt",
     date = "Datum",
     description = "Beschreibung",
@@ -51,7 +58,8 @@ class GermanStrings : LocalizedStrings(
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
     graphsOpenInOtherWindows = "Graphen öffnen sich in einem neuen Fenster.",
-    metadataDiffResults = {
+    metadataDiff = "Metadaten-Diff",
+    `metadataDiffResults$` = {
         when (it) {
             MetadataDiffItemResult.BOTH_EMPTY -> "beide leer"
             MetadataDiffItemResult.DIFFERENT -> "unterschiedlich"
@@ -72,18 +80,19 @@ class GermanStrings : LocalizedStrings(
 class EnglishStrings : LocalizedStrings(
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
+    conceptDiff = "Concept Diff",
     contact = "Contact",
     date = "Date",
     description = "Description",
     experimental = "Experimental?",
-    identifiers = "Identifiers"
-    ,
+    identifiers = "Identifiers",
     jurisdiction = "Jurisdiction",
     language = "en",
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
     graphsOpenInOtherWindows = "Graphs open in another window.",
-    metadataDiffResults = {
+    metadataDiff = "Metadata Diff",
+    `metadataDiffResults$` = {
         when (it) {
             MetadataDiffItemResult.BOTH_EMPTY -> "both empty"
             MetadataDiffItemResult.DIFFERENT -> "different"

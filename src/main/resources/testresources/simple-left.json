@@ -15,6 +15,16 @@
   ],
   "hierarchyMeaning": "is-a",
   "content": "complete",
+  "property": [
+    {
+      "code": "related-to",
+      "type": "code"
+    },
+    {
+      "code": "color",
+      "type": "string"
+    }
+  ],
   "concept": [
     {
       "code": "A",
@@ -22,6 +32,12 @@
       "concept": [
         {
           "code": "Q"
+        }
+      ],
+      "property": [
+        {
+          "code": "color",
+          "valueCode": "red"
         }
       ]
     },

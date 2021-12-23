@@ -1,9 +1,7 @@
 package terminodiff.ui
 
 import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -46,32 +44,49 @@ fun MetadataDiffPanel(
     val diff by remember { mutableStateOf(builder.build()) }
     val listState = rememberLazyListState()
 
-    LazyVerticalGrid(
-        cells = GridCells.Adaptive(384.dp),
-        state = listState,
-        modifier = Modifier.padding(top = 8.dp),
-        contentPadding = PaddingValues(
-            start = 12.dp,
-            end = 12.dp,
-            bottom = 16.dp
-        ),
+    Card(
+        modifier = Modifier.padding(8.dp).fillMaxWidth(),
+        elevation = 8.dp,
+        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
     ) {
-        items(diff.diffResults) { res ->
-            fun itemGetter(cs: CodeSystem): String? = when (res.diffItem) {
-                is MetadataDiff.MetadataStringDiffItem -> res.diffItem.instanceGetter.invoke(cs)
-                is MetadataDiff.MetadataListDiffItem -> res.diffItem.instanceGetter.invoke(cs)?.joinToString(",")
-                else -> "not yet implemented"
-            }
+        Column(Modifier.padding(8.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
 
-            val diffColors = getDiffColors(useDarkTheme = useDarkTheme)
-            MetadataItem(
-                label = res.diffItem.label,
-                valueLeft = itemGetter(leftCs),
-                valueRight = itemGetter(rightCs),
-                comparisonResult = res,
-                localizedStrings = localizedStrings,
-                diffColors = diffColors
+            Text(
+                text = localizedStrings.metadataDiff,
+                style = MaterialTheme.typography.headlineMedium,
+                color = MaterialTheme.colorScheme.onTertiaryContainer
             )
+
+            LazyVerticalGrid(
+                cells = GridCells.Adaptive(384.dp),
+                state = listState,
+                modifier = Modifier.padding(top = 8.dp),
+                contentPadding = PaddingValues(
+                    start = 12.dp,
+                    end = 12.dp,
+                    bottom = 16.dp
+                ),
+            ) {
+                items(diff.diffResults) { res ->
+                    fun itemGetter(cs: CodeSystem): String? = when (res.diffItem) {
+                        is MetadataDiff.MetadataStringDiffItem -> res.diffItem.instanceGetter.invoke(cs)
+                        is MetadataDiff.MetadataListDiffItem -> res.diffItem.instanceGetter.invoke(cs)
+                            ?.joinToString(",")
+                        else -> "not yet implemented"
+                    }
+
+                    val diffColors = getDiffColors(useDarkTheme = useDarkTheme)
+                    MetadataItem(
+                        label = res.diffItem.label,
+                        valueLeft = itemGetter(leftCs),
+                        valueRight = itemGetter(rightCs),
+                        comparisonResult = res,
+                        localizedStrings = localizedStrings,
+                        diffColors = diffColors
+                    )
+                }
+            }
         }
     }
 }
@@ -114,7 +129,7 @@ fun MetadataItem(
                     )
                     val (backgroundColor, foregroundColor) = colorForResult(comparisonResult, diffColors)
                     Chip(
-                        text = localizedStrings.metadataDiffResults.invoke(comparisonResult.result),
+                        text = localizedStrings.`metadataDiffResults$`.invoke(comparisonResult.result),
                         backgroundColor = backgroundColor,
                         textColor = foregroundColor
                     )

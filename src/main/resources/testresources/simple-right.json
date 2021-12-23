@@ -19,6 +19,10 @@
     {
       "code": "related-to",
       "type": "code"
+    },
+    {
+      "code": "color",
+      "type": "string"
     }
   ],
   "concept": [
@@ -28,6 +32,12 @@
       "concept": [
         {
           "code": "Q"
+        }
+      ],
+      "property": [
+        {
+          "code": "color",
+          "valueCode": "green"
         }
       ]
     },

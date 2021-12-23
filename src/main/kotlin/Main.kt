@@ -2,7 +2,6 @@
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material.Scaffold
@@ -16,15 +15,19 @@ import ca.uhn.fhir.context.FhirContext
 import org.hl7.fhir.r4.model.CodeSystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import terminodiff.engine.concepts.ConceptDiffItem
+import terminodiff.engine.graph.CodeSystemDiffBuilder
+import terminodiff.engine.graph.CodeSystemGraphBuilder
+import terminodiff.engine.graph.CodeSystemRole
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.i18n.SupportedLocale
 import terminodiff.i18n.getStrings
+import terminodiff.ui.ConceptDiffPanel
 import terminodiff.ui.MetadataDiffPanel
 import terminodiff.ui.ShowGraphsPanel
 import terminodiff.ui.TerminoDiffTopAppBar
 import terminodiff.ui.theme.TerminoDiffTheme
 import java.io.File
-import java.util.*
 
 val logger: Logger = LoggerFactory.getILoggerFactory().getLogger("terminodiff")
 
@@ -77,6 +80,27 @@ fun LocalizedAppWindow(
     onLocaleChange: () -> Unit,
     onChangeDarkTheme: () -> Unit
 ) {
+    val leftCs = TestContainer.oncotreeLeft
+    val rightCs = TestContainer.oncotreeRight
+    val leftGraphBuilder = CodeSystemGraphBuilder(leftCs, CodeSystemRole.LEFT)
+    val rightGraphBuilder = CodeSystemGraphBuilder(rightCs, CodeSystemRole.RIGHT)
+    val diff = CodeSystemDiffBuilder(leftGraphBuilder, rightGraphBuilder).build().also {
+        logger.info("${it.onlyInLeftConcepts.size} code(-s) only in left: ${it.onlyInLeftConcepts.joinToString(", ")}")
+        logger.info("${it.onlyInRightConcepts.size} code(-s) only in right: ${it.onlyInRightConcepts.joinToString(", ")}")
+        val differentConcepts =
+            it.conceptDifferences.filterValues { d -> d.conceptComparison.any { c -> c.result != ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL } || d.propertyComparison.size != 0 }
+        logger.info(
+            "${differentConcepts.size} concept-level difference(-s): ${
+                differentConcepts.entries.joinToString(separator = "\n - ") { (key, diff) ->
+                    "$key -> ${
+                        diff.toString(
+                            strings
+                        )
+                    }"
+                }
+            }"
+        )
+    }
     TerminoDiffTheme(useDarkTheme = useDarkTheme) {
         Scaffold(
             topBar = {
@@ -94,18 +118,26 @@ fun LocalizedAppWindow(
                 modifier = Modifier.scrollable(scrollState, Orientation.Vertical),
             ) {
                 ShowGraphsPanel(
-                    TestContainer.fhirContext,
-                    TestContainer.cs1,
-                    TestContainer.cs2,
-                    strings
-                )
-                MetadataDiffPanel(
                     fhirContext = TestContainer.fhirContext,
-                    leftCs = TestContainer.cs1,
-                    rightCs = TestContainer.cs2,
+                    leftCs = leftCs,
+                    rightCs = rightCs,
                     localizedStrings = strings,
                     useDarkTheme = useDarkTheme
                 )
+                ConceptDiffPanel(
+                    leftCs = leftCs,
+                    rightCs = rightCs,
+                    localizedStrings = strings,
+                    useDarkTheme = useDarkTheme
+                )
+                MetadataDiffPanel(
+                    fhirContext = TestContainer.fhirContext,
+                    leftCs = leftCs,
+                    rightCs = rightCs,
+                    localizedStrings = strings,
+                    useDarkTheme = useDarkTheme
+                )
+
             }
         }
     }
