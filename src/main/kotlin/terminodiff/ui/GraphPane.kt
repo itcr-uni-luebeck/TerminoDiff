@@ -5,12 +5,11 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
-import androidx.compose.material.ButtonColors
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -20,7 +19,9 @@ import com.mxgraph.swing.mxGraphComponent
 import org.hl7.fhir.r4.model.CodeSystem
 import org.jgrapht.ext.JGraphXAdapter
 import terminodiff.engine.graph.CodeSystemGraphBuilder
+import terminodiff.engine.graph.CodeSystemRole
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.ui.graphs.SugiyamaLayoutFrame
 import java.awt.BorderLayout
 import java.awt.Dimension
 import javax.swing.JApplet
@@ -51,8 +52,9 @@ fun ShowGraphsPanel(
             Button(
                 colors = buttonColors,
                 onClick = {
-                    showGraphSwingWindowJGraphX(
+                    showGraphSwingWindowJUngraphT(
                         codeSystem = leftCs,
+                        codeSystemRole = CodeSystemRole.LEFT,
                         localizedStrings = localizedStrings,
                         frameTitle = localizedStrings.showLeftGraphButton
                     )
@@ -67,8 +69,9 @@ fun ShowGraphsPanel(
             Button(
                 colors = buttonColors,
                 onClick = {
-                    showGraphSwingWindowJGraphX(
+                    showGraphSwingWindowJUngraphT(
                         codeSystem = rightCs,
+                        codeSystemRole = CodeSystemRole.RIGHT,
                         localizedStrings = localizedStrings,
                         frameTitle = localizedStrings.showRightGraphButton
                     )
@@ -79,43 +82,11 @@ fun ShowGraphsPanel(
     }
 }
 
-fun showGraphSwingWindowJGraphX(
+fun showGraphSwingWindowJUngraphT(
     codeSystem: CodeSystem,
+    codeSystemRole: CodeSystemRole,
     localizedStrings: LocalizedStrings,
     frameTitle: String
 ) {
-    val graph = CodeSystemGraphBuilder().buildCodeSystemJGraphT(codeSystem)
-    val applet = object : JApplet() {
-        val defaultSize = Dimension(530, 320)
-        override fun init() {
-            super.init()
-            preferredSize = defaultSize
-            val adapter = JGraphXAdapter(graph).apply {
-                stylesheet.apply {
-                    //todo implement nice stylesheet ^^
-                }
-            }
-            val component = mxGraphComponent(adapter).apply {
-                isEnabled = false
-                isFoldingEnabled = true
-            }
-            size = defaultSize
-            contentPane.add(component)
-            mxFastOrganicLayout(adapter).execute(adapter.defaultParent)
-
-        }
-    }.apply {
-        init()
-    }
-    // TODO: 08/12/21  https://jgrapht.org/guide/UserOverview#jgraphx-adapter
-    // implement JGraphX/JGraphT visualization
-    JFrame().apply {
-        setSize(500, 500)
-        layout = BorderLayout()
-        contentPane.add(applet)
-        title = frameTitle
-        defaultCloseOperation = JFrame.DISPOSE_ON_CLOSE
-        pack()
-        isVisible = true
-    }
+    SugiyamaLayoutFrame(codeSystem, codeSystemRole, frameTitle)
 }

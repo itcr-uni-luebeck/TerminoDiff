@@ -16,6 +16,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Popup
 import androidx.compose.ui.window.PopupPositionProvider
@@ -104,8 +105,9 @@ fun MouseOverPopup(
             Text(text = text, color = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.padding(10.dp))
         }
     },
-    delayMillis = 500,
+    delayMillis = 750,
     tooltipPlacement = TooltipPlacement.CursorPoint(
+        offset = DpOffset(10.dp, 10.dp),
         alignment = Alignment.BottomEnd
     ),
     content = content

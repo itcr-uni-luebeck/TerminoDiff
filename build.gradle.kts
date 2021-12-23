@@ -22,8 +22,8 @@ val hapiVersion = "5.6.1"
 val slf4jVersion = "1.7.32"
 val graphStreamVersion = "2.0"
 val jGraphTVersion = "1.5.1"
-val jGraphXVersion = "4.2.2"
 val material3DesktopVersion = "1.0.0"
+val jungraphtVersion = "1.3"
 
 dependencies {
     testImplementation(kotlin("test"))
@@ -37,7 +37,9 @@ dependencies {
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")
     implementation("org.jgrapht:jgrapht-core:$jGraphTVersion")
     implementation("org.jgrapht:jgrapht-ext:$jGraphTVersion")
-    implementation("com.github.vlsi.mxgraph:jgraphx:$jGraphXVersion")
+    implementation("com.github.tomnelson:jungrapht-visualization:$jungraphtVersion")
+    implementation("com.github.tomnelson:jungrapht-layout:$jungraphtVersion")
+    implementation("net.mahdilamb:colormap:0.9.511")
 }
 
 tasks.test {

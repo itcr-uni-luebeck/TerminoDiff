@@ -15,10 +15,21 @@
   ],
   "hierarchyMeaning": "is-a",
   "content": "complete",
+  "property": [
+    {
+      "code": "related-to",
+      "type": "code"
+    }
+  ],
   "concept": [
     {
       "code": "A",
-      "display": "Right A"
+      "display": "Right A",
+      "concept": [
+        {
+          "code": "Q"
+        }
+      ]
     },
     {
       "code": "B",
@@ -26,6 +37,14 @@
       "property": [
         {
           "code": "parent",
+          "valueCode": "A"
+        },
+        {
+          "code": "related-to",
+          "valueCode": "D"
+        },
+        {
+          "code": "related-to",
           "valueCode": "A"
         }
       ]
@@ -39,6 +58,20 @@
           "valueCode": "A"
         }
       ]
+    },
+    {
+      "code": "Q",
+      "display": "Right Q",
+      "property": [
+        {
+          "code": "child",
+          "valueCode": "P"
+        }
+      ]
+    },
+    {
+      "code": "P",
+      "display": "Right P"
     }
   ]
 }

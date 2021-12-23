@@ -18,31 +18,56 @@
   "concept": [
     {
       "code": "A",
-      "display": "Left A"
+      "display": "Left A",
+      "concept": [
+        {
+          "code": "Q"
+        }
+      ]
     },
     {
       "code": "B",
       "display": "Left B",
-      "property": [{
-        "code": "parent",
-        "valueCode": "A"
-      }]
+      "property": [
+        {
+          "code": "parent",
+          "valueCode": "A"
+        }
+      ]
     },
     {
       "code": "C",
       "display": "Left C",
-      "property": [{
-        "code": "parent",
-        "valueCode": "A"
-      }]
+      "property": [
+        {
+          "code": "parent",
+          "valueCode": "A"
+        }
+      ]
     },
     {
       "code": "D",
       "display": "Left D",
-      "property": [{
-        "code": "parent",
-        "valueCode": "C"
-      }]
+      "property": [
+        {
+          "code": "parent",
+          "valueCode": "C"
+        }
+      ]
+    },
+    {
+      "code": "Q",
+      "display": "Left Q",
+      "property": [
+        {
+          "code": "child",
+          "valueCode": "P"
+        }
+      ]
+    },
+    {
+      "code": "P",
+      "display": "Left P"
     }
   ]
 }

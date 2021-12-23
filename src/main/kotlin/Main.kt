@@ -95,14 +95,14 @@ fun LocalizedAppWindow(
             ) {
                 ShowGraphsPanel(
                     TestContainer.fhirContext,
-                    TestContainer.oncotreeLeft,
-                    TestContainer.oncotreeLeft,
+                    TestContainer.cs1,
+                    TestContainer.cs2,
                     strings
                 )
                 MetadataDiffPanel(
                     fhirContext = TestContainer.fhirContext,
-                    leftCs = TestContainer.oncotreeLeft,
-                    rightCs = TestContainer.oncotreeRight,
+                    leftCs = TestContainer.cs1,
+                    rightCs = TestContainer.cs2,
                     localizedStrings = strings,
                     useDarkTheme = useDarkTheme
                 )
