@@ -1,16 +1,15 @@
 package terminodiff.ui
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
-import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.lazy.GridCells
+import androidx.compose.foundation.lazy.LazyVerticalGrid
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Card
 import androidx.compose.material.OutlinedTextField
-import androidx.compose.material.TextFieldColors
 import androidx.compose.material.TextFieldDefaults
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -18,17 +17,18 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
 import org.hl7.fhir.r4.model.CodeSystem
 import terminodiff.engine.metadata.MetadataDiff
-import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult.*
 import terminodiff.engine.metadata.MetadataDiffBuilder
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.ui.theme.DiffColors
-import terminodiff.ui.theme.customGreen
 import terminodiff.ui.theme.getDiffColors
+import terminodiff.ui.util.Carousel
+import terminodiff.ui.util.CarouselDefaults
+import terminodiff.ui.util.DiffChip
+import terminodiff.ui.util.colorPairForDiffResult
 
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -50,7 +50,10 @@ fun MetadataDiffPanel(
         backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
     ) {
-        Column(Modifier.padding(8.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+        Column(
+            Modifier.padding(8.dp).fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
 
             Text(
                 text = localizedStrings.metadataDiff,
@@ -58,34 +61,48 @@ fun MetadataDiffPanel(
                 color = MaterialTheme.colorScheme.onTertiaryContainer
             )
 
-            LazyVerticalGrid(
-                cells = GridCells.Adaptive(384.dp),
-                state = listState,
-                modifier = Modifier.padding(top = 8.dp),
-                contentPadding = PaddingValues(
-                    start = 12.dp,
-                    end = 12.dp,
-                    bottom = 16.dp
-                ),
+            Row(
+                Modifier.fillMaxWidth(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                items(diff.diffResults) { res ->
-                    fun itemGetter(cs: CodeSystem): String? = when (res.diffItem) {
-                        is MetadataDiff.MetadataStringDiffItem -> res.diffItem.instanceGetter.invoke(cs)
-                        is MetadataDiff.MetadataListDiffItem -> res.diffItem.instanceGetter.invoke(cs)
-                            ?.joinToString(",")
-                        else -> "not yet implemented"
-                    }
+                LazyVerticalGrid(
+                    cells = GridCells.Adaptive(384.dp),
+                    state = listState,
+                    modifier = Modifier.padding(8.dp),
+                    //modifier = Modifier.padding(top = 8.dp),
+                    contentPadding = PaddingValues(
+                        start = 12.dp,
+                        end = 12.dp,
+                        bottom = 16.dp
+                    ),
+                ) {
+                    items(diff.diffResults) { res ->
+                        fun itemGetter(cs: CodeSystem): String? = when (res.diffItem) {
+                            is MetadataDiff.MetadataStringDiffItem -> res.diffItem.instanceGetter.invoke(cs)
+                            is MetadataDiff.MetadataListDiffItem -> res.diffItem.instanceGetter.invoke(cs)
+                                ?.joinToString(",")
+                            else -> "not yet implemented"
+                        }
 
-                    val diffColors = getDiffColors(useDarkTheme = useDarkTheme)
-                    MetadataItem(
-                        label = res.diffItem.label,
-                        valueLeft = itemGetter(leftCs),
-                        valueRight = itemGetter(rightCs),
-                        comparisonResult = res,
-                        localizedStrings = localizedStrings,
-                        diffColors = diffColors
-                    )
+                        val diffColors = getDiffColors(useDarkTheme = useDarkTheme)
+                        MetadataItem(
+                            label = res.diffItem.label,
+                            valueLeft = itemGetter(leftCs),
+                            valueRight = itemGetter(rightCs),
+                            comparisonResult = res,
+                            localizedStrings = localizedStrings,
+                            diffColors = diffColors
+                        )
+                    }
                 }
+
+                Carousel(
+                    state = listState,
+                    colors = CarouselDefaults.colors(thumbColor = MaterialTheme.colorScheme.onTertiaryContainer),
+                    modifier = Modifier
+                        .padding(end = 8.dp)
+                        .fillMaxHeight(0.9f)
+                )
             }
         }
     }
@@ -127,8 +144,8 @@ fun MetadataItem(
                         value = valueLeft,
                         label = label.invoke(localizedStrings)
                     )
-                    val (backgroundColor, foregroundColor) = colorForResult(comparisonResult, diffColors)
-                    Chip(
+                    val (backgroundColor, foregroundColor) = colorPairForDiffResult(comparisonResult, diffColors)
+                    DiffChip(
                         text = localizedStrings.`metadataDiffResults$`.invoke(comparisonResult.result),
                         backgroundColor = backgroundColor,
                         textColor = foregroundColor
@@ -142,14 +159,6 @@ fun MetadataItem(
 
         }
     }
-}
-
-fun colorForResult(
-    comparisonResult: MetadataDiff.MetadataComparisonResult,
-    diffColors: DiffColors
-): Pair<Color, Color> = when (comparisonResult.result) {
-    DIFFERENT_TEXT, DIFFERENT, DIFFERENT_COUNT -> if (comparisonResult.expected) diffColors.yellowPair else diffColors.redPair
-    else -> diffColors.greenPair
 }
 
 @Composable
@@ -166,27 +175,3 @@ fun readOnlyTextField(
         colors = TextFieldDefaults.outlinedTextFieldColors(focusedBorderColor = MaterialTheme.colorScheme.secondary)
     )
 
-@Preview
-@Composable
-fun Chip(
-    modifier: Modifier = Modifier,
-    text: String,
-    backgroundColor: Color,
-    textColor: Color
-) {
-    Surface(
-        modifier = modifier.padding(4.dp),
-        color = backgroundColor,
-        tonalElevation = 4.dp,
-        shape = RoundedCornerShape(8.dp)
-    ) {
-        Row {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                color = textColor,
-                modifier = Modifier.padding(8.dp)
-            )
-        }
-    }
-}

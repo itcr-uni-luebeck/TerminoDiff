@@ -1,6 +1,9 @@
 package terminodiff.i18n
 
+import terminodiff.engine.concepts.ConceptDiffItem
+import terminodiff.engine.concepts.ConceptDiffResult
 import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult
+import java.io.File
 
 /**
  * we pass around an instance of localizedstrings, since we want every composable to recompose when the language changes.
@@ -10,6 +13,8 @@ abstract class LocalizedStrings(
     val changeLanguage: String,
     val conceptDiff: String,
     val contact: String,
+    val code: String = "Code",
+    val `conceptDiffResults$`: (ConceptDiffResult) -> String,
     val date: String,
     val description: String,
     val definition: String = "Definition",
@@ -24,7 +29,7 @@ abstract class LocalizedStrings(
     val loadRightFile: String,
     val graphsOpenInOtherWindows: String,
     val metadataDiff: String,
-    val `metadataDiffResults$`: (terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult) -> String,
+    val `metadataDiffResults$`: (MetadataDiffItemResult) -> String,
     val name: String = "Name",
     val noDataLoadedTitle: String,
     val publisher: String,
@@ -37,8 +42,8 @@ abstract class LocalizedStrings(
     val showLeftGraphButton: String,
     val showRightGraphButton: String,
     val toggleDarkTheme: String,
-    val `leftFileOpenFilename$`: String,
-    val `rightFileOpenFilename$`: String,
+    val `leftFileOpenFilename$`: (File) -> String,
+    val `rightFileOpenFilename$`: (File) -> String,
 )
 
 enum class SupportedLocale {
@@ -54,6 +59,12 @@ class GermanStrings : LocalizedStrings(
     canonicalUrl = "Kanonische URL",
     changeLanguage = "Sprache wechseln",
     conceptDiff = "Konzept-Diff",
+    `conceptDiffResults$` = {
+        when (it.result) {
+            ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> "Unterschiedlich"
+            ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identisch"
+        }
+    },
     contact = "Kontakt",
     date = "Datum",
     description = "Beschreibung",
@@ -82,14 +93,20 @@ class GermanStrings : LocalizedStrings(
     showLeftGraphButton = "Linken Graphen zeigen",
     showRightGraphButton = "Rechten Graphen zeigen",
     toggleDarkTheme = "Helles/Dunkles Thema",
-    `leftFileOpenFilename$` = "Linke Datei geöffnet: %s",
-    `rightFileOpenFilename$` = "Rechte Datei geöffnet: %s"
+    `leftFileOpenFilename$` = { file -> "Linke Datei geöffnet: ${file.absolutePath}" },
+    `rightFileOpenFilename$` = { file -> "Rechte Datei geöffnet: ${file.absolutePath}" }
 )
 
 class EnglishStrings : LocalizedStrings(
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
     conceptDiff = "Concept Diff",
+    `conceptDiffResults$` = {
+        when (it.result) {
+            ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> "Different"
+            ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identical"
+        }
+    },
     contact = "Contact",
     date = "Date",
     description = "Description",
@@ -118,8 +135,8 @@ class EnglishStrings : LocalizedStrings(
     showLeftGraphButton = "Show left graph",
     showRightGraphButton = "Show right graph",
     toggleDarkTheme = "Toggle dark theme",
-    `leftFileOpenFilename$` = "Left file open: %s",
-    `rightFileOpenFilename$` = "Right file open: %s"
+    `leftFileOpenFilename$` = { file -> "Left file open: ${file.absolutePath}" },
+    `rightFileOpenFilename$` = { file -> "Right file open: ${file.absolutePath}" },
 )
 
 val defaultStrings = getStrings()

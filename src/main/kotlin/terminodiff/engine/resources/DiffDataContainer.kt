@@ -35,13 +35,14 @@ class DiffDataContainer(
     var rightGraphBuilder: CodeSystemGraphBuilder? = null
     var codeSystemDiff: CodeSystemDiffBuilder? = null
 
-    fun computeDiff(localizedStrings: LocalizedStrings) {
-        when {
-            !isInitialized -> return
+    fun computeDiff(localizedStrings: LocalizedStrings): Boolean {
+        return when {
+            !isInitialized -> false
             else -> {
                 leftGraphBuilder = CodeSystemGraphBuilder(leftCodeSystem!!, CodeSystemRole.LEFT)
                 rightGraphBuilder = CodeSystemGraphBuilder(rightCodeSystem!!, CodeSystemRole.RIGHT)
                 codeSystemDiff = buildDiff(leftGraphBuilder!!, rightGraphBuilder!!, localizedStrings)
+                true
             }
         }
     }

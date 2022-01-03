@@ -103,11 +103,13 @@ fun LocalizedAppWindow(
     val onLoadLeftFile: () -> Unit = {
         loadFile(localizedStrings.loadLeftFile, fhirContext = fhirContext)?.let {
             leftCsFilenameResource = it
+            dataContainer.computeDiff(localizedStrings)
         }
     }
     val onLoadRightFile: () -> Unit = {
         loadFile(localizedStrings.loadRightFile, fhirContext = fhirContext)?.let {
             rightCsFilenameResource = it
+            dataContainer.computeDiff(localizedStrings)
         }
     }
 
@@ -137,8 +139,8 @@ fun LocalizedAppWindow(
                     modifier = Modifier.padding(scaffoldPadding),
                     scrollState = scrollState,
                     localizedStrings = localizedStrings,
-                    leftFilename = leftCsFilenameResource?.first,
-                    rightFilename = rightCsFilenameResource?.first,
+                    leftFile = leftCsFilenameResource?.first,
+                    rightFile = rightCsFilenameResource?.first,
                     onLoadLeftFile = onLoadLeftFile,
                     onLoadRightFile = onLoadRightFile,
                 )
@@ -155,8 +157,8 @@ private fun ContainerUninitializedContent(
     localizedStrings: LocalizedStrings,
     onLoadLeftFile: () -> Unit,
     onLoadRightFile: () -> Unit,
-    leftFilename: File?,
-    rightFilename: File?,
+    leftFile: File?,
+    rightFile: File?,
 ) {
     Column(modifier.scrollable(scrollState, Orientation.Vertical)) {
         Card(
@@ -203,8 +205,8 @@ private fun ContainerUninitializedContent(
                     }
                 }
                 when {
-                    leftFilename != null -> localizedStrings.`leftFileOpenFilename$`.format(leftFilename.absolutePath)
-                    rightFilename != null -> localizedStrings.`rightFileOpenFilename$`.format(rightFilename.absolutePath)
+                    leftFile != null -> localizedStrings.`leftFileOpenFilename$`.invoke(leftFile)
+                    rightFile != null -> localizedStrings.`rightFileOpenFilename$`.invoke(rightFile)
                     else -> null
                 }?.let { openFilenameText ->
                     Text(
@@ -239,8 +241,7 @@ private fun ContainerInitializedContent(
             useDarkTheme = useDarkTheme
         )
         ConceptDiffPanel(
-            leftCs = dataContainer.leftCodeSystem!!,
-            rightCs = dataContainer.rightCodeSystem!!,
+            diffDataContainer = dataContainer,
             localizedStrings = strings,
             useDarkTheme = useDarkTheme
         )

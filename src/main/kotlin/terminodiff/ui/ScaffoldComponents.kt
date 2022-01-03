@@ -31,6 +31,9 @@ class AppIconResource {
         val icChangeLanguage: ImageRelativePath = "icons/ic-language.xml"
         val icLoadLeftFile: ImageRelativePath = "icons/ic-open-left.xml"
         val icLoadRightFile: ImageRelativePath = "icons/ic-open-right.xml"
+
+        fun loadFile(relativePath: ImageRelativePath) =
+            AppIconResource::class.java.classLoader.getResourceAsStream(relativePath)
     }
 }
 
@@ -97,7 +100,7 @@ fun AppImageIcon(
     label: String,
     tint: Color = MaterialTheme.colorScheme.onPrimaryContainer
 ) {
-    AppIconResource::class.java.classLoader.getResourceAsStream(relativePath)?.let { iconStream ->
+    AppIconResource.loadFile(relativePath)?.let { iconStream ->
         Icon(
             loadXmlImageVector(
                 iconStream,
@@ -115,15 +118,17 @@ fun AppImageIcon(
 @Composable
 fun MouseOverPopup(
     text: String,
+    backgroundColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
+    foregroundColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
     content: @Composable () -> Unit
 ) = TooltipArea(
     tooltip = {
         Surface(
             modifier = Modifier.shadow(4.dp),
-            color = MaterialTheme.colorScheme.tertiaryContainer,
+            color = backgroundColor,
             shape = RoundedCornerShape(4.dp)
         ) {
-            Text(text = text, color = MaterialTheme.colorScheme.onTertiaryContainer, modifier = Modifier.padding(10.dp))
+            Text(text = text, color = foregroundColor, modifier = Modifier.padding(10.dp))
         }
     },
     delayMillis = 750,

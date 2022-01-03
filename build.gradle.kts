@@ -2,7 +2,7 @@ import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val composeVersion = "1.0.0"
+val composeVersion = "0.1.0"
 
 plugins {
     kotlin("jvm") version "1.5.31"
@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "de.uzl.itcr"
-version = "1.0"
+version = "1.0.0-alpha1"
 
 repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
@@ -42,6 +42,7 @@ dependencies {
     implementation("com.github.tomnelson:jungrapht-layout:$jungraphtVersion")
     implementation("net.mahdilamb:colormap:0.9.511")
     implementation("li.flor:native-j-file-chooser:1.6.4")
+    implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359") // provides org.xml.sax
 }
 
 tasks.test {
@@ -55,7 +56,7 @@ java {
 
 javafx {
     // add javafx to the classpath
-    // TODO: 03/01/22 figure out a way to modularize this app, to suppress javafx message 
+    // TODO: 03/01/22 figure out a way to modularize this app, to suppress javafx message
     version = "17.0.1"
     modules("javafx.controls", "javafx.swing")
 }
@@ -77,8 +78,11 @@ compose.desktop {
                 TargetFormat.AppImage,
                 TargetFormat.Exe
             )
+            macOS {
+                dmgPackageVersion = "1.0.0"
+            }
             packageName = "TerminoDiff"
-            packageVersion = "1.0.0"
+            packageVersion = "0.1.0"
         }
     }
 }
