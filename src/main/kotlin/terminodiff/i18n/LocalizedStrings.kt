@@ -2,6 +2,9 @@ package terminodiff.i18n
 
 import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult
 
+/**
+ * we pass around an instance of localizedstrings, since we want every composable to recompose when the language changes.
+ */
 abstract class LocalizedStrings(
     val canonicalUrl: String,
     val changeLanguage: String,
@@ -21,8 +24,9 @@ abstract class LocalizedStrings(
     val loadRightFile: String,
     val graphsOpenInOtherWindows: String,
     val metadataDiff: String,
-    val `metadataDiffResults$`: (MetadataDiffItemResult) -> String,
+    val `metadataDiffResults$`: (terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult) -> String,
     val name: String = "Name",
+    val noDataLoadedTitle: String,
     val publisher: String,
     val property: String = "Property",
     val status: String = "Status",
@@ -32,7 +36,9 @@ abstract class LocalizedStrings(
     val viewGraphTitle: String,
     val showLeftGraphButton: String,
     val showRightGraphButton: String,
-    val toggleDarkTheme: String
+    val toggleDarkTheme: String,
+    val `leftFileOpenFilename$`: String,
+    val `rightFileOpenFilename$`: String,
 )
 
 enum class SupportedLocale {
@@ -69,12 +75,15 @@ class GermanStrings : LocalizedStrings(
             MetadataDiffItemResult.DIFFERENT_TEXT -> "unterschiedlicher Text"
         }
     },
+    noDataLoadedTitle = "Keine Daten geladen",
     publisher = "Herausgeber",
     title = "Titel",
     viewGraphTitle = "Graph anzeigen",
     showLeftGraphButton = "Linken Graphen zeigen",
     showRightGraphButton = "Rechten Graphen zeigen",
-    toggleDarkTheme = "Helles/Dunkles Thema"
+    toggleDarkTheme = "Helles/Dunkles Thema",
+    `leftFileOpenFilename$` = "Linke Datei geöffnet: %s",
+    `rightFileOpenFilename$` = "Rechte Datei geöffnet: %s"
 )
 
 class EnglishStrings : LocalizedStrings(
@@ -102,12 +111,15 @@ class EnglishStrings : LocalizedStrings(
             MetadataDiffItemResult.DIFFERENT_TEXT -> "different text"
         }
     },
+    noDataLoadedTitle = "No data loaded",
     publisher = "Publisher",
     title = "Title",
     viewGraphTitle = "View graph",
     showLeftGraphButton = "Show left graph",
     showRightGraphButton = "Show right graph",
-    toggleDarkTheme = "Toggle dark theme"
+    toggleDarkTheme = "Toggle dark theme",
+    `leftFileOpenFilename$` = "Left file open: %s",
+    `rightFileOpenFilename$` = "Right file open: %s"
 )
 
 val defaultStrings = getStrings()

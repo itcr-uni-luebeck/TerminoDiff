@@ -12,17 +12,27 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Popup
-import androidx.compose.ui.window.PopupPositionProvider
 import org.xml.sax.InputSource
 import terminodiff.i18n.LocalizedStrings
-import java.io.File
+import java.io.InputStream
+
+typealias ImageRelativePath = String
+
+class AppIconResource {
+    companion object {
+        val icDarkMode: ImageRelativePath = "icons/ic-dark-mode.xml"
+        val icChangeLanguage: ImageRelativePath = "icons/ic-language.xml"
+        val icLoadLeftFile: ImageRelativePath = "icons/ic-open-left.xml"
+        val icLoadRightFile: ImageRelativePath = "icons/ic-open-right.xml"
+    }
+}
 
 @Composable
 fun TerminoDiffTopAppBar(
@@ -41,28 +51,28 @@ fun TerminoDiffTopAppBar(
             MouseOverPopup(localizedStrings.toggleDarkTheme) {
                 IconActionButton(
                     onClick = onChangeDarkTheme,
-                    resourceRelativePath = "icons/ic-dark-mode.xml",
+                    imageRelativePath = AppIconResource.icDarkMode,
                     label = localizedStrings.toggleDarkTheme
                 )
             }
             MouseOverPopup(localizedStrings.changeLanguage) {
                 IconActionButton(
                     onClick = onLocaleChange,
-                    resourceRelativePath = "icons/ic-language.xml",
+                    imageRelativePath = AppIconResource.icChangeLanguage,
                     label = localizedStrings.changeLanguage
                 )
             }
-            MouseOverPopup(localizedStrings.toggleDarkTheme) {
+            MouseOverPopup(localizedStrings.loadLeftFile) {
                 IconActionButton(
                     onClick = onLoadLeftFile,
-                    resourceRelativePath = "icons/ic-open-left.xml",
+                    imageRelativePath = AppIconResource.icLoadLeftFile,
                     label = localizedStrings.loadLeftFile
                 )
             }
             MouseOverPopup(localizedStrings.loadRightFile) {
                 IconActionButton(
                     onClick = onLoadRightFile,
-                    resourceRelativePath = "icons/ic-open-right.xml",
+                    imageRelativePath = AppIconResource.icLoadRightFile,
                     label = localizedStrings.loadRightFile
                 )
             }
@@ -73,16 +83,27 @@ fun TerminoDiffTopAppBar(
 @Composable
 private fun IconActionButton(
     onClick: () -> Unit,
-    resourceRelativePath: String,
+    imageRelativePath: ImageRelativePath,
     label: String,
 ) {
     IconButton(onClick = onClick) {
+        AppImageIcon(imageRelativePath, label)
+    }
+}
+
+@Composable
+fun AppImageIcon(
+    relativePath: ImageRelativePath,
+    label: String,
+    tint: Color = MaterialTheme.colorScheme.onPrimaryContainer
+) {
+    AppIconResource::class.java.classLoader.getResourceAsStream(relativePath)?.let { iconStream ->
         Icon(
             loadXmlImageVector(
-                File("src/main/resources/${resourceRelativePath.trimStart('/', '\\')}"),
+                iconStream,
                 LocalDensity.current
             ), label,
-            tint = MaterialTheme.colorScheme.onPrimaryContainer
+            tint = tint
         )
     }
 }
@@ -113,5 +134,5 @@ fun MouseOverPopup(
     content = content
 )
 
-fun loadXmlImageVector(file: File, density: Density): ImageVector =
-    file.inputStream().buffered().use { loadXmlImageVector(InputSource(it), density) }
+fun loadXmlImageVector(stream: InputStream, density: Density): ImageVector =
+    stream.buffered().use { loadXmlImageVector(InputSource(it), density) }

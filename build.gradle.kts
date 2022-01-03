@@ -7,6 +7,7 @@ val composeVersion = "1.0.0"
 plugins {
     kotlin("jvm") version "1.5.31"
     id("org.jetbrains.compose") version "1.0.0"
+    id("org.openjfx.javafxplugin") version "0.0.10"
 }
 
 group = "de.uzl.itcr"
@@ -40,6 +41,7 @@ dependencies {
     implementation("com.github.tomnelson:jungrapht-visualization:$jungraphtVersion")
     implementation("com.github.tomnelson:jungrapht-layout:$jungraphtVersion")
     implementation("net.mahdilamb:colormap:0.9.511")
+    implementation("li.flor:native-j-file-chooser:1.6.4")
 }
 
 tasks.test {
@@ -51,6 +53,13 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
+javafx {
+    // add javafx to the classpath
+    // TODO: 03/01/22 figure out a way to modularize this app, to suppress javafx message 
+    version = "17.0.1"
+    modules("javafx.controls", "javafx.swing")
+}
+
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
@@ -60,7 +69,14 @@ compose.desktop {
     application {
         mainClass = "MainKt"
         nativeDistributions {
-            targetFormats(TargetFormat.Dmg, TargetFormat.Msi, TargetFormat.Deb)
+            targetFormats(
+                TargetFormat.Dmg,
+                TargetFormat.Msi,
+                TargetFormat.Deb,
+                TargetFormat.Rpm,
+                TargetFormat.AppImage,
+                TargetFormat.Exe
+            )
             packageName = "TerminoDiff"
             packageVersion = "1.0.0"
         }

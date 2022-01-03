@@ -21,7 +21,6 @@ import terminodiff.ui.graphs.SugiyamaLayoutFrame
 
 @Composable
 fun ShowGraphsPanel(
-    fhirContext: FhirContext,
     leftCs: CodeSystem,
     rightCs: CodeSystem,
     localizedStrings: LocalizedStrings,
