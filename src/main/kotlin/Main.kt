@@ -82,25 +82,9 @@ fun LocalizedAppWindow(
 ) {
     val leftCs = TestContainer.oncotreeLeft
     val rightCs = TestContainer.oncotreeRight
-    val leftGraphBuilder = CodeSystemGraphBuilder(leftCs, CodeSystemRole.LEFT)
-    val rightGraphBuilder = CodeSystemGraphBuilder(rightCs, CodeSystemRole.RIGHT)
-    val diff = CodeSystemDiffBuilder(leftGraphBuilder, rightGraphBuilder).build().also {
-        logger.info("${it.onlyInLeftConcepts.size} code(-s) only in left: ${it.onlyInLeftConcepts.joinToString(", ")}")
-        logger.info("${it.onlyInRightConcepts.size} code(-s) only in right: ${it.onlyInRightConcepts.joinToString(", ")}")
-        val differentConcepts =
-            it.conceptDifferences.filterValues { d -> d.conceptComparison.any { c -> c.result != ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL } || d.propertyComparison.size != 0 }
-        logger.info(
-            "${differentConcepts.size} concept-level difference(-s): ${
-                differentConcepts.entries.joinToString(separator = "\n - ") { (key, diff) ->
-                    "$key -> ${
-                        diff.toString(
-                            strings
-                        )
-                    }"
-                }
-            }"
-        )
-    }
+    val leftGraphBuilder by remember { mutableStateOf(CodeSystemGraphBuilder(leftCs, CodeSystemRole.LEFT)) }
+    val rightGraphBuilder by remember { mutableStateOf(CodeSystemGraphBuilder(rightCs, CodeSystemRole.RIGHT)) }
+    val diff by remember { mutableStateOf(buildDiff(leftGraphBuilder, rightGraphBuilder, strings)) }
     TerminoDiffTheme(useDarkTheme = useDarkTheme) {
         Scaffold(
             topBar = {
@@ -140,6 +124,30 @@ fun LocalizedAppWindow(
 
             }
         }
+    }
+}
+
+private fun buildDiff(
+    leftGraphBuilder: CodeSystemGraphBuilder,
+    rightGraphBuilder: CodeSystemGraphBuilder,
+    strings: LocalizedStrings
+): CodeSystemDiffBuilder {
+    return CodeSystemDiffBuilder(leftGraphBuilder, rightGraphBuilder).build().also {
+        logger.info("${it.onlyInLeftConcepts.size} code(-s) only in left: ${it.onlyInLeftConcepts.joinToString(", ")}")
+        logger.info("${it.onlyInRightConcepts.size} code(-s) only in right: ${it.onlyInRightConcepts.joinToString(", ")}")
+        val differentConcepts =
+            it.conceptDifferences.filterValues { d -> d.conceptComparison.any { c -> c.result != ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL } || d.propertyComparison.size != 0 }
+        logger.info(
+            "${differentConcepts.size} concept-level difference(-s): ${
+                differentConcepts.entries.joinToString(separator = "\n - ") { (key, diff) ->
+                    "$key -> ${
+                        diff.toString(
+                            strings
+                        )
+                    }"
+                }
+            }"
+        )
     }
 }
 
