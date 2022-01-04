@@ -9,10 +9,9 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.ApplicationScope
-import androidx.compose.ui.window.Window
-import androidx.compose.ui.window.application
+import androidx.compose.ui.window.*
 import ca.uhn.fhir.context.FhirContext
 import org.hl7.fhir.r4.model.CodeSystem
 import org.slf4j.Logger
@@ -25,30 +24,20 @@ import terminodiff.i18n.getStrings
 import terminodiff.preferences.AppPreferences
 import terminodiff.ui.*
 import terminodiff.ui.theme.TerminoDiffTheme
+import java.awt.Dimension
 import java.io.File
 
-val logger: Logger = LoggerFactory.getILoggerFactory().getLogger("terminodiff")
+val logger: Logger = LoggerFactory.getLogger(TerminoDiffApp::class.java)
 
+/**
+ * just for creating the log
+ */
 class TerminoDiffApp
 
-/*class TestContainer {
-    companion object {
-        val fhirContext: FhirContext = FhirContext.forR4()
 
-        private fun loadCsByName(filename: String): CodeSystem = fhirContext.newJsonParser().parseResource(
-            CodeSystem::class.java,
-            File("src/main/resources/testresources/$filename").readText(),
-        )
-
-        val cs1 = loadCsByName("simple-left.json")
-        val cs2 = loadCsByName("simple-right.json")
-
-        val oncotreeLeft = loadCsByName("oncotree_2020_10_01.json")
-        val oncotreeRight = loadCsByName("oncotree_2021_11_02.json")
-
-    }
-}*/
-
+fun main() = application {
+    AppWindow(this)
+}
 
 @Composable
 fun AppWindow(applicationScope: ApplicationScope) {
@@ -56,13 +45,27 @@ fun AppWindow(applicationScope: ApplicationScope) {
     var strings by remember { mutableStateOf(getStrings(locale)) }
     val scrollState = rememberScrollState()
     var useDarkTheme by remember { mutableStateOf(AppPreferences.darkModeEnabled) }
-    Window(onCloseRequest = { applicationScope.exitApplication() }) {
+    var hasResizedWindow by remember { mutableStateOf(false) }
+    Window(
+        onCloseRequest = { applicationScope.exitApplication() },
+    ) {
         this.window.title = strings.terminoDiff
+        if (!hasResizedWindow) {
+            //app crashes if we use state for the window, when the locale is changed, with the error
+            //that the window is already on screen.
+            //this is because everything is recomposed when the locale changes, and that breaks AWT.
+            //using the mutable state, we change the window size exactly once, during the first (re-) composition,
+            //so that the user can then change the res as they require.
+            //A resolution of 1280x960 is 4:3.
+            this.window.size = Dimension(1280, 960)
+            hasResizedWindow = true
+        }
 
         LocalizedAppWindow(
             localizedStrings = strings,
             scrollState = scrollState,
             useDarkTheme = useDarkTheme,
+            frameWindow = this,
             onLocaleChange = {
                 locale = when (locale) {
                     SupportedLocale.DE -> SupportedLocale.EN
@@ -85,10 +88,12 @@ fun LocalizedAppWindow(
     scrollState: ScrollState,
     useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
-    onChangeDarkTheme: () -> Unit
+    onChangeDarkTheme: () -> Unit,
+    frameWindow: FrameWindowScope
 ) {
     //val leftCs = TestContainer.oncotreeLeft
     //val rightCs = TestContainer.oncotreeRight
+    val scope = rememberCoroutineScope()
     var leftCsFilenameResource: Pair<File, CodeSystem>? by remember { mutableStateOf(null) }
     var rightCsFilenameResource: Pair<File, CodeSystem>? by remember { mutableStateOf(null) }
     val fhirContext = remember { FhirContext.forR4() }
@@ -101,13 +106,13 @@ fun LocalizedAppWindow(
         }
     }
     val onLoadLeftFile: () -> Unit = {
-        loadFile(localizedStrings.loadLeftFile, fhirContext = fhirContext)?.let {
+        loadFile(localizedStrings.loadLeftFile, fhirContext = fhirContext, frameWindow)?.let {
             leftCsFilenameResource = it
             dataContainer.computeDiff(localizedStrings)
         }
     }
     val onLoadRightFile: () -> Unit = {
-        loadFile(localizedStrings.loadRightFile, fhirContext = fhirContext)?.let {
+        loadFile(localizedStrings.loadRightFile, fhirContext = fhirContext, frameWindow)?.let {
             rightCsFilenameResource = it
             dataContainer.computeDiff(localizedStrings)
         }
@@ -205,8 +210,8 @@ private fun ContainerUninitializedContent(
                     }
                 }
                 when {
-                    leftFile != null -> localizedStrings.`leftFileOpenFilename$`.invoke(leftFile)
-                    rightFile != null -> localizedStrings.`rightFileOpenFilename$`.invoke(rightFile)
+                    leftFile != null -> localizedStrings.leftFileOpenFilename_.invoke(leftFile)
+                    rightFile != null -> localizedStrings.rightFileOpenFilename_.invoke(rightFile)
                     else -> null
                 }?.let { openFilenameText ->
                     Text(
@@ -238,9 +243,10 @@ private fun ContainerInitializedContent(
             leftCs = dataContainer.leftCodeSystem!!,
             rightCs = dataContainer.rightCodeSystem!!,
             localizedStrings = strings,
-            useDarkTheme = useDarkTheme
+            useDarkTheme = useDarkTheme,
         )
         ConceptDiffPanel(
+            verticalWeight = 0.45f,
             diffDataContainer = dataContainer,
             localizedStrings = strings,
             useDarkTheme = useDarkTheme
@@ -255,7 +261,3 @@ private fun ContainerInitializedContent(
     }
 }
 
-
-fun main() = application {
-    AppWindow(this)
-}

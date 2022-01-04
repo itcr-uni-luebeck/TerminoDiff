@@ -17,6 +17,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
 import org.hl7.fhir.r4.model.CodeSystem
@@ -51,18 +52,18 @@ fun MetadataDiffPanel(
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
     ) {
         Column(
-            Modifier.padding(8.dp).fillMaxWidth(),
+            Modifier.padding(8.dp).fillMaxSize(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
 
             Text(
                 text = localizedStrings.metadataDiff,
-                style = MaterialTheme.typography.headlineMedium,
+                style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onTertiaryContainer
             )
 
             Row(
-                Modifier.fillMaxWidth(),
+                Modifier.fillMaxSize(),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 LazyVerticalGrid(
@@ -131,7 +132,8 @@ fun MetadataItem(
         ) {
             Text(
                 text = label.invoke(localizedStrings),
-                style = MaterialTheme.typography.headlineSmall,
+                style = MaterialTheme.typography.bodyLarge,
+                fontWeight = FontWeight.Bold,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Box(Modifier.fillMaxHeight()) {
@@ -146,9 +148,10 @@ fun MetadataItem(
                     )
                     val (backgroundColor, foregroundColor) = colorPairForDiffResult(comparisonResult, diffColors)
                     DiffChip(
-                        text = localizedStrings.`metadataDiffResults$`.invoke(comparisonResult.result),
+                        text = localizedStrings.metadataDiffResults_.invoke(comparisonResult.result),
                         backgroundColor = backgroundColor,
-                        textColor = foregroundColor
+                        textColor = foregroundColor,
+                        icon = null
                     )
                     readOnlyTextField(
                         value = valueRight,

@@ -1,9 +1,6 @@
 package terminodiff.ui
 
-import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
@@ -13,7 +10,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ca.uhn.fhir.context.FhirContext
 import org.hl7.fhir.r4.model.CodeSystem
 import terminodiff.engine.graph.CodeSystemRole
 import terminodiff.i18n.LocalizedStrings
@@ -24,7 +20,7 @@ fun ShowGraphsPanel(
     leftCs: CodeSystem,
     rightCs: CodeSystem,
     localizedStrings: LocalizedStrings,
-    useDarkTheme: Boolean
+    useDarkTheme: Boolean,
 ) {
     Card(
         Modifier.padding(8.dp).fillMaxWidth(),
@@ -52,7 +48,7 @@ fun ShowGraphsPanel(
                         useDarkTheme = useDarkTheme
                     )
                 }) {
-                Text(localizedStrings.showLeftGraphButton)
+                Text(localizedStrings.showLeftGraphButton, color = MaterialTheme.colorScheme.onPrimary)
             }
             Text(
                 text = localizedStrings.graphsOpenInOtherWindows,
@@ -70,7 +66,7 @@ fun ShowGraphsPanel(
                         useDarkTheme = useDarkTheme
                     )
                 }) {
-                Text(localizedStrings.showRightGraphButton)
+                Text(localizedStrings.showRightGraphButton, color = MaterialTheme.colorScheme.onPrimary)
             }
         }
     }

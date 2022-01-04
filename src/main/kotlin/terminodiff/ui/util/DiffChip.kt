@@ -1,28 +1,31 @@
 package terminodiff.ui.util
 
-import androidx.compose.desktop.ui.tooling.preview.Preview
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.unit.dp
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.ConceptDiffResult
 import terminodiff.engine.metadata.MetadataDiff
 import terminodiff.ui.theme.DiffColors
 
-@Preview
 @Composable
 fun DiffChip(
     modifier: Modifier = Modifier,
     text: String,
     backgroundColor: Color,
-    textColor: Color
+    textColor: Color,
+    textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+    icon: ImageVector? = null
 ) {
     Surface(
         modifier = modifier.padding(4.dp),
@@ -30,10 +33,17 @@ fun DiffChip(
         tonalElevation = 4.dp,
         shape = RoundedCornerShape(8.dp)
     ) {
-        Row {
+        Row(
+            Modifier.fillMaxHeight(),
+            horizontalArrangement = Arrangement.Center,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            if (icon != null) {
+                Icon(imageVector = icon, null, tint = textColor)
+            }
             Text(
                 text = text,
-                style = MaterialTheme.typography.bodyMedium,
+                style = textStyle,
                 color = textColor,
                 modifier = Modifier.padding(8.dp)
             )
@@ -41,12 +51,28 @@ fun DiffChip(
     }
 }
 
+@Composable
+fun DiffChip(
+    modifier: Modifier = Modifier,
+    text: String,
+    colorPair: Pair<Color, Color>,
+    textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
+    icon: ImageVector? = null
+) = DiffChip(
+    modifier = modifier,
+    text = text,
+    backgroundColor = colorPair.first,
+    textColor = colorPair.second,
+    textStyle = textStyle,
+    icon = icon
+)
+
 fun colorPairForConceptDiffResult(
     comparisonResult: ConceptDiffResult,
     diffColors: DiffColors
 ): Pair<Color, Color> = when (comparisonResult.result) {
     ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> diffColors.greenPair
-    ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> diffColors.redPair
+    ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> diffColors.yellowPair
 }
 
 fun colorPairForDiffResult(

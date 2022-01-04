@@ -6,7 +6,8 @@ import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult
 import java.io.File
 
 /**
- * we pass around an instance of localizedstrings, since we want every composable to recompose when the language changes.
+ * we pass around an instance of localizedstrings, since we want every composable
+ * to recompose when the language changes.
  */
 abstract class LocalizedStrings(
     val canonicalUrl: String,
@@ -14,7 +15,7 @@ abstract class LocalizedStrings(
     val conceptDiff: String,
     val contact: String,
     val code: String = "Code",
-    val `conceptDiffResults$`: (ConceptDiffResult) -> String,
+    val conceptDiffResults_: (ConceptDiffItem.ConceptDiffResultEnum) -> String,
     val date: String,
     val description: String,
     val definition: String = "Definition",
@@ -22,6 +23,7 @@ abstract class LocalizedStrings(
     val display: String = "Display",
     val experimental: String,
     val id: String = "ID",
+    val identical: String,
     val identifiers: String,
     val jurisdiction: String,
     val language: String,
@@ -29,21 +31,28 @@ abstract class LocalizedStrings(
     val loadRightFile: String,
     val graphsOpenInOtherWindows: String,
     val metadataDiff: String,
-    val `metadataDiffResults$`: (MetadataDiffItemResult) -> String,
+    val metadataDiffResults_: (MetadataDiffItemResult) -> String,
     val name: String = "Name",
     val noDataLoadedTitle: String,
+    val numberDifferent_: (Int) -> String,
+    val onlyInLeft: String,
+    val onlyInRight: String,
+    val overallComparison: String,
     val publisher: String,
     val property: String = "Property",
-    val status: String = "Status",
-    val terminoDiff: String = "TerminoDiff",
-    val title: String,
-    val version: String = "Version",
-    val viewGraphTitle: String,
+    val showAll: String,
+    val showDifferent: String,
+    val showIdentical: String,
     val showLeftGraphButton: String,
     val showRightGraphButton: String,
+    val status: String = "Status",
     val toggleDarkTheme: String,
-    val `leftFileOpenFilename$`: (File) -> String,
-    val `rightFileOpenFilename$`: (File) -> String,
+    val title: String,
+    val terminoDiff: String = "TerminoDiff",
+    val version: String = "Version",
+    val viewGraphTitle: String,
+    val leftFileOpenFilename_: (File) -> String,
+    val rightFileOpenFilename_: (File) -> String,
 )
 
 enum class SupportedLocale {
@@ -59,8 +68,8 @@ class GermanStrings : LocalizedStrings(
     canonicalUrl = "Kanonische URL",
     changeLanguage = "Sprache wechseln",
     conceptDiff = "Konzept-Diff",
-    `conceptDiffResults$` = {
-        when (it.result) {
+    conceptDiffResults_ = {
+        when (it) {
             ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> "Unterschiedlich"
             ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identisch"
         }
@@ -70,13 +79,14 @@ class GermanStrings : LocalizedStrings(
     description = "Beschreibung",
     experimental = "Experimentell?",
     identifiers = "IDs",
+    identical = "Identisch",
     jurisdiction = "Jurisdiktion",
     language = "de",
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
     graphsOpenInOtherWindows = "Graphen öffnen sich in einem neuen Fenster.",
     metadataDiff = "Metadaten-Diff",
-    `metadataDiffResults$` = {
+    metadataDiffResults_ = {
         when (it) {
             MetadataDiffItemResult.BOTH_EMPTY -> "beide leer"
             MetadataDiffItemResult.DIFFERENT -> "unterschiedlich"
@@ -87,22 +97,29 @@ class GermanStrings : LocalizedStrings(
         }
     },
     noDataLoadedTitle = "Keine Daten geladen",
+    numberDifferent_ = { "$it unterschiedlich" },
+    onlyInLeft = "Nur links",
+    onlyInRight = "Nur rechts",
+    overallComparison = "Gesamt",
     publisher = "Herausgeber",
-    title = "Titel",
-    viewGraphTitle = "Graph anzeigen",
+    showAll = "Alle anzeigen",
+    showDifferent = "Nur unterschiedliche",
+    showIdentical = "Nur identische",
     showLeftGraphButton = "Linken Graphen zeigen",
     showRightGraphButton = "Rechten Graphen zeigen",
+    viewGraphTitle = "Graph anzeigen",
+    title = "Titel",
     toggleDarkTheme = "Helles/Dunkles Thema",
-    `leftFileOpenFilename$` = { file -> "Linke Datei geöffnet: ${file.absolutePath}" },
-    `rightFileOpenFilename$` = { file -> "Rechte Datei geöffnet: ${file.absolutePath}" }
+    leftFileOpenFilename_ = { file -> "Linke Datei geöffnet: ${file.absolutePath}" },
+    rightFileOpenFilename_ = { file -> "Rechte Datei geöffnet: ${file.absolutePath}" }
 )
 
 class EnglishStrings : LocalizedStrings(
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
     conceptDiff = "Concept Diff",
-    `conceptDiffResults$` = {
-        when (it.result) {
+    conceptDiffResults_ = {
+        when (it) {
             ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> "Different"
             ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identical"
         }
@@ -111,6 +128,7 @@ class EnglishStrings : LocalizedStrings(
     date = "Date",
     description = "Description",
     experimental = "Experimental?",
+    identical = "Identical",
     identifiers = "Identifiers",
     jurisdiction = "Jurisdiction",
     language = "en",
@@ -118,7 +136,7 @@ class EnglishStrings : LocalizedStrings(
     loadRightFile = "Load right file",
     graphsOpenInOtherWindows = "Graphs open in another window.",
     metadataDiff = "Metadata Diff",
-    `metadataDiffResults$` = {
+    metadataDiffResults_ = {
         when (it) {
             MetadataDiffItemResult.BOTH_EMPTY -> "both empty"
             MetadataDiffItemResult.DIFFERENT -> "different"
@@ -129,14 +147,21 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     noDataLoadedTitle = "No data loaded",
+    numberDifferent_ = { "$it different" },
+    onlyInLeft = "Only left",
+    onlyInRight = "Only right",
+    overallComparison = "Overall",
     publisher = "Publisher",
-    title = "Title",
-    viewGraphTitle = "View graph",
+    showAll = "Show all",
+    showIdentical = "Only identical",
+    showDifferent = "Only different",
     showLeftGraphButton = "Show left graph",
     showRightGraphButton = "Show right graph",
+    title = "Title",
     toggleDarkTheme = "Toggle dark theme",
-    `leftFileOpenFilename$` = { file -> "Left file open: ${file.absolutePath}" },
-    `rightFileOpenFilename$` = { file -> "Right file open: ${file.absolutePath}" },
+    viewGraphTitle = "View graph",
+    leftFileOpenFilename_ = { file -> "Left file open: ${file.absolutePath}" },
+    rightFileOpenFilename_ = { file -> "Right file open: ${file.absolutePath}" },
 )
 
 val defaultStrings = getStrings()

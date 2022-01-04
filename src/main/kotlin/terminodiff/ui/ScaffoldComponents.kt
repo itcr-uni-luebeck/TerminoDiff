@@ -3,6 +3,7 @@ package terminodiff.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TopAppBar
@@ -34,6 +35,13 @@ class AppIconResource {
 
         fun loadFile(relativePath: ImageRelativePath) =
             AppIconResource::class.java.classLoader.getResourceAsStream(relativePath)
+
+        fun loadXmlImageVector(stream: InputStream, density: Density): ImageVector =
+            stream.buffered().use { loadXmlImageVector(InputSource(it), density) }
+
+        @Composable
+        fun loadXmlImageVector(relativePath: ImageRelativePath): ImageVector =
+            loadFile(relativePath)!!.buffered().use { loadXmlImageVector(InputSource(it), LocalDensity.current) }
     }
 }
 

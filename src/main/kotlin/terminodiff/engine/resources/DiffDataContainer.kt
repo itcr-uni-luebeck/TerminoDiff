@@ -1,5 +1,6 @@
 package terminodiff.engine.resources
 
+import androidx.compose.ui.window.FrameWindowScope
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.DataFormatException
 import li.flor.nativejfilechooser.NativeJFileChooser
@@ -73,11 +74,11 @@ class DiffDataContainer(
 
 }
 
-class FhirLoader(private val frame: NativeJFileChooser, private val file: File, private val fhirContext: FhirContext) :
+class FhirLoader(private val frame: FrameWindowScope, private val file: File, private val fhirContext: FhirContext) :
     SwingWorker<Pair<File, CodeSystem>?, Void>() {
 
     init {
-        frame.cursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
+        frame.window.cursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
     }
 
     override fun doInBackground(): Pair<File, CodeSystem>? {
@@ -102,13 +103,13 @@ class FhirLoader(private val frame: NativeJFileChooser, private val file: File, 
         try {
             get()
         } finally {
-            frame.cursor = Cursor.getDefaultCursor()
+            frame.window.cursor = Cursor.getDefaultCursor()
         }
     }
 
 }
 
-fun loadFile(title: String, fhirContext: FhirContext): Pair<File, CodeSystem>? =
+fun loadFile(title: String, fhirContext: FhirContext, frameWindow: FrameWindowScope): Pair<File, CodeSystem>? =
     NativeJFileChooser(AppPreferences.fileBrowserDirectory).apply {
         dialogTitle = title
         isAcceptAllFileFilterUsed = false
@@ -121,7 +122,7 @@ fun loadFile(title: String, fhirContext: FhirContext): Pair<File, CodeSystem>? =
                 val selectedFile = chooser.selectedFile?.absoluteFile ?: return null
                 chooser.currentDirectory.absolutePath.let {
                     AppPreferences.fileBrowserDirectory = it
-                    FhirLoader(chooser, selectedFile, fhirContext).let { loader ->
+                    FhirLoader(frameWindow, selectedFile, fhirContext).let { loader ->
                         loader.execute()
                         loader.get()
                     }
