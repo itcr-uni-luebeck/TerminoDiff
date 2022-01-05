@@ -52,6 +52,7 @@ fun <T> LazyTable(
                                     TableCell(
                                         modifier = modifier.height(cellHeight),
                                         weight = spec.weight + nextSpec.weight,
+                                        tooltipText = spec.tooltipText?.invoke(data),
                                         content = {
                                             spec.content(data)
                                         }
@@ -63,6 +64,7 @@ fun <T> LazyTable(
                             TableCell(
                                 modifier = Modifier.height(cellHeight),
                                 weight = spec.weight,
+                                tooltipText = spec.tooltipText?.invoke(data),
                                 content = {
                                     spec.content(data)
                                 }

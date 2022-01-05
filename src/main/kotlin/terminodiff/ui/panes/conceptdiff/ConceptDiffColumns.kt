@@ -132,7 +132,7 @@ private fun ColumnSpec.Companion.columnSpecForProperty(
     stringValueResolver: (FhirConceptDetails) -> String?,
 ): ColumnSpec<ConceptTableData> {
     val tooltipTextFun: (ConceptTableData) -> () -> String? =
-        { data -> tooltipForCode(data.leftDetails, data.rightDetails, stringValueResolver) }
+        { data -> tooltipForConceptProperty(data.leftDetails, data.rightDetails, stringValueResolver) }
     return ColumnSpec(
         title = localizedStrings.display,
         weight = weight,
@@ -161,14 +161,16 @@ private fun ColumnSpec.Companion.columnSpecForProperty(
     }
 }
 
-private fun tooltipForCode(
+private fun tooltipForConceptProperty(
     leftConcept: FhirConceptDetails?, rightConcept: FhirConceptDetails?, property: (FhirConceptDetails) -> String?
 ): () -> String? = {
     val leftValue = leftConcept?.let(property)
     val rightValue = rightConcept?.let(property)
     when {
         leftValue == null && rightValue == null -> null
-        leftValue == rightValue -> "'$leftValue'"
+        leftValue != null && rightValue == null -> leftValue.toString()
+        leftValue == null && rightValue != null -> rightValue.toString()
+        leftValue == rightValue -> leftValue.toString()
         else -> "'$leftValue' vs. '$rightValue'"
     }
 }
