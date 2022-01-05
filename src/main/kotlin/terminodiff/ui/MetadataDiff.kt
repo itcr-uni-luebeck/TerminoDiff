@@ -86,8 +86,7 @@ fun MetadataDiffTable(
         ColumnSpec.propertyColumnSpec(localizedStrings),
         ColumnSpec.resultColumnSpec(localizedStrings, diffColors),
         ColumnSpec.leftValueColumnSpec(localizedStrings, leftCodeSystem),
-        ColumnSpec.rightValueColumnSpec(localizedStrings, rightCodeSystem),
-        ColumnSpec.propertyColumnSpec(localizedStrings)
+        ColumnSpec.rightValueColumnSpec(localizedStrings, rightCodeSystem)
     )
     LazyTable(
         columnSpecs = columnSpecs,

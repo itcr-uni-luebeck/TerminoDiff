@@ -125,7 +125,7 @@ fun RowScope.TableCell(
 data class ColumnSpec<T>(
     val title: String,
     val weight: Float,
-    val tooltipText: (() -> String?)? = null,
+    val tooltipText: ((T) -> () -> String?)? = null,
     val mergeIf: ((T) -> Boolean)? = null,
     val content: @Composable (T) -> Unit,
 ) {

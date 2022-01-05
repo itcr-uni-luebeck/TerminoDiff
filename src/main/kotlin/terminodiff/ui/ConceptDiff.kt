@@ -150,288 +150,48 @@ fun DiffDataTable(
 ) {
     if (!diffDataContainer.isInitialized || diffDataContainer.codeSystemDiff == null) throw IllegalStateException("the diff data container is not initialized")
 
-    val columnSpecs = buildColumnSpecs(localizedStrings, tableData, diffColors)
+    val columnSpecs = listOf(
+        ColumnSpec.codeColumnSpec(localizedStrings),
+        ColumnSpec.displayColumnSpec(localizedStrings, diffColors),
+        ColumnSpec.definitionColumnSpec(localizedStrings, diffColors),
+        ColumnSpec.propertyColumnSpec(localizedStrings, diffColors),
+        ColumnSpec.overallComparisonColumnSpec(localizedStrings, diffColors)
+    )
 
     TableScreen(
         tableData = tableData,
         lazyListState = lazyListState,
-        columnSpecs = columnSpecs,
+        columnSpecs = columnSpecs
     )
 }
 
-@Composable
-private fun buildColumnSpecs(
-    localizedStrings: LocalizedStrings, tableData: TableData, diffColors: DiffColors
-) = listOf(
-    ConceptDiffColumnSpec.codeColumnSpec(localizedStrings), ConceptDiffColumnSpec.displayColumnSpec(
-        localizedStrings, tableData.leftGraphBuilder, tableData.rightGraphBuilder, diffColors
-    ), ConceptDiffColumnSpec.definitionColumnSpec(
-        localizedStrings, tableData.leftGraphBuilder, tableData.rightGraphBuilder, diffColors
-    ), ConceptDiffColumnSpec.propertyColumnSpec(
-        localizedStrings, tableData.leftGraphBuilder, tableData.rightGraphBuilder, diffColors
-    ), ConceptDiffColumnSpec.overallComparisonColumnSpec(
-        localizedStrings, diffColors,
-    )
-)
-
-@Composable
-fun RowScope.ConceptDiffHeaderCell(
-    weight: Float, text: String
-) {
-    Box(
-        Modifier.border(1.dp, MaterialTheme.colorScheme.onTertiaryContainer).weight(weight).padding(2.dp)
-    ) {
-        Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
-            Text(
-                text = text,
-                style = MaterialTheme.typography.bodyMedium,
-                fontWeight = FontWeight.Bold,
-                fontStyle = FontStyle.Italic
-            )
-        }
+fun tooltipForCode(
+    leftConcept: FhirConceptDetails?, rightConcept: FhirConceptDetails?, property: (FhirConceptDetails) -> String?
+): () -> String? = {
+    val leftValue = leftConcept?.let(property)
+    val rightValue = rightConcept?.let(property)
+    when {
+        leftValue == null && rightValue == null -> null
+        leftValue == rightValue -> "'$leftValue'"
+        else -> "'$leftValue' vs. '$rightValue'"
     }
 }
 
 @Composable
-fun RowScope.ConceptDiffTableCell(
-    modifier: Modifier = Modifier, weight: Float, tooltipText: (() -> String?)? = null, content: @Composable () -> Unit
+fun contentWithText(
+    diff: ConceptDiff, localizedStrings: LocalizedStrings, diffColors: DiffColors, text: String?, labelToFind: String
 ) {
-    Row(
-        modifier = modifier.border(1.dp, MaterialTheme.colorScheme.onTertiaryContainer).weight(weight).padding(2.dp),
-        horizontalArrangement = Arrangement.Center,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        when {
-            tooltipText == null || tooltipText() == null -> content()
-            else -> MouseOverPopup(
-                text = tooltipText()!!,
-                backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-                foregroundColor = MaterialTheme.colorScheme.onPrimaryContainer,
-                content = content
-            )
-        }
-    }
-}
-
-data class ConceptDiffColumnSpec(
-    val title: String,
-    val weight: Float,
-    val tooltipText: ((String) -> String?)? = null,
-    val tooltipOnlyInX: ((String, FhirConceptDetails) -> String?)? = null,
-    val cellContent: @Composable (String, ConceptDiff) -> Unit,
-    val cellContentOnlyInX: @Composable (String, FhirConceptDetails, Boolean) -> Unit
-) {
-
-    companion object {
-
-        private fun tooltipForCode(
-            leftGraphBuilder: CodeSystemGraphBuilder,
-            rightGraphBuilder: CodeSystemGraphBuilder,
-            property: (FhirConceptDetails) -> String?
-        ): (String) -> String? = { code ->
-            val leftValue = leftGraphBuilder.nodeTree[code]?.let(property)
-            val rightValue = rightGraphBuilder.nodeTree[code]?.let(property)
-            when {
-                leftValue == null && rightValue == null -> null
-                leftValue == rightValue -> "'$leftValue'"
-                else -> "'$leftValue' vs. '$rightValue'"
-            }
-
-        }
-
-        @Composable
-        fun codeColumnSpec(localizedStrings: LocalizedStrings): ConceptDiffColumnSpec {
-            @Composable
-            fun textRow(code: String) = Row(
-                Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
-            ) {
-                SelectableText(code, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
-
-            }
-            return ConceptDiffColumnSpec(title = localizedStrings.code, weight = 0.1f, cellContent = { code, _ ->
-                textRow(code)
-            }, cellContentOnlyInX = { code, _, _ -> textRow(code) })
-        }
-
-        @Composable
-        private fun contentWithText(
-            code: String,
-            diff: ConceptDiff,
-            localizedStrings: LocalizedStrings,
-            diffColors: DiffColors,
-            tooltipTextFun: (String) -> String?,
-            labelToFind: String
-        ) {
-            Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-                ChipForConceptDiffResult(
-                    modifier = Modifier.padding(end = 2.dp),
-                    conceptComparison = diff.conceptComparison,
-                    labelToFind = labelToFind,
-                    localizedStrings = localizedStrings,
-                    diffColors = diffColors
-                )
-                val tooltipText = tooltipTextFun.invoke(code)
-                SelectableText(
-                    text = tooltipText ?: "null",
-                    fontStyle = if (tooltipText == null) FontStyle.Italic else FontStyle.Normal
-                )
-            }
-        }
-
-        fun displayColumnSpec(
-            localizedStrings: LocalizedStrings,
-            leftGraphBuilder: CodeSystemGraphBuilder,
-            rightGraphBuilder: CodeSystemGraphBuilder,
-            diffColors: DiffColors
-        ): ConceptDiffColumnSpec {
-            val tooltipTextFun = tooltipForCode(
-                leftGraphBuilder = leftGraphBuilder,
-                rightGraphBuilder = rightGraphBuilder,
-                property = FhirConceptDetails::display
-            )
-            return ConceptDiffColumnSpec(localizedStrings.display,
-                weight = 0.25f,
-                tooltipText = tooltipTextFun,
-                tooltipOnlyInX = { _, concept -> concept.display },
-                cellContent = { code, diff ->
-                    contentWithText(
-                        code = code,
-                        diff = diff,
-                        localizedStrings = localizedStrings,
-                        diffColors = diffColors,
-                        tooltipTextFun = tooltipTextFun,
-                        labelToFind = localizedStrings.display
-                    )
-                },
-                cellContentOnlyInX = { _, concept, _ ->
-                    SelectableText(
-                        text = concept.display ?: "null",
-                        fontStyle = if (concept.display == null) FontStyle.Italic else FontStyle.Normal
-                    )
-                })
-        }
-
-        fun definitionColumnSpec(
-            localizedStrings: LocalizedStrings,
-            leftGraphBuilder: CodeSystemGraphBuilder,
-            rightGraphBuilder: CodeSystemGraphBuilder,
-            diffColors: DiffColors
-        ): ConceptDiffColumnSpec {
-            val tooltipTextFun = tooltipForCode(
-                leftGraphBuilder = leftGraphBuilder,
-                rightGraphBuilder = rightGraphBuilder,
-                property = FhirConceptDetails::definition
-            )
-            return ConceptDiffColumnSpec(title = localizedStrings.definition,
-                weight = 0.25f,
-                tooltipText = tooltipTextFun,
-                tooltipOnlyInX = { _, concept -> concept.definition },
-                cellContent = { code, diff ->
-                    contentWithText(
-                        code = code,
-                        diff = diff,
-                        localizedStrings = localizedStrings,
-                        diffColors = diffColors,
-                        tooltipTextFun = tooltipTextFun,
-                        labelToFind = localizedStrings.definition
-                    )
-                },
-                cellContentOnlyInX = { _, concept, _ ->
-                    Text(
-                        text = concept.definition ?: "null",
-                        fontStyle = if (concept.definition == null) FontStyle.Italic else FontStyle.Normal
-                    )
-                })
-        }
-
-        fun propertyColumnSpec(
-            localizedStrings: LocalizedStrings,
-            leftGraphBuilder: CodeSystemGraphBuilder,
-            rightGraphBuilder: CodeSystemGraphBuilder,
-            diffColors: DiffColors
-        ): ConceptDiffColumnSpec =
-            ConceptDiffColumnSpec(
-                title = localizedStrings.property,
-                weight = 0.25f,
-                tooltipText = null,
-                cellContent = { _, diff ->
-                    when {
-                        diff.propertyComparison.none() -> {
-                            DiffChip(
-                                text = localizedStrings.identical, colorPair = diffColors.greenPair
-                            )
-                        }
-                        else -> {
-                            // TODO: 04/01/22
-                            Row {
-                                Button(
-                                    onClick = {},
-                                    elevation = ButtonDefaults.elevation(4.dp),
-                                    colors = ButtonDefaults.buttonColors(
-                                        diffColors.yellowPair.first, diffColors.yellowPair.second
-                                    )
-                                ) {
-                                    Text(localizedStrings.numberDifferent_.invoke(diff.propertyComparison.size))
-                                }
-                                /*DiffChip(
-                                    text = localizedStrings.numberDifferent_.invoke(diff.propertyComparison.size),
-                                    colorPair = diffColors.yellowPair,
-                                )*/
-                            }
-                        }
-                    }
-                },
-                cellContentOnlyInX = { _, _, _ ->
-                    // TODO: 04/01/22
-                })
-
-        fun overallComparisonColumnSpec(
-            localizedStrings: LocalizedStrings,
-            diffColors: DiffColors,
-        ): ConceptDiffColumnSpec = ConceptDiffColumnSpec(title = localizedStrings.overallComparison,
-            weight = 0.15f,
-            tooltipText = null,
-            cellContent = { _, diff ->
-                val colors: Pair<Color, Color>
-                val chipLabel: String
-                when {
-                    diff.conceptComparison.any { it.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT } -> {
-                        colors = diffColors.yellowPair
-                        chipLabel =
-                            localizedStrings.conceptDiffResults_.invoke(ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT)
-                    }
-                    else -> {
-                        colors = diffColors.greenPair
-                        chipLabel = localizedStrings.identical
-                    }
-                }
-                DiffChip(
-                    colorPair = colors, text = chipLabel, modifier = Modifier.fillMaxWidth(0.8f)
-                )
-            },
-            cellContentOnlyInX = { _, _, onlyInLeft ->
-                val chipLabel: String
-                val onlyOneVersionIcon: ImageVector
-                when (onlyInLeft) {
-                    true -> {
-                        chipLabel = localizedStrings.onlyInLeft
-                        onlyOneVersionIcon = AppIconResource.loadXmlImageVector(AppIconResource.icLoadLeftFile)
-
-                    }
-                    else -> {
-                        chipLabel = localizedStrings.onlyInRight
-                        onlyOneVersionIcon = AppIconResource.loadXmlImageVector(AppIconResource.icLoadRightFile)
-                    }
-                }
-                DiffChip(
-                    modifier = Modifier.fillMaxWidth(0.8f),
-                    colorPair = diffColors.redPair,
-                    text = chipLabel,
-                    icon = onlyOneVersionIcon
-                )
-            })
+    Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
+        ChipForConceptDiffResult(
+            modifier = Modifier.padding(end = 2.dp),
+            conceptComparison = diff.conceptComparison,
+            labelToFind = labelToFind,
+            localizedStrings = localizedStrings,
+            diffColors = diffColors
+        )
+        SelectableText(
+            text = text ?: "null", fontStyle = if (text == null) FontStyle.Italic else FontStyle.Normal
+        )
     }
 }
 
@@ -454,66 +214,169 @@ private fun ChipForConceptDiffResult(
     )
 }
 
-@OptIn(ExperimentalFoundationApi::class)
+private fun ColumnSpec.Companion.codeColumnSpec(localizedStrings: LocalizedStrings) =
+    ColumnSpec<ConceptTableData>(title = localizedStrings.code, weight = 0.1f, content = {
+        SelectableText(it.code, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
+    })
+
+private fun ColumnSpec.Companion.displayColumnSpec(
+    localizedStrings: LocalizedStrings,
+    diffColors: DiffColors
+) = columnSpecForProperty(
+    localizedStrings = localizedStrings, diffColors = diffColors, labelToFind = localizedStrings.display,
+    weight = 0.25f, stringValueResolver = FhirConceptDetails::display
+)
+
+private fun ColumnSpec.Companion.columnSpecForProperty(
+    localizedStrings: LocalizedStrings,
+    diffColors: DiffColors,
+    labelToFind: String,
+    weight: Float,
+    stringValueResolver: (FhirConceptDetails) -> String?,
+): ColumnSpec<ConceptTableData> {
+    val tooltipTextFun: (ConceptTableData) -> () -> String? =
+        { data -> tooltipForCode(data.leftDetails, data.rightDetails, stringValueResolver) }
+    return ColumnSpec(
+        title = localizedStrings.display,
+        weight = weight,
+        tooltipText = tooltipTextFun,
+    ) { data ->
+        val singleConcept = when {
+            data.isOnlyInLeft() -> data.leftDetails!!
+            data.isOnlyInRight() -> data.rightDetails!!
+            else -> null
+        }
+        when {
+            data.isInBoth() -> contentWithText(
+                diff = data.diff!!,
+                localizedStrings = localizedStrings,
+                diffColors = diffColors,
+                labelToFind = labelToFind,
+                text = tooltipTextFun(data).invoke()
+            )
+            singleConcept != null -> { // else
+                val text = stringValueResolver.invoke(singleConcept)
+                SelectableText(
+                    text = text ?: "null", fontStyle = if (text == null) FontStyle.Italic else FontStyle.Normal
+                )
+            }
+        }
+    }
+}
+
+private fun ColumnSpec.Companion.definitionColumnSpec(
+    localizedStrings: LocalizedStrings,
+    diffColors: DiffColors,
+) = ColumnSpec.columnSpecForProperty(
+    localizedStrings = localizedStrings, diffColors = diffColors, labelToFind = localizedStrings.definition,
+    weight = 0.25f, stringValueResolver = FhirConceptDetails::definition
+)
+
+private fun ColumnSpec.Companion.propertyColumnSpec(
+    localizedStrings: LocalizedStrings,
+    diffColors: DiffColors
+) = ColumnSpec<ConceptTableData>(
+    title = localizedStrings.property,
+    weight = 0.25f,
+    tooltipText = null
+) { data ->
+    when {
+        data.isInBoth() -> {
+            when {
+                data.diff!!.propertyComparison.none() -> DiffChip(
+                    text = localizedStrings.identical, colorPair = diffColors.greenPair
+                )
+                else -> {
+                    // TODO: 04/01/22
+                    Row {
+                        Button(
+                            onClick = {},
+                            elevation = ButtonDefaults.elevation(4.dp),
+                            colors = ButtonDefaults.buttonColors(
+                                diffColors.yellowPair.first, diffColors.yellowPair.second
+                            )
+                        ) {
+                            Text(localizedStrings.numberDifferent_.invoke(data.diff.propertyComparison.size))
+                        }
+                    }
+                }
+            }
+        }
+        else -> {
+            // TODO: 05/01/22
+        }
+    }
+}
+
+private fun ColumnSpec.Companion.overallComparisonColumnSpec(
+    localizedStrings: LocalizedStrings,
+    diffColors: DiffColors
+) = ColumnSpec<ConceptTableData>(
+    title = localizedStrings.overallComparison,
+    weight = 0.1f,
+    tooltipText = null,
+) { data ->
+    when (data.isInBoth()) {
+        true -> {
+            val anyDifferent = data.diff!!.conceptComparison.any {
+                it.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT
+            }
+            val colors: Pair<Color, Color> = if (anyDifferent) diffColors.yellowPair else diffColors.greenPair
+            val chipLabel: String =
+                if (anyDifferent) localizedStrings.conceptDiffResults_.invoke(ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT)
+                else localizedStrings.identical
+
+            DiffChip(
+                colorPair = colors, text = chipLabel, modifier = Modifier.fillMaxWidth(0.8f)
+            )
+        }
+        else -> {
+            val chipLabel: String =
+                if (data.isOnlyInLeft()) localizedStrings.onlyInLeft else localizedStrings.onlyInRight
+            val onlyOneVersionIcon: ImageVector = when (data.isOnlyInLeft()) {
+                true -> AppIconResource.loadXmlImageVector(AppIconResource.icLoadLeftFile)
+                else -> AppIconResource.loadXmlImageVector(AppIconResource.icLoadRightFile)
+            }
+            DiffChip(
+                modifier = Modifier.fillMaxWidth(0.8f),
+                colorPair = diffColors.redPair,
+                text = chipLabel,
+                icon = onlyOneVersionIcon
+            )
+        }
+    }
+}
+
+data class ConceptTableData(
+    val code: String,
+    val leftDetails: FhirConceptDetails?,
+    val rightDetails: FhirConceptDetails?,
+    val diff: ConceptDiff?
+) {
+    fun isOnlyInLeft() = leftDetails != null && rightDetails == null
+    fun isOnlyInRight() = leftDetails == null && rightDetails != null
+    fun isInBoth() = diff != null
+}
+
 @Composable
 fun TableScreen(
     tableData: TableData,
     lazyListState: LazyListState,
-    columnSpecs: List<ConceptDiffColumnSpec>,
+    columnSpecs: List<ColumnSpec<ConceptTableData>>
 ) {
-    val cellHeight = 50.dp
-
-    Column(Modifier.fillMaxSize().padding(16.dp)) {
-        // draw the header row
-        Row(Modifier.fillMaxWidth()) {
-            columnSpecs.forEach { spec ->
-                ConceptDiffHeaderCell(weight = spec.weight, text = spec.title)
-            }
-        }
-        // a thicker line beneath the header
-        Divider(color = MaterialTheme.colorScheme.onTertiaryContainer, thickness = 1.dp)
-
-        // draw the actual cells, contained by a LazyColumn
-        Row(Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            LazyColumn(state = lazyListState) {
-                items(tableData.shownCodes) { code ->
-                    Row(
-                        Modifier.wrapContentHeight()
-                    ) {
-                        when (code) {
-                            in tableData.onlyInLeftConcepts, in tableData.onlyInRightConcepts -> {
-                                val isLeft = code in tableData.onlyInLeftConcepts
-                                val concept =
-                                    if (isLeft) tableData.leftGraphBuilder.nodeTree[code] else tableData.rightGraphBuilder.nodeTree[code]
-                                columnSpecs.forEach { spec ->
-                                    ConceptDiffTableCell(modifier = Modifier.height(cellHeight),
-                                        weight = spec.weight,
-                                        tooltipText = { spec.tooltipOnlyInX?.invoke(code, concept!!) },
-                                        content = {
-                                            spec.cellContentOnlyInX.invoke(code, concept!!, isLeft)
-                                        })
-                                }
-                            }
-                            else -> {
-                                val diff = tableData.conceptDiff[code]
-                                    ?: throw IllegalStateException("the code $code is not found in the diff")
-                                columnSpecs.forEach { spec ->
-                                    ConceptDiffTableCell(modifier = Modifier.height(cellHeight),
-                                        weight = spec.weight,
-                                        tooltipText = { spec.tooltipText?.invoke(code) },
-                                        content = { spec.cellContent.invoke(code, diff) })
-                                }
-                            }
-                        }
-
-                    }
-                }
-            }
-            Carousel(
-                state = lazyListState,
-                colors = CarouselDefaults.colors(MaterialTheme.colorScheme.onTertiaryContainer),
-                modifier = Modifier.padding(8.dp).width(8.dp).fillMaxHeight(0.9f)
-            )
-        }
+    val containedData: List<ConceptTableData> = tableData.shownCodes.map { code ->
+        ConceptTableData(
+            code = code,
+            leftDetails = tableData.leftGraphBuilder.nodeTree[code],
+            rightDetails = tableData.rightGraphBuilder.nodeTree[code],
+            diff = tableData.conceptDiff[code]
+        )
     }
+    LazyTable(
+        columnSpecs = columnSpecs,
+        lazyListState = lazyListState,
+        tableData = containedData,
+        keyFun = { it.code },
+        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer
+    )
 }
