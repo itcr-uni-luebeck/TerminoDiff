@@ -1,4 +1,4 @@
-package terminodiff.ui
+package terminodiff.ui.panes.graph
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.Button

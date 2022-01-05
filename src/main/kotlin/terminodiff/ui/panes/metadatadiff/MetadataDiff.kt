@@ -1,4 +1,4 @@
-package terminodiff.ui
+package terminodiff.ui.panes.metadatadiff
 
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.layout.*
@@ -20,7 +20,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
 import org.hl7.fhir.r4.model.CodeSystem
-import org.hl7.fhir.r4.model.Identifier
 import terminodiff.engine.metadata.MetadataDiff
 import terminodiff.engine.metadata.MetadataDiffBuilder
 import terminodiff.i18n.LocalizedStrings

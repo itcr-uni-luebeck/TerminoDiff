@@ -9,7 +9,6 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import ca.uhn.fhir.context.FhirContext
@@ -23,6 +22,9 @@ import terminodiff.i18n.SupportedLocale
 import terminodiff.i18n.getStrings
 import terminodiff.preferences.AppPreferences
 import terminodiff.ui.*
+import terminodiff.ui.panes.conceptdiff.ConceptDiffPanel
+import terminodiff.ui.panes.graph.ShowGraphsPanel
+import terminodiff.ui.panes.metadatadiff.MetadataDiffPanel
 import terminodiff.ui.theme.TerminoDiffTheme
 import java.awt.Dimension
 import java.io.File
