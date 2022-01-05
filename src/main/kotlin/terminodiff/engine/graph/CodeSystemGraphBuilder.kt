@@ -132,7 +132,7 @@ data class FhirConceptDetails(
 )
 
 data class FhirConceptDesignation(
-    val language: String, val use: Coding, val value: String
+    val language: String?, val use: Coding?, val value: String
 )
 
 data class FhirConceptSimpleProperty(

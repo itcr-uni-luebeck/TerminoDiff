@@ -34,28 +34,32 @@ fun ColumnSpec.Companion.codeColumnSpec(localizedStrings: LocalizedStrings) =
     })
 
 fun ColumnSpec.Companion.displayColumnSpec(
-    localizedStrings: LocalizedStrings,
-    diffColors: DiffColors
+    localizedStrings: LocalizedStrings, diffColors: DiffColors
 ) = columnSpecForProperty(
-    localizedStrings = localizedStrings, diffColors = diffColors, labelToFind = localizedStrings.display,
-    weight = 0.25f, stringValueResolver = FhirConceptDetails::display
+    localizedStrings = localizedStrings,
+    title = localizedStrings.display,
+    diffColors = diffColors,
+    labelToFind = localizedStrings.display,
+    weight = 0.25f,
+    stringValueResolver = FhirConceptDetails::display
 )
 
 fun ColumnSpec.Companion.definitionColumnSpec(
     localizedStrings: LocalizedStrings,
     diffColors: DiffColors,
 ) = ColumnSpec.columnSpecForProperty(
-    localizedStrings = localizedStrings, diffColors = diffColors, labelToFind = localizedStrings.definition,
-    weight = 0.25f, stringValueResolver = FhirConceptDetails::definition
+    localizedStrings = localizedStrings,
+    title = localizedStrings.definition,
+    diffColors = diffColors,
+    labelToFind = localizedStrings.definition,
+    weight = 0.25f,
+    stringValueResolver = FhirConceptDetails::definition
 )
 
 fun ColumnSpec.Companion.propertyColumnSpec(
-    localizedStrings: LocalizedStrings,
-    diffColors: DiffColors
+    localizedStrings: LocalizedStrings, diffColors: DiffColors
 ) = ColumnSpec<ConceptTableData>(
-    title = localizedStrings.property,
-    weight = 0.25f,
-    tooltipText = null
+    title = localizedStrings.property, weight = 0.25f, tooltipText = null
 ) { data ->
     when {
         data.isInBoth() -> {
@@ -86,8 +90,7 @@ fun ColumnSpec.Companion.propertyColumnSpec(
 }
 
 fun ColumnSpec.Companion.overallComparisonColumnSpec(
-    localizedStrings: LocalizedStrings,
-    diffColors: DiffColors
+    localizedStrings: LocalizedStrings, diffColors: DiffColors
 ) = ColumnSpec<ConceptTableData>(
     title = localizedStrings.overallComparison,
     weight = 0.1f,
@@ -126,6 +129,7 @@ fun ColumnSpec.Companion.overallComparisonColumnSpec(
 
 private fun ColumnSpec.Companion.columnSpecForProperty(
     localizedStrings: LocalizedStrings,
+    title: String,
     diffColors: DiffColors,
     labelToFind: String,
     weight: Float,
@@ -134,7 +138,7 @@ private fun ColumnSpec.Companion.columnSpecForProperty(
     val tooltipTextFun: (ConceptTableData) -> () -> String? =
         { data -> tooltipForConceptProperty(data.leftDetails, data.rightDetails, stringValueResolver) }
     return ColumnSpec(
-        title = localizedStrings.display,
+        title = title,
         weight = weight,
         tooltipText = tooltipTextFun,
     ) { data ->
