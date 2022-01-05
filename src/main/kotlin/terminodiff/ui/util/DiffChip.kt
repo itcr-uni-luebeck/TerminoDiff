@@ -31,7 +31,7 @@ fun DiffChip(
         modifier = modifier.padding(4.dp),
         color = backgroundColor,
         tonalElevation = 4.dp,
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(16.dp)
     ) {
         Row(
             Modifier.fillMaxHeight(),
@@ -39,13 +39,15 @@ fun DiffChip(
             verticalAlignment = Alignment.CenterVertically
         ) {
             if (icon != null) {
-                Icon(imageVector = icon, null, tint = textColor)
+                Icon(
+                    modifier = Modifier.padding(start = 4.dp, end = 4.dp),
+                    imageVector = icon,
+                    contentDescription = null,
+                    tint = textColor
+                )
             }
             Text(
-                text = text,
-                style = textStyle,
-                color = textColor,
-                modifier = Modifier.padding(8.dp)
+                text = text, style = textStyle, color = textColor, modifier = Modifier.padding(8.dp)
             )
         }
     }
@@ -68,16 +70,14 @@ fun DiffChip(
 )
 
 fun colorPairForConceptDiffResult(
-    comparisonResult: ConceptDiffResult,
-    diffColors: DiffColors
+    comparisonResult: ConceptDiffResult, diffColors: DiffColors
 ): Pair<Color, Color> = when (comparisonResult.result) {
     ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> diffColors.greenPair
     ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> diffColors.yellowPair
 }
 
 fun colorPairForDiffResult(
-    comparisonResult: MetadataDiff.MetadataComparisonResult,
-    diffColors: DiffColors
+    comparisonResult: MetadataDiff.MetadataComparisonResult, diffColors: DiffColors
 ): Pair<Color, Color> = when (comparisonResult.result) {
     MetadataDiff.MetadataDiffItemResult.DIFFERENT_TEXT, MetadataDiff.MetadataDiffItemResult.DIFFERENT, MetadataDiff.MetadataDiffItemResult.DIFFERENT_COUNT -> if (comparisonResult.expected) diffColors.yellowPair else diffColors.redPair
     else -> diffColors.greenPair

@@ -15,6 +15,7 @@ abstract class LocalizedStrings(
     val conceptDiff: String,
     val contact: String,
     val code: String = "Code",
+    val comparison: String,
     val conceptDiffResults_: (ConceptDiffItem.ConceptDiffResultEnum) -> String,
     val date: String,
     val description: String,
@@ -30,12 +31,21 @@ abstract class LocalizedStrings(
     val loadLeftFile: String,
     val loadRightFile: String,
     val graphsOpenInOtherWindows: String,
+    val leftValue: String,
+    val rightValue: String,
     val metadataDiff: String,
     val metadataDiffResults_: (MetadataDiffItemResult) -> String,
     val name: String = "Name",
     val noDataLoadedTitle: String,
     val numberDifferent_: (Int) -> String,
+    val numberItems_: (Int) -> String = {
+        when (it) {
+            1 -> "1 item"
+            else -> "$it items"
+        }
+    },
     val onlyInLeft: String,
+    val onlyConceptDifferences: String,
     val onlyInRight: String,
     val overallComparison: String,
     val publisher: String,
@@ -67,6 +77,7 @@ enum class SupportedLocale {
 class GermanStrings : LocalizedStrings(
     canonicalUrl = "Kanonische URL",
     changeLanguage = "Sprache wechseln",
+    comparison = "Vergleich",
     conceptDiff = "Konzept-Diff",
     conceptDiffResults_ = {
         when (it) {
@@ -84,6 +95,8 @@ class GermanStrings : LocalizedStrings(
     language = "de",
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
+    leftValue = "Linker Wert",
+    rightValue = "Rechter Wert",
     graphsOpenInOtherWindows = "Graphen öffnen sich in einem neuen Fenster.",
     metadataDiff = "Metadaten-Diff",
     metadataDiffResults_ = {
@@ -99,12 +112,13 @@ class GermanStrings : LocalizedStrings(
     noDataLoadedTitle = "Keine Daten geladen",
     numberDifferent_ = { "$it unterschiedlich" },
     onlyInLeft = "Nur links",
+    onlyConceptDifferences = "Konzeptunterschiede",
     onlyInRight = "Nur rechts",
     overallComparison = "Gesamt",
     publisher = "Herausgeber",
-    showAll = "Alle anzeigen",
-    showDifferent = "Nur unterschiedliche",
-    showIdentical = "Nur identische",
+    showAll = "Alle",
+    showDifferent = "Unterschiedliche",
+    showIdentical = "Identische",
     showLeftGraphButton = "Linken Graphen zeigen",
     showRightGraphButton = "Rechten Graphen zeigen",
     viewGraphTitle = "Graph anzeigen",
@@ -117,6 +131,7 @@ class GermanStrings : LocalizedStrings(
 class EnglishStrings : LocalizedStrings(
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
+    comparison = "Comparison",
     conceptDiff = "Concept Diff",
     conceptDiffResults_ = {
         when (it) {
@@ -134,6 +149,8 @@ class EnglishStrings : LocalizedStrings(
     language = "en",
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
+    leftValue = "Left value",
+    rightValue = "Right value",
     graphsOpenInOtherWindows = "Graphs open in another window.",
     metadataDiff = "Metadata Diff",
     metadataDiffResults_ = {
@@ -149,12 +166,13 @@ class EnglishStrings : LocalizedStrings(
     noDataLoadedTitle = "No data loaded",
     numberDifferent_ = { "$it different" },
     onlyInLeft = "Only left",
+    onlyConceptDifferences = "Concept differences",
     onlyInRight = "Only right",
     overallComparison = "Overall",
     publisher = "Publisher",
-    showAll = "Show all",
-    showIdentical = "Only identical",
-    showDifferent = "Only different",
+    showAll = "All",
+    showIdentical = "Identical",
+    showDifferent = "Different",
     showLeftGraphButton = "Show left graph",
     showRightGraphButton = "Show right graph",
     title = "Title",

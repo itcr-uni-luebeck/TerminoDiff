@@ -7,14 +7,12 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.Surface
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 
 @Composable
@@ -30,7 +28,7 @@ fun ToggleableChip(
         modifier = modifier.padding(4.dp),
         color = chipColor,
         tonalElevation = 4.dp,
-        shape = RoundedCornerShape(8.dp)
+        shape = RoundedCornerShape(4.dp)
     ) {
         Row(modifier = Modifier.toggleable(value = isSelected, onValueChange = { onSelectionChanged(name) })) {
             Text(
@@ -48,14 +46,15 @@ fun ToggleableChipGroup(
     specs: List<ToggleableChipSpec>,
     chipModifier: Modifier = Modifier,
     selectedItem: String?,
-    onSelectionChanged: (String) -> Unit
+    onSelectionChanged: (String) -> Unit,
+    currentCount: Int
 ) {
     Column(modifier = Modifier.padding(2.dp)) {
         LazyRow {
             items(specs) { spec ->
                 ToggleableChip(
                     name = spec.name,
-                    text = spec.text,
+                    text = if (spec.name == selectedItem) "${spec.text} ($currentCount)" else spec.text,
                     modifier = chipModifier,
                     isSelected = spec.name == selectedItem,
                     onSelectionChanged = { name ->

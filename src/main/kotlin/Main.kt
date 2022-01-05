@@ -97,24 +97,33 @@ fun LocalizedAppWindow(
     var leftCsFilenameResource: Pair<File, CodeSystem>? by remember { mutableStateOf(null) }
     var rightCsFilenameResource: Pair<File, CodeSystem>? by remember { mutableStateOf(null) }
     val fhirContext = remember { FhirContext.forR4() }
-    val dataContainer by remember {
-        derivedStateOf {
+    var dataContainer by remember {
+        mutableStateOf(
             DiffDataContainer(
                 leftCsFilenameResource?.second,
                 rightCsFilenameResource?.second
             )
-        }
+        )
     }
+
+    fun updateDataContainer() {
+        dataContainer = DiffDataContainer(
+            leftCsFilenameResource?.second,
+            rightCsFilenameResource?.second
+        )
+        dataContainer.computeDiff(localizedStrings)
+    }
+
     val onLoadLeftFile: () -> Unit = {
         loadFile(localizedStrings.loadLeftFile, fhirContext = fhirContext, frameWindow)?.let {
             leftCsFilenameResource = it
-            dataContainer.computeDiff(localizedStrings)
+            updateDataContainer()
         }
     }
     val onLoadRightFile: () -> Unit = {
         loadFile(localizedStrings.loadRightFile, fhirContext = fhirContext, frameWindow)?.let {
             rightCsFilenameResource = it
-            dataContainer.computeDiff(localizedStrings)
+            updateDataContainer()
         }
     }
 
