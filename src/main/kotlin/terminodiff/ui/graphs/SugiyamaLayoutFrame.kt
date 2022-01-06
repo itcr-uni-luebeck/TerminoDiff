@@ -2,14 +2,11 @@ package terminodiff.ui.graphs
 
 import org.hl7.fhir.r4.model.CodeSystem
 import org.jungrapht.visualization.VisualizationViewer
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.engine.graph.CodeSystemRole
 import terminodiff.engine.graph.FhirConceptEdge
 import terminodiff.java.ui.SugiyamaLayoutViewer
 import java.awt.BorderLayout
-import java.awt.Color
 import javax.swing.JFrame
 import javax.swing.JPanel
 import javax.swing.WindowConstants
@@ -25,7 +22,7 @@ class SugiyamaLayoutFrame(
     useDarkTheme: Boolean
 ) : JFrame() {
     private val codeSystemGraphBuilder =
-        CodeSystemGraphBuilder(codeSystem = codeSystem, codeSystemRole = codeSystemRole)
+        CodeSystemGraphBuilder(codeSystem = codeSystem)
 
     private val container = JPanel(BorderLayout())
 

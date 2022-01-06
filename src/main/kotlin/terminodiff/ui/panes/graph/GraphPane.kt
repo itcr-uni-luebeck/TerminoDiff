@@ -43,7 +43,6 @@ fun ShowGraphsPanel(
                     showGraphSwingWindowJUngraphT(
                         codeSystem = leftCs,
                         codeSystemRole = CodeSystemRole.LEFT,
-                        localizedStrings = localizedStrings,
                         frameTitle = localizedStrings.showLeftGraphButton,
                         useDarkTheme = useDarkTheme
                     )
@@ -61,7 +60,6 @@ fun ShowGraphsPanel(
                     showGraphSwingWindowJUngraphT(
                         codeSystem = rightCs,
                         codeSystemRole = CodeSystemRole.RIGHT,
-                        localizedStrings = localizedStrings,
                         frameTitle = localizedStrings.showRightGraphButton,
                         useDarkTheme = useDarkTheme
                     )
@@ -75,7 +73,6 @@ fun ShowGraphsPanel(
 fun showGraphSwingWindowJUngraphT(
     codeSystem: CodeSystem,
     codeSystemRole: CodeSystemRole,
-    localizedStrings: LocalizedStrings,
     frameTitle: String,
     useDarkTheme: Boolean
 ) {

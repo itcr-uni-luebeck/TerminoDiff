@@ -29,7 +29,7 @@ import terminodiff.ui.theme.TerminoDiffTheme
 import java.awt.Dimension
 import java.io.File
 
-val logger: Logger = LoggerFactory.getLogger(TerminoDiffApp::class.java)
+private val logger: Logger = LoggerFactory.getLogger(TerminoDiffApp::class.java)
 
 /**
  * just for creating the log
@@ -53,12 +53,12 @@ fun AppWindow(applicationScope: ApplicationScope) {
     ) {
         this.window.title = strings.terminoDiff
         if (!hasResizedWindow) {
-            //app crashes if we use state for the window, when the locale is changed, with the error
-            //that the window is already on screen.
-            //this is because everything is recomposed when the locale changes, and that breaks AWT.
-            //using the mutable state, we change the window size exactly once, during the first (re-) composition,
-            //so that the user can then change the res as they require.
-            //A resolution of 1280x960 is 4:3.
+            // app crashes if we use state for the window, when the locale is changed, with the error
+            // that the window is already on screen.
+            // this is because everything is recomposed when the locale changes, and that breaks AWT.
+            // using the mutable state, we change the window size exactly once, during the first (re-) composition,
+            // so that the user can then change the res as they require.
+            // A resolution of 1280x960 is 4:3.
             this.window.size = Dimension(1280, 960)
             hasResizedWindow = true
         }

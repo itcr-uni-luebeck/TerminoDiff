@@ -10,7 +10,7 @@ import kotlin.properties.ReadWriteProperty
 import kotlin.reflect.KClass
 import kotlin.reflect.KProperty
 
-val logger: Logger = LoggerFactory.getLogger(AppPreferences::class.java)
+private val logger: Logger = LoggerFactory.getLogger(AppPreferences::class.java)
 
 /**
  * https://stackoverflow.com/q/66462586

@@ -10,7 +10,6 @@ import org.slf4j.LoggerFactory
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.graph.CodeSystemDiffBuilder
 import terminodiff.engine.graph.CodeSystemGraphBuilder
-import terminodiff.engine.graph.CodeSystemRole
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
 import java.awt.Cursor
@@ -18,7 +17,7 @@ import java.io.File
 import javax.swing.SwingWorker
 import javax.swing.filechooser.FileNameExtensionFilter
 
-val logger: Logger = LoggerFactory.getILoggerFactory().getLogger("DiffDataContainer")
+private val logger: Logger = LoggerFactory.getILoggerFactory().getLogger("DiffDataContainer")
 
 class DiffDataContainer(
     var leftCodeSystem: CodeSystem? = null,
@@ -40,8 +39,8 @@ class DiffDataContainer(
         return when {
             !isInitialized -> false
             else -> {
-                leftGraphBuilder = CodeSystemGraphBuilder(leftCodeSystem!!, CodeSystemRole.LEFT)
-                rightGraphBuilder = CodeSystemGraphBuilder(rightCodeSystem!!, CodeSystemRole.RIGHT)
+                leftGraphBuilder = CodeSystemGraphBuilder(leftCodeSystem!!)
+                rightGraphBuilder = CodeSystemGraphBuilder(rightCodeSystem!!)
                 codeSystemDiff = buildDiff(leftGraphBuilder!!, rightGraphBuilder!!, localizedStrings)
                 true
             }

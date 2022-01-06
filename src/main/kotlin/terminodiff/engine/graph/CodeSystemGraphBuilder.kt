@@ -10,7 +10,7 @@ import terminodiff.ui.graphs.EdgeColorRegistry
 import java.awt.Color
 import java.util.*
 
-val logger: Logger = LoggerFactory.getLogger(CodeSystemGraphBuilder::class.java)
+private val logger: Logger = LoggerFactory.getLogger(CodeSystemGraphBuilder::class.java)
 
 enum class CodeSystemRole {
     LEFT, RIGHT
@@ -19,7 +19,7 @@ enum class CodeSystemRole {
 typealias PropertyMap = Map<String, CodeSystem.PropertyType>
 
 class CodeSystemGraphBuilder(
-    val codeSystem: CodeSystem, val codeSystemRole: CodeSystemRole
+    val codeSystem: CodeSystem
 ) {
 
     // store more detailed node data in a red-black tree, which can retrieve nodes in O(log n)
@@ -42,13 +42,17 @@ class CodeSystemGraphBuilder(
      * list of properties within the CS. Hence, by converting to a set and adding parent and child,
      * they will appear in the list exactly once
      */
-    val edgePropertyCodes: List<String> = codeSystem.property.asSequence().filter {
+    private val edgePropertyCodes: List<String> = codeSystem.property.asSequence().filter {
         it.hasType() && it.type == CodeSystem.PropertyType.CODE
     }.map { it.code }.toHashSet().plus("parent").plus("child").toList()
 
     val graph: Graph<String, FhirConceptEdge> =
-        GraphTypeBuilder.directed<String, FhirConceptEdge>().allowingMultipleEdges(true).allowingSelfLoops(true)
-            .edgeClass(FhirConceptEdge::class.java).weighted(false).buildGraph().also {
+        GraphTypeBuilder.directed<String, FhirConceptEdge>()
+            .allowingMultipleEdges(true)
+            .allowingSelfLoops(true)
+            .edgeClass(FhirConceptEdge::class.java)
+            .weighted(false)
+            .buildGraph().also {
                 generateNodesAndEdges(it, edgePropertyCodes, simplePropertyCodeTypes)
             }
 
@@ -109,15 +113,9 @@ class CodeSystemGraphBuilder(
     }
 }
 
-data class FhirConceptNode(
-    val code: String, var role: CodeSystemRole
-)
-
 data class FhirConceptEdge(
     val from: String, val to: String, val propertyCode: String
 ) {
-    override fun toString(): String = propertyCode
-
     fun getLabel(): String = "'$from' -> '$to' [$propertyCode]"
 
     fun getColor(): Color = EdgeColorRegistry.getColor(propertyCode)
