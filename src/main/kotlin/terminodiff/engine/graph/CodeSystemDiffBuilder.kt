@@ -1,6 +1,5 @@
 package terminodiff.engine.graph
 
-import org.apache.commons.lang3.builder.Diff
 import org.jgrapht.Graph
 import org.jgrapht.graph.builder.GraphTypeBuilder
 import org.slf4j.Logger
@@ -39,7 +38,14 @@ class CodeSystemDiffBuilder(
         }
         onlyInRightConcepts.addAll(rightBuilder.nodeTree.keys.filter { it !in conceptDifferences.keys })
         buildDiffGraph()
-        logger.info("Diff edges: {}", differenceGraph.edgeSet().joinToString("; "))
+        logger.info(
+            "Built diff graph, ${differenceGraph.vertexSet().count()} vertices, ${
+                differenceGraph.edgeSet().count()
+            } edges"
+        )
+        logger.info("only in left graph: ${onlyInLeftConcepts.size} concepts")
+        logger.info("only in right graph: ${onlyInRightConcepts.size} concepts")
+        logger.debug("Diff edges: {}", differenceGraph.edgeSet().joinToString("; "))
         return this
     }
 
@@ -47,19 +53,28 @@ class CodeSystemDiffBuilder(
         graphBuilder: CodeSystemGraphBuilder, otherGraphBuilder: CodeSystemGraphBuilder, kind: DiffGraphElementKind
     ) =
         graphBuilder.graph.edgeSet().minus(otherGraphBuilder.graph.edgeSet()).also {
-            logger.info("only in $kind: {}", it.joinToString("; "))
-        }.map { edge ->
-            val fromConcept = graphBuilder.nodeTree[edge.from]!!
-            val toConcept = graphBuilder.nodeTree[edge.to]!!
-            val diffEdge = DiffEdge(
-                fromCode = edge.from,
-                fromDisplay = fromConcept.display,
-                toCode = edge.to,
-                toDisplay = toConcept.display,
-                propertyCode = edge.propertyCode,
-                inWhich = kind
-            )
-            diffEdge
+            logger.debug("only in $kind: {}", it.joinToString("; "))
+        }.mapNotNull { edge ->
+            val toConcept = graphBuilder.nodeTree[edge.to]
+            val fromConcept = graphBuilder.nodeTree[edge.from]
+            when {
+                toConcept == null -> {
+                    logger.warn("the code '${edge.to}' for property '${edge.propertyCode}' was not found in $kind")
+                    return@mapNotNull null
+                }
+                fromConcept == null -> {
+                    logger.warn("the code '${edge.from}' for property '${edge.propertyCode}' was not found in $kind")
+                    return@mapNotNull null
+                }
+                else -> DiffEdge(
+                    fromCode = edge.from,
+                    fromDisplay = fromConcept.display,
+                    toCode = edge.to,
+                    toDisplay = toConcept.display,
+                    propertyCode = edge.propertyCode,
+                    inWhich = kind
+                )
+            }
         }
 
     private fun buildDiffGraph() {

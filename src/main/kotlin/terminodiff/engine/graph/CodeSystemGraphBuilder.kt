@@ -47,20 +47,15 @@ class CodeSystemGraphBuilder(
     }.map { it.code }.toHashSet().plus("parent").plus("child").toList()
 
     val graph: Graph<String, FhirConceptEdge> =
-        GraphTypeBuilder.directed<String, FhirConceptEdge>()
-            .allowingMultipleEdges(true)
-            .allowingSelfLoops(true)
-            .edgeClass(FhirConceptEdge::class.java)
-            .weighted(false)
-            .buildGraph().also {
+        GraphTypeBuilder.directed<String, FhirConceptEdge>().allowingMultipleEdges(true).allowingSelfLoops(true)
+            .edgeClass(FhirConceptEdge::class.java).weighted(false).buildGraph().also {
                 generateNodesAndEdges(it, edgePropertyCodes, simplePropertyCodeTypes)
             }
 
     private fun generateNodesAndEdges(
-        theGraph: Graph<String, FhirConceptEdge>,
-        edgePropertyCodes: List<String>,
-        simplePropertyCodeTypes: PropertyMap
+        theGraph: Graph<String, FhirConceptEdge>, edgePropertyCodes: List<String>, simplePropertyCodeTypes: PropertyMap
     ) {
+        val allCodes = codeSystem.concept.map { it.code }
         codeSystem.concept.forEach { c ->
             val from = c.code!!
             if (theGraph.addVertex(from)) logger.debug("added $from")
@@ -73,6 +68,7 @@ class CodeSystemGraphBuilder(
                             theGraph = theGraph, from = to, to = from, code = "parent", logSuffix = "child edge"
                         ) // inverse order, since parent and child edges are semantically
                         // interchangeable, and dealing only with one kind is easier downstream
+                        !in allCodes -> return@mapNotNull null //this is not an edge, but something like kind=category
                         else -> addEdge(theGraph, from, to, p.code, "${p.code} edge")
                     }
 
@@ -105,9 +101,7 @@ class CodeSystemGraphBuilder(
         if (theGraph.addVertex(to)) // if already exists, no problem
             logger.debug("added target node $to")
         if (theGraph.addEdge(
-                from,
-                to,
-                FhirConceptEdge(from, to, code)
+                from, to, FhirConceptEdge(from, to, code)
             )
         ) logger.debug("added $code edge '$from' -> '$to' [$logSuffix]")
     }

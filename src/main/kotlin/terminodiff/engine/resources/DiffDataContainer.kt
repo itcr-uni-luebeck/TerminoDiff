@@ -52,12 +52,13 @@ class DiffDataContainer(
         rightGraphBuilder: CodeSystemGraphBuilder,
         localizedStrings: LocalizedStrings
     ): CodeSystemDiffBuilder {
+        logger.info("building diff")
         return CodeSystemDiffBuilder(leftGraphBuilder, rightGraphBuilder).build().also {
             logger.info("${it.onlyInLeftConcepts.size} code(-s) only in left: ${it.onlyInLeftConcepts.joinToString(", ")}")
             logger.info("${it.onlyInRightConcepts.size} code(-s) only in right: ${it.onlyInRightConcepts.joinToString(", ")}")
             val differentConcepts =
                 it.conceptDifferences.filterValues { d -> d.conceptComparison.any { c -> c.result != ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL } || d.propertyComparison.size != 0 }
-            logger.info(
+            logger.debug(
                 "${differentConcepts.size} concept-level difference(-s): ${
                     differentConcepts.entries.joinToString(separator = "\n - ") { (key, diff) ->
                         "$key -> ${
@@ -123,6 +124,7 @@ fun loadFile(title: String, fhirContext: FhirContext, frameWindow: FrameWindowSc
                     AppPreferences.fileBrowserDirectory = it
                     FhirLoader(frameWindow, selectedFile, fhirContext).let { loader ->
                         loader.execute()
+                        logger.info("loaded file at ${selectedFile.absolutePath}")
                         loader.get()
                     }
                 }

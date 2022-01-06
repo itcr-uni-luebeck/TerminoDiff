@@ -7,22 +7,16 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontStyle
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.engine.concepts.ConceptDiff
 import terminodiff.engine.concepts.ConceptDiffItem
-import terminodiff.engine.concepts.ConceptDiffResult
 import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.ui.AppIconResource
 import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.theme.getDiffColors
 import terminodiff.ui.util.*
@@ -41,9 +35,26 @@ fun ConceptDiffPanel(
     val diffColors by remember { mutableStateOf(getDiffColors(useDarkTheme = useDarkTheme)) }
     var activeFilter by remember { mutableStateOf(ToggleableChipSpec.showDifferent) }
     val tableData by remember { derivedStateOf { filterDiffItems(diffDataContainer, activeFilter) } }
-    val currentCount by remember { derivedStateOf { tableData.shownCodes.size } }
     val lazyListState = rememberLazyListState(0)
     val coroutineScope = rememberCoroutineScope()
+    val filterSpecs by remember {
+        mutableStateOf(
+            listOf(
+                ToggleableChipSpec(ToggleableChipSpec.showAll, localizedStrings.showAll),
+                ToggleableChipSpec(ToggleableChipSpec.showIdentical, localizedStrings.showIdentical),
+                ToggleableChipSpec(ToggleableChipSpec.showDifferent, localizedStrings.showDifferent),
+                ToggleableChipSpec(ToggleableChipSpec.onlyConceptDifferences, localizedStrings.onlyConceptDifferences),
+                ToggleableChipSpec(ToggleableChipSpec.onlyInLeft, localizedStrings.onlyInLeft),
+                ToggleableChipSpec(ToggleableChipSpec.onlyInRight, localizedStrings.onlyInRight)
+            )
+        )
+    }
+    val counts by remember {
+        derivedStateOf {
+            filterSpecs
+                .associate { it.name to filterDiffItems(diffDataContainer, it.name).shownCodes.size }
+        }
+    }
 
     Card(
         modifier = Modifier.padding(8.dp).fillMaxWidth().fillMaxHeight(verticalWeight),
@@ -57,7 +68,11 @@ fun ConceptDiffPanel(
                 style = MaterialTheme.typography.headlineSmall,
                 color = MaterialTheme.colorScheme.onTertiaryContainer
             )
-            FilterGroup(localizedStrings = localizedStrings, activeFilter = activeFilter, currentCount = currentCount) {
+            FilterGroup(
+                filterSpecs = filterSpecs,
+                filterCounts = counts,
+                activeFilter = activeFilter
+            ) {
                 logger.info("changed filter to $it")
                 activeFilter = it
                 coroutineScope.launch {
@@ -113,20 +128,16 @@ data class TableData(
 
 @Composable
 fun FilterGroup(
-    localizedStrings: LocalizedStrings, activeFilter: String, currentCount: Int, onFilterChange: (String) -> Unit
-) {
-    val specs = listOf(
-        ToggleableChipSpec(ToggleableChipSpec.showAll, localizedStrings.showAll),
-        ToggleableChipSpec(ToggleableChipSpec.showIdentical, localizedStrings.showIdentical),
-        ToggleableChipSpec(ToggleableChipSpec.showDifferent, localizedStrings.showDifferent),
-        ToggleableChipSpec(ToggleableChipSpec.onlyConceptDifferences, localizedStrings.onlyConceptDifferences),
-        ToggleableChipSpec(ToggleableChipSpec.onlyInLeft, localizedStrings.onlyInLeft),
-        ToggleableChipSpec(ToggleableChipSpec.onlyInRight, localizedStrings.onlyInRight)
-    )
-    ToggleableChipGroup(
-        specs, selectedItem = activeFilter, onSelectionChanged = onFilterChange, currentCount = currentCount
-    )
-}
+    filterSpecs: List<ToggleableChipSpec>,
+    filterCounts: Map<String, Int>,
+    activeFilter: String,
+    onFilterChange: (String) -> Unit,
+) = ToggleableChipGroup(
+    specs = filterSpecs,
+    selectedItem = activeFilter,
+    onSelectionChanged = onFilterChange,
+    filterCounts = filterCounts
+)
 
 @Composable
 fun DiffDataTable(
@@ -147,9 +158,7 @@ fun DiffDataTable(
     )
 
     TableScreen(
-        tableData = tableData,
-        lazyListState = lazyListState,
-        columnSpecs = columnSpecs
+        tableData = tableData, lazyListState = lazyListState, columnSpecs = columnSpecs
     )
 }
 
@@ -166,9 +175,7 @@ data class ConceptTableData(
 
 @Composable
 fun TableScreen(
-    tableData: TableData,
-    lazyListState: LazyListState,
-    columnSpecs: List<ColumnSpec<ConceptTableData>>
+    tableData: TableData, lazyListState: LazyListState, columnSpecs: List<ColumnSpec<ConceptTableData>>
 ) {
     val containedData: List<ConceptTableData> = tableData.shownCodes.map { code ->
         ConceptTableData(

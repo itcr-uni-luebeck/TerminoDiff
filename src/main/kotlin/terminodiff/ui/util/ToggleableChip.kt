@@ -47,14 +47,14 @@ fun ToggleableChipGroup(
     chipModifier: Modifier = Modifier,
     selectedItem: String?,
     onSelectionChanged: (String) -> Unit,
-    currentCount: Int
+    filterCounts: Map<String, Int>
 ) {
     Column(modifier = Modifier.padding(2.dp)) {
         LazyRow {
             items(specs) { spec ->
                 ToggleableChip(
                     name = spec.name,
-                    text = if (spec.name == selectedItem) "${spec.text} ($currentCount)" else spec.text,
+                    text = "${spec.text} (${filterCounts[spec.name]})",
                     modifier = chipModifier,
                     isSelected = spec.name == selectedItem,
                     onSelectionChanged = { name ->
