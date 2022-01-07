@@ -14,8 +14,9 @@ class EdgeColorRegistry {
         private val colorMap = Colormaps.Qualitative.Tab10()
         private val propertyColorMap = mutableMapOf<String, Color>()
 
-        fun getDiffGraphColor(inWhich: DiffGraphElementKind): Color =
-            colorMap.get((inWhich.ordinal).toFloat() * 0.1f)
+        fun getDiffGraphColor(inWhich: DiffGraphElementKind): Color {
+            return colorMap.get((inWhich.ordinal).toFloat() * 0.1f)
+        }
 
         fun getColor(property: String): Color = when (val color = propertyColorMap[property]) {
             null -> {

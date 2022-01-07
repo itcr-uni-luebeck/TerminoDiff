@@ -1,9 +1,8 @@
 package terminodiff.preferences
 
-import TerminoDiffApp
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import terminodiff.i18n.LocalizedStrings
+import terminodiff.TerminoDiffApp
 import terminodiff.i18n.SupportedLocale
 import java.util.prefs.Preferences
 import kotlin.properties.ReadWriteProperty

@@ -15,6 +15,12 @@ import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.List;
 
+/**
+ * combined implementation from the samples in jungraph-visualization: SatelliteViewRefactoredMouseDemo and
+ * EiglspergerWithGhidraGraphInputExp
+ * @param <V> the vertex class
+ * @param <E> the edge class
+ */
 public abstract class GraphJFrame<V, E> extends JFrame {
 
     protected final DefaultGraphMouse<V, E> graphMouse = new DefaultGraphMouse<>();

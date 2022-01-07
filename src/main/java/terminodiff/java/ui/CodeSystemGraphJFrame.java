@@ -6,7 +6,6 @@ import org.jungrapht.visualization.renderers.Renderer;
 import terminodiff.engine.graph.FhirConceptEdge;
 import terminodiff.i18n.LocalizedStrings;
 
-import java.awt.*;
 import java.util.function.Function;
 
 public class CodeSystemGraphJFrame extends GraphJFrame<String, FhirConceptEdge> {

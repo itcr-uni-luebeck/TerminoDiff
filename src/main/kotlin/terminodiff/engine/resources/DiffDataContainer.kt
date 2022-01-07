@@ -120,13 +120,11 @@ fun loadFile(title: String, fhirContext: FhirContext, frameWindow: FrameWindowSc
             NativeJFileChooser.CANCEL_OPTION -> null
             NativeJFileChooser.APPROVE_OPTION -> {
                 val selectedFile = chooser.selectedFile?.absoluteFile ?: return null
-                chooser.currentDirectory.absolutePath.let {
-                    AppPreferences.fileBrowserDirectory = it
-                    FhirLoader(frameWindow, selectedFile, fhirContext).let { loader ->
-                        loader.execute()
-                        logger.info("loaded file at ${selectedFile.absolutePath}")
-                        loader.get()
-                    }
+                AppPreferences.fileBrowserDirectory = selectedFile.parentFile.absolutePath
+                FhirLoader(frameWindow, selectedFile, fhirContext).let { loader ->
+                    loader.execute()
+                    logger.info("loaded file at ${selectedFile.absolutePath}")
+                    loader.get()
                 }
             }
             else -> null
