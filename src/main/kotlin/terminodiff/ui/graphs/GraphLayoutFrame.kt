@@ -6,6 +6,8 @@ import org.jungrapht.visualization.VisualizationScrollPane
 import org.jungrapht.visualization.VisualizationViewer
 import terminodiff.engine.graph.*
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.java.ui.CodeSystemGraphJFrame
+import terminodiff.java.ui.DiffGraphJFrame
 import terminodiff.java.ui.GraphViewer
 import java.awt.BorderLayout
 import javax.swing.JFrame
@@ -41,6 +43,23 @@ class CodeSystemGraphLayoutFrame(
         isVisible = true
     }
 }
+
+fun CodeSystemGraphLayoutFrame2(
+    codeSystem: CodeSystem,
+    useDarkTheme: Boolean,
+    localizedStrings: LocalizedStrings
+) {
+    val graphBuilder = CodeSystemGraphBuilder(codeSystem = codeSystem)
+    CodeSystemGraphJFrame(graphBuilder.graph, useDarkTheme, localizedStrings) { c: String ->
+        graphBuilder.nodeTree[c]?.display ?: "no display"
+    }
+}
+
+fun DiffGraphLayoutFrame2(
+    diffGraph: Graph<DiffNode, DiffEdge>,
+    useDarkTheme: Boolean,
+    localizedStrings: LocalizedStrings
+) = DiffGraphJFrame(diffGraph, useDarkTheme, localizedStrings)
 
 class DiffGraphLayoutFrame(
     diffGraph: Graph<DiffNode, DiffEdge>,

@@ -15,8 +15,11 @@ import org.jgrapht.Graph
 import terminodiff.engine.graph.DiffEdge
 import terminodiff.engine.graph.DiffNode
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.java.ui.CodeSystemGraphJFrame
 import terminodiff.ui.graphs.CodeSystemGraphLayoutFrame
+import terminodiff.ui.graphs.CodeSystemGraphLayoutFrame2
 import terminodiff.ui.graphs.DiffGraphLayoutFrame
+import terminodiff.ui.graphs.DiffGraphLayoutFrame2
 
 @Composable
 fun ShowGraphsPanel(
@@ -47,7 +50,8 @@ fun ShowGraphsPanel(
                     showGraphSwingWindow(
                         codeSystem = leftCs,
                         frameTitle = localizedStrings.showLeftGraphButton,
-                        useDarkTheme = useDarkTheme
+                        useDarkTheme = useDarkTheme,
+                        localizedStrings = localizedStrings
                     )
                 }) {
                 Text(localizedStrings.showLeftGraphButton, color = MaterialTheme.colorScheme.onPrimary)
@@ -71,7 +75,8 @@ fun ShowGraphsPanel(
                     showGraphSwingWindow(
                         codeSystem = rightCs,
                         frameTitle = localizedStrings.showRightGraphButton,
-                        useDarkTheme = useDarkTheme
+                        useDarkTheme = useDarkTheme,
+                        localizedStrings = localizedStrings
                     )
                 }) {
                 Text(localizedStrings.showRightGraphButton, color = MaterialTheme.colorScheme.onPrimary)
@@ -85,16 +90,18 @@ fun showDiffGraphSwingWindow(
     frameTitle: String,
     useDarkTheme: Boolean,
     localizedStrings: LocalizedStrings
-) =
-    DiffGraphLayoutFrame(
-        diffGraph = diffGraph,
-        title = frameTitle,
-        useDarkTheme = useDarkTheme,
-        localizedStrings = localizedStrings
-    )
+) = DiffGraphLayoutFrame2(diffGraph, useDarkTheme, localizedStrings)
+//    DiffGraphLayoutFrame(
+//        diffGraph = diffGraph,
+//        title = frameTitle,
+//        useDarkTheme = useDarkTheme,
+//        localizedStrings = localizedStrings
+//    )
 
 fun showGraphSwingWindow(
     codeSystem: CodeSystem,
     frameTitle: String,
-    useDarkTheme: Boolean
-) = CodeSystemGraphLayoutFrame(codeSystem, frameTitle, useDarkTheme)
+    useDarkTheme: Boolean,
+    localizedStrings: LocalizedStrings
+) = //CodeSystemGraphLayoutFrame(codeSystem, frameTitle, useDarkTheme)
+    CodeSystemGraphLayoutFrame2(codeSystem, useDarkTheme, localizedStrings)
