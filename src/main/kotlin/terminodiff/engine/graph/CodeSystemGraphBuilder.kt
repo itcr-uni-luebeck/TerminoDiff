@@ -68,7 +68,7 @@ class CodeSystemGraphBuilder(
                             theGraph = theGraph, from = to, to = from, code = "parent", logSuffix = "child edge"
                         ) // inverse order, since parent and child edges are semantically
                         // interchangeable, and dealing only with one kind is easier downstream
-                        !in allCodes -> return@mapNotNull null //this is not an edge, but something like kind=category
+                        //!in allCodes -> return@mapNotNull null //this is not an edge, but something like kind=category
                         else -> addEdge(theGraph, from, to, p.code, "${p.code} edge")
                     }
 

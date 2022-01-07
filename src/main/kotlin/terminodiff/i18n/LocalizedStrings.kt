@@ -2,6 +2,7 @@ package terminodiff.i18n
 
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.ConceptDiffResult
+import terminodiff.engine.graph.DiffGraphElementKind
 import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult
 import java.io.File
 
@@ -21,7 +22,9 @@ abstract class LocalizedStrings(
     val description: String,
     val definition: String = "Definition",
     val designation: String = "Designation",
+    val diffGraph: String,
     val display: String = "Display",
+    val displayAndInWhich_: (String?, DiffGraphElementKind) -> String,
     val experimental: String,
     val id: String = "ID",
     val identical: String,
@@ -88,6 +91,15 @@ class GermanStrings : LocalizedStrings(
     contact = "Kontakt",
     date = "Datum",
     description = "Beschreibung",
+    diffGraph = "Differenz-Graph",
+    displayAndInWhich_ = { display, inWhich ->
+        val where = when (inWhich) {
+            DiffGraphElementKind.LEFT -> "nur links"
+            DiffGraphElementKind.RIGHT -> "nur rechts"
+            DiffGraphElementKind.BOTH -> "in beiden"
+        }
+        "'$display' ($where)"
+    },
     experimental = "Experimentell?",
     identifiers = "IDs",
     identical = "Identisch",
@@ -142,6 +154,15 @@ class EnglishStrings : LocalizedStrings(
     contact = "Contact",
     date = "Date",
     description = "Description",
+    diffGraph = "Difference Graph",
+    displayAndInWhich_ = { display, inWhich ->
+        val where = when (inWhich) {
+            DiffGraphElementKind.LEFT -> "only left"
+            DiffGraphElementKind.RIGHT -> "only right"
+            DiffGraphElementKind.BOTH -> "in both"
+        }
+        "'$display' ($where)"
+    },
     experimental = "Experimental?",
     identical = "Identical",
     identifiers = "Identifiers",

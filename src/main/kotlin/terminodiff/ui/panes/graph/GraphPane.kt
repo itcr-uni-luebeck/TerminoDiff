@@ -11,14 +11,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.hl7.fhir.r4.model.CodeSystem
-import terminodiff.engine.graph.CodeSystemRole
+import org.jgrapht.Graph
+import terminodiff.engine.graph.DiffEdge
+import terminodiff.engine.graph.DiffNode
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.ui.graphs.SugiyamaLayoutFrame
+import terminodiff.ui.graphs.CodeSystemGraphLayoutFrame
+import terminodiff.ui.graphs.DiffGraphLayoutFrame
 
 @Composable
 fun ShowGraphsPanel(
     leftCs: CodeSystem,
     rightCs: CodeSystem,
+    diffGraph: Graph<DiffNode, DiffEdge>,
     localizedStrings: LocalizedStrings,
     useDarkTheme: Boolean,
 ) {
@@ -34,32 +38,38 @@ fun ShowGraphsPanel(
         )
         Row(
             modifier = Modifier.padding(8.dp),
-            horizontalArrangement = Arrangement.Center,
+            horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Button(
                 colors = buttonColors,
                 onClick = {
-                    showGraphSwingWindowJUngraphT(
+                    showGraphSwingWindow(
                         codeSystem = leftCs,
-                        codeSystemRole = CodeSystemRole.LEFT,
                         frameTitle = localizedStrings.showLeftGraphButton,
                         useDarkTheme = useDarkTheme
                     )
                 }) {
                 Text(localizedStrings.showLeftGraphButton, color = MaterialTheme.colorScheme.onPrimary)
             }
-            Text(
-                text = localizedStrings.graphsOpenInOtherWindows,
-                modifier = Modifier.padding(start = 8.dp, end = 8.dp),
-                color = MaterialTheme.colorScheme.onSecondaryContainer
-            )
+            Button(
+                colors = ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.tertiary),
+                onClick = {
+                    showDiffGraphSwingWindow(
+                        diffGraph = diffGraph,
+                        frameTitle = localizedStrings.diffGraph,
+                        useDarkTheme = useDarkTheme,
+                        localizedStrings = localizedStrings
+                    )
+                }) {
+                Text(localizedStrings.diffGraph, color = MaterialTheme.colorScheme.onTertiary)
+            }
+
             Button(
                 colors = buttonColors,
                 onClick = {
-                    showGraphSwingWindowJUngraphT(
+                    showGraphSwingWindow(
                         codeSystem = rightCs,
-                        codeSystemRole = CodeSystemRole.RIGHT,
                         frameTitle = localizedStrings.showRightGraphButton,
                         useDarkTheme = useDarkTheme
                     )
@@ -70,11 +80,21 @@ fun ShowGraphsPanel(
     }
 }
 
-fun showGraphSwingWindowJUngraphT(
+fun showDiffGraphSwingWindow(
+    diffGraph: Graph<DiffNode, DiffEdge>,
+    frameTitle: String,
+    useDarkTheme: Boolean,
+    localizedStrings: LocalizedStrings
+) =
+    DiffGraphLayoutFrame(
+        diffGraph = diffGraph,
+        title = frameTitle,
+        useDarkTheme = useDarkTheme,
+        localizedStrings = localizedStrings
+    )
+
+fun showGraphSwingWindow(
     codeSystem: CodeSystem,
-    codeSystemRole: CodeSystemRole,
     frameTitle: String,
     useDarkTheme: Boolean
-) {
-    SugiyamaLayoutFrame(codeSystem, codeSystemRole, frameTitle, useDarkTheme)
-}
+) = CodeSystemGraphLayoutFrame(codeSystem, frameTitle, useDarkTheme)

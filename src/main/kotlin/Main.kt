@@ -253,6 +253,7 @@ private fun ContainerInitializedContent(
         ShowGraphsPanel(
             leftCs = dataContainer.leftCodeSystem!!,
             rightCs = dataContainer.rightCodeSystem!!,
+            diffGraph = dataContainer.codeSystemDiff!!.differenceGraph,
             localizedStrings = strings,
             useDarkTheme = useDarkTheme,
         )

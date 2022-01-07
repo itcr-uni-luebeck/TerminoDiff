@@ -5,6 +5,9 @@ import org.jgrapht.graph.builder.GraphTypeBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.engine.concepts.ConceptDiff
+import terminodiff.i18n.LocalizedStrings
+import terminodiff.ui.graphs.EdgeColorRegistry
+import java.awt.Color
 import java.util.*
 
 private val logger: Logger = LoggerFactory.getLogger("CodeSystemDiffBuilder")
@@ -114,7 +117,7 @@ fun Graph<DiffNode, DiffEdge>.addAllEdges(edges: List<Triple<DiffNode, DiffNode,
     edges.forEach { this.addEdge(it.first, it.second, it.third) }
 
 enum class DiffGraphElementKind {
-    LEFT, RIGHT, BOTH
+    BOTH, LEFT, RIGHT
 }
 
 data class DiffNode(
@@ -131,6 +134,9 @@ data class DiffNode(
 
         return true
     }
+
+    fun getTooltip(localizedStrings: LocalizedStrings) = localizedStrings.displayAndInWhich_(display, inWhich)
+    fun getColor(): Color = EdgeColorRegistry.getDiffGraphColor(inWhich)
 }
 
 data class DiffEdge(
@@ -141,5 +147,6 @@ data class DiffEdge(
     val propertyCode: String,
     val inWhich: DiffGraphElementKind
 ) {
-
+    fun getTooltip(): String = "'$fromCode' -> '$toCode' [$propertyCode]"
+    fun getColor(): Color = EdgeColorRegistry.getDiffGraphColor(inWhich)
 }
