@@ -2,6 +2,7 @@ package terminodiff.ui.graphs
 
 import org.hl7.fhir.r4.model.CodeSystem
 import org.jgrapht.Graph
+import org.jungrapht.visualization.VisualizationScrollPane
 import org.jungrapht.visualization.VisualizationViewer
 import terminodiff.engine.graph.*
 import terminodiff.i18n.LocalizedStrings
@@ -52,7 +53,9 @@ class DiffGraphLayoutFrame(
 
     init {
         super.setTitle(title)
-        container.add(viewer.component)
+        val visualizationScrollPane = VisualizationScrollPane(viewer);
+        //container.add(viewer.component)
+        container.add(visualizationScrollPane)
         this.add(container)
         this.defaultCloseOperation = WindowConstants.DISPOSE_ON_CLOSE
         pack()
