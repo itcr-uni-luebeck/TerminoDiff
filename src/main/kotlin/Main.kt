@@ -14,6 +14,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.*
 import ca.uhn.fhir.context.FhirContext
+import com.formdev.flatlaf.FlatDarkLaf
+import com.formdev.flatlaf.FlatLightLaf
 import org.hl7.fhir.r4.model.CodeSystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -30,6 +32,8 @@ import terminodiff.ui.panes.metadatadiff.MetadataDiffPanel
 import terminodiff.ui.theme.TerminoDiffTheme
 import java.awt.Dimension
 import java.io.File
+import javax.imageio.ImageIO
+import javax.swing.UIManager
 
 private val logger: Logger = LoggerFactory.getLogger(TerminoDiffApp::class.java)
 
@@ -38,22 +42,48 @@ private val logger: Logger = LoggerFactory.getLogger(TerminoDiffApp::class.java)
  */
 class TerminoDiffApp
 
+val resourcesDir = System.getProperty("compose.application.resources.dir")?.let {
+    // this only works in the native distribution, or when running via `runDistributable` in Gradle/IntelliJ
+    File(it)
+}
 
 fun main() = application {
-    AppWindow(this)
+    FlatDarkLaf.setup()
+    FlatLightLaf.setup()
+    ThemedAppWindow(this)
 }
 
 @Composable
-fun AppWindow(applicationScope: ApplicationScope) {
+fun ThemedAppWindow(applicationScope: ApplicationScope) {
+    var useDarkTheme by remember { mutableStateOf(AppPreferences.darkModeEnabled) }
+    AppWindow(applicationScope = applicationScope, useDarkTheme = useDarkTheme, onChangeDarkTheme = {
+        useDarkTheme = !useDarkTheme
+        AppPreferences.darkModeEnabled = useDarkTheme
+    })
+}
+
+@Composable
+fun AppWindow(applicationScope: ApplicationScope, useDarkTheme: Boolean, onChangeDarkTheme: () -> Unit) {
+    when (useDarkTheme) {
+        true -> FlatDarkLaf.setup()
+        else -> FlatLightLaf.setup()
+    }
     var locale by remember { mutableStateOf(SupportedLocale.valueOf(AppPreferences.language)) }
     var strings by remember { mutableStateOf(getStrings(locale)) }
     val scrollState = rememberScrollState()
-    var useDarkTheme by remember { mutableStateOf(AppPreferences.darkModeEnabled) }
     var hasResizedWindow by remember { mutableStateOf(false) }
     Window(
         onCloseRequest = { applicationScope.exitApplication() },
     ) {
         this.window.title = strings.terminoDiff
+        resourcesDir?.let {
+            this.window.iconImage = ImageIO.read(it.resolve("terminodiff@0.5x.png"))
+        }
+        when (useDarkTheme) {
+            false -> UIManager.setLookAndFeel(FlatLightLaf())
+            else -> UIManager.setLookAndFeel(FlatDarkLaf())
+        }
+
         if (!hasResizedWindow) {
             // app crashes if we use state for the window, when the locale is changed, with the error
             // that the window is already on screen.
@@ -79,10 +109,8 @@ fun AppWindow(applicationScope: ApplicationScope) {
                 AppPreferences.language = locale.name
                 logger.info("changed locale to ${locale.name}")
             },
-            onChangeDarkTheme = {
-                useDarkTheme = !useDarkTheme
-                AppPreferences.darkModeEnabled = useDarkTheme
-            })
+            onChangeDarkTheme = onChangeDarkTheme
+        )
     }
 }
 
@@ -95,9 +123,7 @@ fun LocalizedAppWindow(
     onChangeDarkTheme: () -> Unit,
     frameWindow: FrameWindowScope
 ) {
-    //val leftCs = TestContainer.oncotreeLeft
-    //val rightCs = TestContainer.oncotreeRight
-    val scope = rememberCoroutineScope()
+
     var leftCsFilenameResource: Pair<File, CodeSystem>? by remember { mutableStateOf(null) }
     var rightCsFilenameResource: Pair<File, CodeSystem>? by remember { mutableStateOf(null) }
     val fhirContext = remember { FhirContext.forR4() }
@@ -234,7 +260,6 @@ private fun ContainerUninitializedContent(
                     )
                 }
             }
-
         }
     }
 

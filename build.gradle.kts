@@ -44,6 +44,7 @@ dependencies {
     implementation("li.flor:native-j-file-chooser:1.6.4")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359") // provides org.xml.sax
     implementation("org.apache.commons:commons-lang3:3.12.0")
+    implementation("com.formdev:flatlaf:2.0")
 }
 
 tasks.test {
@@ -67,28 +68,25 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
 }
 
-val iconPath = "src/main/resources/icons/appicons"
-
 compose.desktop {
     application {
         mainClass = "terminodiff.MainKt"
         nativeDistributions {
+            val resourceDir = project.layout.projectDirectory.dir("resources")
+            appResourcesRootDir.set(resourceDir)
+            licenseFile.set(project.file("LICENSE"))
+            packageName = "TerminoDiff"
+            packageVersion = "1.0.0"
+            description = "Visually compare HL7 FHIR Terminology"
+            vendor = "IT Center for Clinical Reserach, University of Lübeck"
+            copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
+
             linux {
-                iconFile.set(project.file("$iconPath/terminodiff.png"))
+                iconFile.set(resourceDir.file("terminodiff.png"))
                 targetFormats(
                     TargetFormat.Deb,
                     TargetFormat.Rpm,
                     TargetFormat.AppImage,
-                )
-            }
-            windows {
-                iconFile.set(project.file("$iconPath/terminodiff.ico"))
-                perUserInstall = true
-                dirChooser = true
-                upgradeUuid = "ECFA19D9-D1F2-4AF5-9E5E-59A8F21C3A79"
-                targetFormats(
-                    TargetFormat.Exe,
-                    TargetFormat.Msi
                 )
             }
             macOS {
@@ -97,16 +95,23 @@ compose.desktop {
                     sign.set(true)
                     identity.set("Joshua Wiedekopf")
                 }
-                iconFile.set(project.file("$iconPath/terminodiff.icns"))
+                iconFile.set(resourceDir.file("macos/terminodiff.icns"))
                 targetFormats(
                     TargetFormat.Dmg
                 )
             }
-            licenseFile.set(project.file("LICENSE"))
-            packageName = "TerminoDiff"
-            packageVersion = "1.0.0"
-            description = "Visually compare HL7 FHIR Terminology"
-            copyright = "IT Center for Clinical Research, University of Lübeck, 2022-"
+            windows {
+                iconFile.set(resourceDir.file("windows/terminodiff.ico"))
+                perUserInstall = true
+                dirChooser = true
+                upgradeUuid = "ECFA19D9-D1F2-4AF5-9E5E-59A8F21C3A79"
+                menuGroup = "TerminoDiff"
+                targetFormats(
+                    TargetFormat.Exe,
+                    TargetFormat.Msi
+                )
+            }
+
         }
     }
 }
