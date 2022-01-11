@@ -4,6 +4,7 @@ import androidx.compose.ui.window.FrameWindowScope
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.DataFormatException
 import li.flor.nativejfilechooser.NativeJFileChooser
+import org.apache.commons.lang3.SystemUtils
 import org.hl7.fhir.r4.model.CodeSystem
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -14,6 +15,7 @@ import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
 import java.awt.Cursor
 import java.io.File
+import javax.swing.JFileChooser
 import javax.swing.SwingWorker
 import javax.swing.filechooser.FileNameExtensionFilter
 
@@ -106,16 +108,25 @@ class FhirLoader(private val frame: FrameWindowScope, private val file: File, pr
             frame.window.cursor = Cursor.getDefaultCursor()
         }
     }
-
 }
 
-fun loadFile(title: String, fhirContext: FhirContext, frameWindow: FrameWindowScope): Pair<File, CodeSystem>? =
-    NativeJFileChooser(AppPreferences.fileBrowserDirectory).apply {
+private fun getFileChooser(title: String): JFileChooser {
+    return when (SystemUtils.IS_OS_MAC) {
+        // NativeJFileChooser hangs on Azul Zulu 11 + JavaFX on macOS 12.1 aarch64.
+        // with Azul Zulu w/o JFX, currently the file browser does not work at all on a M1 MBA.
+        // hence, the non-native file chooser is used instead.
+        true -> JFileChooser(AppPreferences.fileBrowserDirectory)
+        else -> NativeJFileChooser(AppPreferences.fileBrowserDirectory)
+    }.apply {
         dialogTitle = title
         isAcceptAllFileFilterUsed = false
         addChoosableFileFilter(FileNameExtensionFilter("FHIR+JSON (*.json)", "json", "JSON"))
         addChoosableFileFilter(FileNameExtensionFilter("FHIR+XML (*.xml)", "xml", "XML"))
-    }.let { chooser ->
+    }
+}
+
+fun loadFile(title: String, fhirContext: FhirContext, frameWindow: FrameWindowScope): Pair<File, CodeSystem>? =
+    getFileChooser(title).let { chooser ->
         return@let when (chooser.showOpenDialog(null)) {
             NativeJFileChooser.CANCEL_OPTION -> null
             NativeJFileChooser.APPROVE_OPTION -> {

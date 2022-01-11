@@ -11,7 +11,7 @@ plugins {
 }
 
 group = "de.uzl.itcr"
-version = "1.0.0-alpha1"
+version = "1.0.0"
 
 repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
@@ -33,7 +33,7 @@ dependencies {
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:$hapiVersion")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:$hapiVersion")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-validation:$hapiVersion")
-    implementation("ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:$hapiVersion")
+    //implementation("ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:$hapiVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")
     implementation("org.jgrapht:jgrapht-core:$jGraphTVersion")
@@ -43,6 +43,7 @@ dependencies {
     implementation("net.mahdilamb:colormap:0.9.511")
     implementation("li.flor:native-j-file-chooser:1.6.4")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359") // provides org.xml.sax
+    implementation("org.apache.commons:commons-lang3:3.12.0")
 }
 
 tasks.test {
@@ -66,23 +67,46 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
 }
 
+val iconPath = "src/main/resources/icons/appicons"
+
 compose.desktop {
     application {
-        mainClass = "MainKt"
+        mainClass = "terminodiff.MainKt"
         nativeDistributions {
-            targetFormats(
-                TargetFormat.Dmg,
-                TargetFormat.Msi,
-                TargetFormat.Deb,
-                TargetFormat.Rpm,
-                TargetFormat.AppImage,
-                TargetFormat.Exe
-            )
-            macOS {
-                dmgPackageVersion = "1.0.0"
+            linux {
+                iconFile.set(project.file("$iconPath/terminodiff.png"))
+                targetFormats(
+                    TargetFormat.Deb,
+                    TargetFormat.Rpm,
+                    TargetFormat.AppImage,
+                )
             }
+            windows {
+                iconFile.set(project.file("$iconPath/terminodiff.ico"))
+                perUserInstall = true
+                dirChooser = true
+                upgradeUuid = "ECFA19D9-D1F2-4AF5-9E5E-59A8F21C3A79"
+                targetFormats(
+                    TargetFormat.Exe,
+                    TargetFormat.Msi
+                )
+            }
+            macOS {
+                bundleID = "de.uzl.itcr.terminodiff"
+                signing {
+                    sign.set(true)
+                    identity.set("Joshua Wiedekopf")
+                }
+                iconFile.set(project.file("$iconPath/terminodiff.icns"))
+                targetFormats(
+                    TargetFormat.Dmg
+                )
+            }
+            licenseFile.set(project.file("LICENSE"))
             packageName = "TerminoDiff"
-            packageVersion = "0.1.0"
+            packageVersion = "1.0.0"
+            description = "Visually compare HL7 FHIR Terminology"
+            copyright = "IT Center for Clinical Research, University of Lübeck, 2022-"
         }
     }
 }
