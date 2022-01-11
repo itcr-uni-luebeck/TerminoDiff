@@ -76,19 +76,20 @@ class DiffDataContainer(
 
 }
 
-class FhirLoader(private val frame: FrameWindowScope, private val file: File, private val fhirContext: FhirContext) :
-    SwingWorker<Pair<File, CodeSystem>?, Void>() {
+class FhirLoader(private val frame: FrameWindowScope, private val file: File?, private val fhirContext: FhirContext) :
+    SwingWorker<CodeSystem?, Void>() {
 
     init {
         frame.window.cursor = Cursor.getPredefinedCursor(Cursor.WAIT_CURSOR)
     }
 
-    override fun doInBackground(): Pair<File, CodeSystem>? {
+    override fun doInBackground(): CodeSystem? {
+        if (file == null) return null
         return try {
             when (file.extension.lowercase()) {
-                "xml" -> file to fhirContext.newXmlParser()
+                "xml" -> fhirContext.newXmlParser()
                     .parseResource(CodeSystem::class.java, file.reader())
-                "json" -> file to fhirContext.newJsonParser()
+                "json" -> fhirContext.newJsonParser()
                     .parseResource(CodeSystem::class.java, file.reader())
                 else -> {
                     logger.error("The file at ${file.absolutePath} has an unsupported file type")
@@ -109,36 +110,4 @@ class FhirLoader(private val frame: FrameWindowScope, private val file: File, pr
         }
     }
 }
-
-private fun getFileChooser(title: String): JFileChooser {
-    return when (SystemUtils.IS_OS_MAC) {
-        // NativeJFileChooser hangs on Azul Zulu 11 + JavaFX on macOS 12.1 aarch64.
-        // with Azul Zulu w/o JFX, currently the file browser does not work at all on a M1 MBA.
-        // hence, the non-native file chooser is used instead.
-        true -> JFileChooser(AppPreferences.fileBrowserDirectory)
-        else -> NativeJFileChooser(AppPreferences.fileBrowserDirectory)
-    }.apply {
-        dialogTitle = title
-        isAcceptAllFileFilterUsed = false
-        addChoosableFileFilter(FileNameExtensionFilter("FHIR+JSON (*.json)", "json", "JSON"))
-        addChoosableFileFilter(FileNameExtensionFilter("FHIR+XML (*.xml)", "xml", "XML"))
-    }
-}
-
-fun loadFile(title: String, fhirContext: FhirContext, frameWindow: FrameWindowScope): Pair<File, CodeSystem>? =
-    getFileChooser(title).let { chooser ->
-        return@let when (chooser.showOpenDialog(null)) {
-            NativeJFileChooser.CANCEL_OPTION -> null
-            NativeJFileChooser.APPROVE_OPTION -> {
-                val selectedFile = chooser.selectedFile?.absoluteFile ?: return null
-                AppPreferences.fileBrowserDirectory = selectedFile.parentFile.absolutePath
-                FhirLoader(frameWindow, selectedFile, fhirContext).let { loader ->
-                    loader.execute()
-                    logger.info("loaded file at ${selectedFile.absolutePath}")
-                    loader.get()
-                }
-            }
-            else -> null
-        }
-    }
 
