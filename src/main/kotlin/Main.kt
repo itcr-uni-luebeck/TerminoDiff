@@ -83,7 +83,6 @@ fun AppWindow(applicationScope: ApplicationScope, useDarkTheme: Boolean, onChang
             localizedStrings = strings,
             scrollState = scrollState,
             useDarkTheme = useDarkTheme,
-            frameWindow = this,
             onLocaleChange = {
                 locale = when (locale) {
                     SupportedLocale.DE -> SupportedLocale.EN

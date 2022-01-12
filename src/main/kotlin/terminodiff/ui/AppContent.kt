@@ -9,20 +9,15 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.FrameWindowScope
 import ca.uhn.fhir.context.FhirContext
-import ca.uhn.fhir.parser.DataFormatException
 import li.flor.nativejfilechooser.NativeJFileChooser
 import org.apache.commons.lang3.SystemUtils
-import org.hl7.fhir.r4.model.CodeSystem
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import terminodiff.engine.resources.DiffDataContainer
-import terminodiff.engine.resources.FhirLoader
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
 import terminodiff.ui.AppIconResource
@@ -36,26 +31,21 @@ import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 
-private val logger: Logger = LoggerFactory.getLogger("TerminodiffAppContent")
-
 @Composable
 fun TerminodiffAppContent(
     localizedStrings: LocalizedStrings,
     scrollState: ScrollState,
     useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
-    onChangeDarkTheme: () -> Unit,
-    frameWindow: FrameWindowScope
+    onChangeDarkTheme: () -> Unit
 ) {
-
-    var leftCsFilename: File? by remember { mutableStateOf(null) }
-    var rightCsFilename: File? by remember { mutableStateOf(null) }
     val fhirContext = remember { FhirContext.forR4() }
+    val diffDataContainer = remember { DiffDataContainer(fhirContext, localizedStrings) }
     val onLoadLeftFile: () -> Unit = {
-        leftCsFilename = showLoadFileDialog(localizedStrings.loadLeftFile, frameWindow)
+        diffDataContainer.leftFilename = showLoadFileDialog(localizedStrings.loadLeftFile)
     }
     val onLoadRightFile: () -> Unit = {
-        rightCsFilename = showLoadFileDialog(localizedStrings.loadRightFile, frameWindow)
+        diffDataContainer.rightFilename = showLoadFileDialog(localizedStrings.loadRightFile)
     }
 
     TerminodiffContentWindow(
@@ -65,31 +55,10 @@ fun TerminodiffAppContent(
         onLocaleChange = onLocaleChange,
         onChangeDarkTheme = onChangeDarkTheme,
         fhirContext = fhirContext,
-        leftCsFilename = leftCsFilename,
-        rightCsFilename = rightCsFilename,
         onLoadLeftFile = onLoadLeftFile,
-        onLoadRightFile = onLoadRightFile
+        onLoadRightFile = onLoadRightFile,
+        diffDataContainer = diffDataContainer
     )
-}
-
-private fun loadResource(file: File?, fhirContext: FhirContext): CodeSystem? {
-    if (file == null) return null
-    logger.info("Loading resource from ${file.absolutePath}")
-    return try {
-        when (file.extension.lowercase()) {
-            "xml" -> fhirContext.newXmlParser()
-                .parseResource(CodeSystem::class.java, file.reader())
-            "json" -> fhirContext.newJsonParser()
-                .parseResource(CodeSystem::class.java, file.reader())
-            else -> {
-                logger.error("The file at ${file.absolutePath} has an unsupported file type")
-                null
-            }
-        }
-    } catch (e: DataFormatException) {
-        logger.error("The file at ${file.absolutePath} could not be parsed as FHIR", e)
-        null
-    }
 }
 
 @Composable
@@ -100,17 +69,11 @@ fun TerminodiffContentWindow(
     onLocaleChange: () -> Unit,
     onChangeDarkTheme: () -> Unit,
     fhirContext: FhirContext,
-    leftCsFilename: File?,
-    rightCsFilename: File?,
     onLoadLeftFile: () -> Unit,
     onLoadRightFile: () -> Unit,
+    diffDataContainer: DiffDataContainer
 ) {
-    val leftResource by remember {
-        derivedStateOf { loadResource(leftCsFilename, fhirContext) }
-    }
-    val rightResource by remember {
-        derivedStateOf { loadResource(rightCsFilename, fhirContext) }
-    }
+
     TerminoDiffTheme(useDarkTheme = useDarkTheme) {
         Scaffold(
             topBar = {
@@ -124,22 +87,21 @@ fun TerminodiffContentWindow(
             },
             backgroundColor = MaterialTheme.colorScheme.background
         ) { scaffoldPadding ->
-            when (leftResource != null && rightResource != null) {
+            when (diffDataContainer.leftCodeSystem != null && diffDataContainer.rightCodeSystem != null) {
                 true -> ContainerInitializedContent(
                     modifier = Modifier.padding(scaffoldPadding),
                     scrollState = scrollState,
                     strings = localizedStrings,
                     useDarkTheme = useDarkTheme,
                     fhirContext = fhirContext,
-                    leftResource = leftResource!!,
-                    rightResource = rightResource!!
+                    diffDataContainer = diffDataContainer
                 )
                 false -> ContainerUninitializedContent(
                     modifier = Modifier.padding(scaffoldPadding),
                     scrollState = scrollState,
                     localizedStrings = localizedStrings,
-                    leftFile = leftCsFilename,
-                    rightFile = rightCsFilename,
+                    leftFile = diffDataContainer.leftFilename,
+                    rightFile = diffDataContainer.rightFilename,
                     onLoadLeftFile = onLoadLeftFile,
                     onLoadRightFile = onLoadRightFile,
                 )
@@ -226,33 +188,27 @@ private fun ContainerInitializedContent(
     strings: LocalizedStrings,
     useDarkTheme: Boolean,
     fhirContext: FhirContext,
-    leftResource: CodeSystem,
-    rightResource: CodeSystem,
+    diffDataContainer: DiffDataContainer
 ) {
-    val dataContainer by remember {
-        derivedStateOf {
-            DiffDataContainer(leftResource, rightResource)
-        }
-    }
     Column(
         modifier = modifier.scrollable(scrollState, Orientation.Vertical),
     ) {
         ShowGraphsPanel(
-            leftCs = dataContainer.leftCodeSystem!!,
-            rightCs = dataContainer.rightCodeSystem!!,
-            diffGraph = dataContainer.codeSystemDiff!!.differenceGraph,
+            leftCs = diffDataContainer.leftCodeSystem!!,
+            rightCs = diffDataContainer.rightCodeSystem!!,
+            diffGraph = diffDataContainer.codeSystemDiff!!.differenceGraph,
             localizedStrings = strings,
             useDarkTheme = useDarkTheme,
         )
         ConceptDiffPanel(
             verticalWeight = 0.45f,
-            diffDataContainer = dataContainer,
+            diffDataContainer = diffDataContainer,
             localizedStrings = strings,
             useDarkTheme = useDarkTheme
         )
         MetadataDiffPanel(
-            leftCs = dataContainer.leftCodeSystem!!,
-            rightCs = dataContainer.rightCodeSystem!!,
+            leftCs = diffDataContainer.leftCodeSystem!!,
+            rightCs = diffDataContainer.rightCodeSystem!!,
             localizedStrings = strings,
             useDarkTheme = useDarkTheme,
             fhirContext = fhirContext
@@ -264,7 +220,8 @@ fun getFileChooser(title: String): JFileChooser {
     return when (SystemUtils.IS_OS_MAC) {
         // NativeJFileChooser hangs on Azul Zulu 11 + JavaFX on macOS 12.1 aarch64.
         // with Azul Zulu w/o JFX, currently the file browser does not work at all on a M1 MBA.
-        // hence, the non-native file chooser is used instead.
+        // hence, the non-native file chooser is used instead, which is not *nearly* as nice,
+        // but it seems to be much more stabl
         true -> JFileChooser(AppPreferences.fileBrowserDirectory)
         else -> NativeJFileChooser(AppPreferences.fileBrowserDirectory)
     }.apply {
@@ -275,7 +232,7 @@ fun getFileChooser(title: String): JFileChooser {
     }
 }
 
-fun showLoadFileDialog(title: String, frameWindow: FrameWindowScope): File? = getFileChooser(title).let { chooser ->
+fun showLoadFileDialog(title: String): File? = getFileChooser(title).let { chooser ->
     when (chooser.showOpenDialog(null)) {
         JFileChooser.CANCEL_OPTION -> null
         JFileChooser.APPROVE_OPTION -> {

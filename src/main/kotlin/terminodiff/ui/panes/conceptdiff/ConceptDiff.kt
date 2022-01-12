@@ -147,7 +147,7 @@ fun DiffDataTable(
     diffColors: DiffColors,
     lazyListState: LazyListState
 ) {
-    if (!diffDataContainer.isInitialized || diffDataContainer.codeSystemDiff == null) throw IllegalStateException("the diff data container is not initialized")
+    if (diffDataContainer.codeSystemDiff == null) throw IllegalStateException("the diff data container is not initialized")
 
     val columnSpecs = listOf(
         ColumnSpec.codeColumnSpec(localizedStrings),
