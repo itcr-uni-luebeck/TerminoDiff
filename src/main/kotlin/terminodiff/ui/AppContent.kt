@@ -207,11 +207,9 @@ private fun ContainerInitializedContent(
             useDarkTheme = useDarkTheme
         )
         MetadataDiffPanel(
-            leftCs = diffDataContainer.leftCodeSystem!!,
-            rightCs = diffDataContainer.rightCodeSystem!!,
+            diffDataContainer = diffDataContainer,
             localizedStrings = strings,
             useDarkTheme = useDarkTheme,
-            fhirContext = fhirContext
         )
     }
 }

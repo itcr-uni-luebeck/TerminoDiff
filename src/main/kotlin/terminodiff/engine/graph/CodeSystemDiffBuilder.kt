@@ -6,6 +6,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.engine.concepts.ConceptDiff
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.terminodiff.engine.metadata.MetadataDiff
 import terminodiff.ui.graphs.EdgeColorRegistry
 import java.awt.Color
 import java.util.*
@@ -13,9 +14,13 @@ import java.util.*
 private val logger: Logger = LoggerFactory.getLogger("CodeSystemDiffBuilder")
 
 class CodeSystemDiffBuilder(
-    private val leftBuilder: CodeSystemGraphBuilder, private val rightBuilder: CodeSystemGraphBuilder
+    private val leftBuilder: CodeSystemGraphBuilder, private val rightBuilder: CodeSystemGraphBuilder, private val localizedStrings: LocalizedStrings
 ) {
 
+    val metadataDifferences = MetadataDiff(leftBuilder.codeSystem, rightBuilder.codeSystem, localizedStrings).also { metadataDiff ->
+        val count = metadataDiff.comparisons.count { it.result == MetadataDiff.MetadataComparisonResult.DIFFERENT }
+        logger.info("Built metadata diff, $count difference(-s)")
+    }
     val conceptDifferences = TreeMap<String, ConceptDiff>()
     val onlyInLeftConcepts = mutableListOf<String>()
     val onlyInRightConcepts = mutableListOf<String>()
@@ -56,7 +61,7 @@ class CodeSystemDiffBuilder(
         graphBuilder: CodeSystemGraphBuilder, otherGraphBuilder: CodeSystemGraphBuilder, kind: DiffGraphElementKind
     ) =
         graphBuilder.graph.edgeSet().minus(otherGraphBuilder.graph.edgeSet()).also {
-            logger.debug("only in $kind: {}", it.joinToString("; "))
+            logger.debug("only in $kind: {}", it.joinToString(separator = "; "))
         }.mapNotNull { edge ->
             val toConcept = graphBuilder.nodeTree[edge.to]
             val fromConcept = graphBuilder.nodeTree[edge.from]

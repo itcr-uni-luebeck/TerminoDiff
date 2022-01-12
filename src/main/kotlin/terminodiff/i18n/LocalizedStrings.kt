@@ -1,16 +1,18 @@
 package terminodiff.i18n
 
 import terminodiff.engine.concepts.ConceptDiffItem
-import terminodiff.engine.concepts.ConceptDiffResult
 import terminodiff.engine.graph.DiffGraphElementKind
-import terminodiff.engine.metadata.MetadataDiff.MetadataDiffItemResult
+import terminodiff.engine.metadata.MetadataDiffOld.MetadataDiffItemResultOld
+import terminodiff.terminodiff.engine.metadata.MetadataDiff
 import java.io.File
 
 /**
- * we pass around an instance of localizedstrings, since we want every composable
+ * we pass around an instance of LocalizedStrings, since we want every composable
  * to recompose when the language changes.
  */
 abstract class LocalizedStrings(
+    val bothListsAreEmpty: String,
+    val bothValuesAreNull: String,
     val canonicalUrl: String,
     val changeLanguage: String,
     val conceptDiff: String,
@@ -22,6 +24,7 @@ abstract class LocalizedStrings(
     val description: String,
     val definition: String = "Definition",
     val designation: String = "Designation",
+    val differentValue: String,
     val diffGraph: String,
     val display: String = "Display",
     val displayAndInWhich_: (String?, DiffGraphElementKind) -> String,
@@ -30,14 +33,13 @@ abstract class LocalizedStrings(
     val identical: String,
     val identifiers: String,
     val jurisdiction: String,
-    val language: String,
     val loadLeftFile: String,
     val loadRightFile: String,
-    val graphsOpenInOtherWindows: String,
     val leftValue: String,
     val rightValue: String,
     val metadataDiff: String,
-    val metadataDiffResults_: (MetadataDiffItemResult) -> String,
+    val metadataDiffResultsOld_: (MetadataDiffItemResultOld) -> String,
+    val metadataDiffResults_: (MetadataDiff.MetadataComparisonResult) -> String,
     val name: String = "Name",
     val noDataLoadedTitle: String,
     val numberDifferent_: (Int) -> String,
@@ -47,6 +49,7 @@ abstract class LocalizedStrings(
             else -> "$it items"
         }
     },
+    val oneValueIsNull: String,
     val onlyInLeft: String,
     val onlyConceptDifferences: String,
     val onlyInRight: String,
@@ -63,7 +66,6 @@ abstract class LocalizedStrings(
     val title: String,
     val terminoDiff: String = "TerminoDiff",
     val version: String = "Version",
-    val viewGraphTitle: String,
     val leftFileOpenFilename_: (File) -> String,
     val rightFileOpenFilename_: (File) -> String,
 )
@@ -78,19 +80,22 @@ enum class SupportedLocale {
 }
 
 class GermanStrings : LocalizedStrings(
+    bothListsAreEmpty = "Beide Listen sind leer",
+    bothValuesAreNull = "Beide Werte sind null",
     canonicalUrl = "Kanonische URL",
     changeLanguage = "Sprache wechseln",
-    comparison = "Vergleich",
     conceptDiff = "Konzept-Diff",
+    contact = "Kontakt",
+    comparison = "Vergleich",
     conceptDiffResults_ = {
         when (it) {
             ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> "Unterschiedlich"
             ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identisch"
         }
     },
-    contact = "Kontakt",
     date = "Datum",
     description = "Beschreibung",
+    differentValue = "Unterschiedliche Werte",
     diffGraph = "Differenz-Graph",
     displayAndInWhich_ = { display, inWhich ->
         val where = when (inWhich) {
@@ -101,28 +106,33 @@ class GermanStrings : LocalizedStrings(
         "'$display' ($where)"
     },
     experimental = "Experimentell?",
-    identifiers = "IDs",
     identical = "Identisch",
+    identifiers = "IDs",
     jurisdiction = "Jurisdiktion",
-    language = "de",
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
     leftValue = "Linker Wert",
     rightValue = "Rechter Wert",
-    graphsOpenInOtherWindows = "Graphen öffnen sich in einem neuen Fenster.",
     metadataDiff = "Metadaten-Diff",
     metadataDiffResults_ = {
         when (it) {
-            MetadataDiffItemResult.BOTH_EMPTY -> "beide leer"
-            MetadataDiffItemResult.DIFFERENT -> "unterschiedlich"
-            MetadataDiffItemResult.IDENTICAL -> "identisch"
-            MetadataDiffItemResult.DIFFERENT_COUNT -> "unterschiedliche Anzahl"
-            MetadataDiffItemResult.BOTH_NULL -> "beide Null"
-            MetadataDiffItemResult.DIFFERENT_TEXT -> "unterschiedlicher Text"
+            MetadataDiff.MetadataComparisonResult.IDENTICAL -> "identisch"
+            MetadataDiff.MetadataComparisonResult.DIFFERENT -> "unterschiedlich"
+        }
+    },
+    metadataDiffResultsOld_ = {
+        when (it) {
+            MetadataDiffItemResultOld.BOTH_EMPTY -> "beide leer"
+            MetadataDiffItemResultOld.DIFFERENT -> "unterschiedlich"
+            MetadataDiffItemResultOld.IDENTICAL -> "identisch"
+            MetadataDiffItemResultOld.DIFFERENT_COUNT -> "unterschiedliche Anzahl"
+            MetadataDiffItemResultOld.BOTH_NULL -> "beide Null"
+            MetadataDiffItemResultOld.DIFFERENT_TEXT -> "unterschiedlicher Text"
         }
     },
     noDataLoadedTitle = "Keine Daten geladen",
     numberDifferent_ = { "$it unterschiedlich" },
+    oneValueIsNull = "Ein Wert ist null",
     onlyInLeft = "Nur links",
     onlyConceptDifferences = "Konzeptunterschiede",
     onlyInRight = "Nur rechts",
@@ -133,27 +143,29 @@ class GermanStrings : LocalizedStrings(
     showIdentical = "Identische",
     showLeftGraphButton = "Linken Graphen zeigen",
     showRightGraphButton = "Rechten Graphen zeigen",
-    viewGraphTitle = "Graph anzeigen",
-    title = "Titel",
     toggleDarkTheme = "Helles/Dunkles Thema",
+    title = "Titel",
     leftFileOpenFilename_ = { file -> "Linke Datei geöffnet: ${file.absolutePath}" },
     rightFileOpenFilename_ = { file -> "Rechte Datei geöffnet: ${file.absolutePath}" }
 )
 
 class EnglishStrings : LocalizedStrings(
+    bothListsAreEmpty = "Both lists are empty",
+    bothValuesAreNull = "Both values are null",
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
-    comparison = "Comparison",
     conceptDiff = "Concept Diff",
+    contact = "Contact",
+    comparison = "Comparison",
     conceptDiffResults_ = {
         when (it) {
             ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> "Different"
             ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identical"
         }
     },
-    contact = "Contact",
     date = "Date",
     description = "Description",
+    differentValue = "Different value",
     diffGraph = "Difference Graph",
     displayAndInWhich_ = { display, inWhich ->
         val where = when (inWhich) {
@@ -167,38 +179,42 @@ class EnglishStrings : LocalizedStrings(
     identical = "Identical",
     identifiers = "Identifiers",
     jurisdiction = "Jurisdiction",
-    language = "en",
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
     leftValue = "Left value",
     rightValue = "Right value",
-    graphsOpenInOtherWindows = "Graphs open in another window.",
     metadataDiff = "Metadata Diff",
     metadataDiffResults_ = {
         when (it) {
-            MetadataDiffItemResult.BOTH_EMPTY -> "both empty"
-            MetadataDiffItemResult.DIFFERENT -> "different"
-            MetadataDiffItemResult.IDENTICAL -> "identical"
-            MetadataDiffItemResult.DIFFERENT_COUNT -> "different count"
-            MetadataDiffItemResult.BOTH_NULL -> "both null"
-            MetadataDiffItemResult.DIFFERENT_TEXT -> "different text"
+            MetadataDiff.MetadataComparisonResult.IDENTICAL -> "identical"
+            MetadataDiff.MetadataComparisonResult.DIFFERENT -> "different"
+        }
+    },
+    metadataDiffResultsOld_ = {
+        when (it) {
+            MetadataDiffItemResultOld.BOTH_EMPTY -> "both empty"
+            MetadataDiffItemResultOld.DIFFERENT -> "different"
+            MetadataDiffItemResultOld.IDENTICAL -> "identical"
+            MetadataDiffItemResultOld.DIFFERENT_COUNT -> "different count"
+            MetadataDiffItemResultOld.BOTH_NULL -> "both null"
+            MetadataDiffItemResultOld.DIFFERENT_TEXT -> "different text"
         }
     },
     noDataLoadedTitle = "No data loaded",
     numberDifferent_ = { "$it different" },
+    oneValueIsNull = "One value is null",
     onlyInLeft = "Only left",
     onlyConceptDifferences = "Concept differences",
     onlyInRight = "Only right",
     overallComparison = "Overall",
     publisher = "Publisher",
     showAll = "All",
-    showIdentical = "Identical",
     showDifferent = "Different",
+    showIdentical = "Identical",
     showLeftGraphButton = "Show left graph",
     showRightGraphButton = "Show right graph",
-    title = "Title",
     toggleDarkTheme = "Toggle dark theme",
-    viewGraphTitle = "View graph",
+    title = "Title",
     leftFileOpenFilename_ = { file -> "Left file open: ${file.absolutePath}" },
     rightFileOpenFilename_ = { file -> "Right file open: ${file.absolutePath}" },
 )
