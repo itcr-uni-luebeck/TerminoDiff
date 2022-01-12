@@ -30,9 +30,7 @@ class DiffDataContainer(private val fhirContext: FhirContext, private val locali
 
     val codeSystemDiff: CodeSystemDiffBuilder? by derivedStateOf {
         buildDiff(
-            leftGraphBuilder,
-            rightGraphBuilder,
-            localizedStrings
+            leftGraphBuilder, rightGraphBuilder, localizedStrings
         )
     }
 
@@ -45,10 +43,8 @@ class DiffDataContainer(private val fhirContext: FhirContext, private val locali
         logger.info("Loading $side resource from ${file.absolutePath}")
         return try {
             when (file.extension.lowercase()) {
-                "xml" -> fhirContext.newXmlParser()
-                    .parseResource(CodeSystem::class.java, file.reader())
-                "json" -> fhirContext.newJsonParser()
-                    .parseResource(CodeSystem::class.java, file.reader())
+                "xml" -> fhirContext.newXmlParser().parseResource(CodeSystem::class.java, file.reader())
+                "json" -> fhirContext.newJsonParser().parseResource(CodeSystem::class.java, file.reader())
                 else -> {
                     logger.error("The file at ${file.absolutePath} has an unsupported file type")
                     null
@@ -74,22 +70,32 @@ class DiffDataContainer(private val fhirContext: FhirContext, private val locali
     ): CodeSystemDiffBuilder? {
         if (leftGraphBuilder == null || rightGraphBuilder == null) return null
         logger.info("building diff")
-        return CodeSystemDiffBuilder(leftGraphBuilder, rightGraphBuilder).build().also {
-            logger.info("${it.onlyInLeftConcepts.size} code(-s) only in left: ${it.onlyInLeftConcepts.joinToString(", ")}")
-            logger.info("${it.onlyInRightConcepts.size} code(-s) only in right: ${it.onlyInRightConcepts.joinToString(", ")}")
-            val differentConcepts =
-                it.conceptDifferences.filterValues { d -> d.conceptComparison.any { c -> c.result != ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL } || d.propertyComparison.size != 0 }
-            logger.debug(
-                "${differentConcepts.size} concept-level difference(-s): ${
-                    differentConcepts.entries.joinToString(separator = "\n - ") { (key, diff) ->
-                        "$key -> ${
-                            diff.toString(
-                                localizedStrings
-                            )
-                        }"
-                    }
+        return CodeSystemDiffBuilder(leftGraphBuilder, rightGraphBuilder, localizedStrings).build().also {
+            logger.info(
+                "${it.onlyInLeftConcepts.size} code(-s) only in left: ${
+                    it.onlyInLeftConcepts.joinToString(
+                        separator = ", ", limit = 50
+                    )
                 }"
             )
+            logger.info(
+                "${it.onlyInRightConcepts.size} code(-s) only in right: ${
+                    it.onlyInRightConcepts.joinToString(
+                        separator = ", ", limit = 50
+                    )
+                }"
+            )
+            val differentConcepts =
+                it.conceptDifferences.filterValues { d -> d.conceptComparison.any { c -> c.result != ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL } || d.propertyComparison.size != 0 }
+            logger.debug("${differentConcepts.size} concept-level difference(-s): ${
+                differentConcepts.entries.joinToString(separator = "\n - ") { (key, diff) ->
+                    "$key -> ${
+                        diff.toString(
+                            localizedStrings
+                        )
+                    }"
+                }
+            }")
         }
     }
 }

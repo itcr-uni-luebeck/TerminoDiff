@@ -12,10 +12,11 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.ConceptDiffResult
-import terminodiff.engine.metadata.MetadataDiff
+import terminodiff.terminodiff.engine.metadata.MetadataDiff
 import terminodiff.ui.theme.DiffColors
 
 @Composable
@@ -25,7 +26,8 @@ fun DiffChip(
     backgroundColor: Color,
     textColor: Color,
     textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
-    icon: ImageVector? = null
+    icon: ImageVector? = null,
+    fontStyle: FontStyle = FontStyle.Normal
 ) {
     Surface(
         modifier = modifier.padding(4.dp),
@@ -47,7 +49,11 @@ fun DiffChip(
                 )
             }
             Text(
-                text = text, style = textStyle, color = textColor, modifier = Modifier.padding(8.dp)
+                text = text,
+                style = textStyle,
+                color = textColor,
+                modifier = Modifier.padding(8.dp),
+                fontStyle = fontStyle
             )
         }
     }
@@ -59,14 +65,16 @@ fun DiffChip(
     text: String,
     colorPair: Pair<Color, Color>,
     textStyle: TextStyle = MaterialTheme.typography.bodyMedium,
-    icon: ImageVector? = null
+    icon: ImageVector? = null,
+    fontStyle: FontStyle = FontStyle.Normal
 ) = DiffChip(
     modifier = modifier,
     text = text,
     backgroundColor = colorPair.first,
     textColor = colorPair.second,
     textStyle = textStyle,
-    icon = icon
+    icon = icon,
+    fontStyle = fontStyle
 )
 
 fun colorPairForConceptDiffResult(
@@ -77,8 +85,8 @@ fun colorPairForConceptDiffResult(
 }
 
 fun colorPairForDiffResult(
-    comparisonResult: MetadataDiff.MetadataComparisonResult, diffColors: DiffColors
+    comparisonResult: MetadataDiff.MetadataComparison, diffColors: DiffColors
 ): Pair<Color, Color> = when (comparisonResult.result) {
-    MetadataDiff.MetadataDiffItemResult.DIFFERENT_TEXT, MetadataDiff.MetadataDiffItemResult.DIFFERENT, MetadataDiff.MetadataDiffItemResult.DIFFERENT_COUNT -> if (comparisonResult.expected) diffColors.yellowPair else diffColors.redPair
+    MetadataDiff.MetadataComparisonResult.DIFFERENT -> if (comparisonResult.diffItem.expectDifferences) diffColors.yellowPair else diffColors.redPair
     else -> diffColors.greenPair
 }
