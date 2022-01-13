@@ -36,6 +36,7 @@ abstract class LocalizedStrings(
     val loadLeftFile: String,
     val loadRightFile: String,
     val leftValue: String,
+    val keyIsDifferent_: (String) -> String,
     val rightValue: String,
     val metadataDiff: String,
     val metadataDiffResultsOld_: (MetadataDiffItemResultOld) -> String,
@@ -43,6 +44,7 @@ abstract class LocalizedStrings(
     val name: String = "Name",
     val noDataLoadedTitle: String,
     val numberDifferent_: (Int) -> String,
+    val numberDifferentReason_: (Int, List<String?>) -> String,
     val numberItems_: (Int) -> String = {
         when (it) {
             1 -> "1 item"
@@ -56,6 +58,7 @@ abstract class LocalizedStrings(
     val overallComparison: String,
     val publisher: String,
     val property: String = "Property",
+    val reload: String,
     val showAll: String,
     val showDifferent: String,
     val showIdentical: String,
@@ -109,6 +112,7 @@ class GermanStrings : LocalizedStrings(
     identical = "Identisch",
     identifiers = "IDs",
     jurisdiction = "Jurisdiktion",
+    keyIsDifferent_ = { "Schlüssel '$it' ist unterschiedlich" },
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
     leftValue = "Linker Wert",
@@ -132,12 +136,17 @@ class GermanStrings : LocalizedStrings(
     },
     noDataLoadedTitle = "Keine Daten geladen",
     numberDifferent_ = { "$it unterschiedlich" },
+    numberDifferentReason_ = { count, differences ->
+        val reason = differences.filterNotNull().joinToString(separator = "; ", limit = 3)
+        "$count unterschiedlich: $reason"
+    },
     oneValueIsNull = "Ein Wert ist null",
     onlyInLeft = "Nur links",
     onlyConceptDifferences = "Konzeptunterschiede",
     onlyInRight = "Nur rechts",
     overallComparison = "Gesamt",
     publisher = "Herausgeber",
+    reload = "Reload",
     showAll = "Alle",
     showDifferent = "Unterschiedliche",
     showIdentical = "Identische",
@@ -179,6 +188,7 @@ class EnglishStrings : LocalizedStrings(
     identical = "Identical",
     identifiers = "Identifiers",
     jurisdiction = "Jurisdiction",
+    keyIsDifferent_ = { "Key '$it' is different" },
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
     leftValue = "Left value",
@@ -202,12 +212,16 @@ class EnglishStrings : LocalizedStrings(
     },
     noDataLoadedTitle = "No data loaded",
     numberDifferent_ = { "$it different" },
+    numberDifferentReason_ = { count, differences ->
+        "$count different: ${differences.joinToString(separator = "; ", limit = 3)}"
+    },
     oneValueIsNull = "One value is null",
     onlyInLeft = "Only left",
     onlyConceptDifferences = "Concept differences",
     onlyInRight = "Only right",
     overallComparison = "Overall",
     publisher = "Publisher",
+    reload = "Reload",
     showAll = "All",
     showDifferent = "Different",
     showIdentical = "Identical",

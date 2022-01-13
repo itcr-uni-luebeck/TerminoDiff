@@ -1,0 +1,1 @@
+Download as SVG, and use [ShapeShifter](https://shapeshifter.design/) to convert the SVG to an "Android" `ImageVector`
