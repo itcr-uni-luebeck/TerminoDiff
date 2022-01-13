@@ -2,7 +2,6 @@ package terminodiff.i18n
 
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.graph.DiffGraphElementKind
-import terminodiff.engine.metadata.MetadataDiffOld.MetadataDiffItemResultOld
 import terminodiff.terminodiff.engine.metadata.MetadataDiff
 import java.io.File
 
@@ -39,7 +38,6 @@ abstract class LocalizedStrings(
     val keyIsDifferent_: (String) -> String,
     val rightValue: String,
     val metadataDiff: String,
-    val metadataDiffResultsOld_: (MetadataDiffItemResultOld) -> String,
     val metadataDiffResults_: (MetadataDiff.MetadataComparisonResult) -> String,
     val name: String = "Name",
     val noDataLoadedTitle: String,
@@ -112,26 +110,16 @@ class GermanStrings : LocalizedStrings(
     identical = "Identisch",
     identifiers = "IDs",
     jurisdiction = "Jurisdiktion",
-    keyIsDifferent_ = { "Schlüssel '$it' ist unterschiedlich" },
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
     leftValue = "Linker Wert",
+    keyIsDifferent_ = { "Schlüssel '$it' ist unterschiedlich" },
     rightValue = "Rechter Wert",
     metadataDiff = "Metadaten-Diff",
     metadataDiffResults_ = {
         when (it) {
             MetadataDiff.MetadataComparisonResult.IDENTICAL -> "identisch"
             MetadataDiff.MetadataComparisonResult.DIFFERENT -> "unterschiedlich"
-        }
-    },
-    metadataDiffResultsOld_ = {
-        when (it) {
-            MetadataDiffItemResultOld.BOTH_EMPTY -> "beide leer"
-            MetadataDiffItemResultOld.DIFFERENT -> "unterschiedlich"
-            MetadataDiffItemResultOld.IDENTICAL -> "identisch"
-            MetadataDiffItemResultOld.DIFFERENT_COUNT -> "unterschiedliche Anzahl"
-            MetadataDiffItemResultOld.BOTH_NULL -> "beide Null"
-            MetadataDiffItemResultOld.DIFFERENT_TEXT -> "unterschiedlicher Text"
         }
     },
     noDataLoadedTitle = "Keine Daten geladen",
@@ -188,26 +176,16 @@ class EnglishStrings : LocalizedStrings(
     identical = "Identical",
     identifiers = "Identifiers",
     jurisdiction = "Jurisdiction",
-    keyIsDifferent_ = { "Key '$it' is different" },
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
     leftValue = "Left value",
+    keyIsDifferent_ = { "Key '$it' is different" },
     rightValue = "Right value",
     metadataDiff = "Metadata Diff",
     metadataDiffResults_ = {
         when (it) {
             MetadataDiff.MetadataComparisonResult.IDENTICAL -> "identical"
             MetadataDiff.MetadataComparisonResult.DIFFERENT -> "different"
-        }
-    },
-    metadataDiffResultsOld_ = {
-        when (it) {
-            MetadataDiffItemResultOld.BOTH_EMPTY -> "both empty"
-            MetadataDiffItemResultOld.DIFFERENT -> "different"
-            MetadataDiffItemResultOld.IDENTICAL -> "identical"
-            MetadataDiffItemResultOld.DIFFERENT_COUNT -> "different count"
-            MetadataDiffItemResultOld.BOTH_NULL -> "both null"
-            MetadataDiffItemResultOld.DIFFERENT_TEXT -> "different text"
         }
     },
     noDataLoadedTitle = "No data loaded",
