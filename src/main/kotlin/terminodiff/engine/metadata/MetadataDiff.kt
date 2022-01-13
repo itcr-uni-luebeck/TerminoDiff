@@ -2,6 +2,8 @@ package terminodiff.terminodiff.engine.metadata
 
 
 import org.hl7.fhir.r4.model.CodeSystem
+import org.hl7.fhir.r4.model.ContactDetail
+import org.hl7.fhir.r4.model.ContactPoint
 import org.hl7.fhir.r4.model.Identifier
 import terminodiff.i18n.LocalizedStrings
 
@@ -33,6 +35,7 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
         StringComparisonItem({ experimental }, false, localizedStrings) { it.experimental.toString() },
         StringComparisonItem({ date }, true, localizedStrings) { it.date?.toString() },
         StringComparisonItem({ publisher }, false, localizedStrings) { it.publisher?.toString() },
+        ContactComparisonItem({ contact }, localizedStrings),
         StringComparisonItem({ description }, false, localizedStrings) { it.description },
     )
 
@@ -117,6 +120,18 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
 
         abstract fun getComparisonKey(value: Type): Key
         abstract fun getComparisonValue(value: Type): ComparisonValue?
+        abstract fun formatInstance(data: Type): String
+
+        override val renderDisplay: (CodeSystem) -> String?
+            get() = { codeSystem ->
+                val instance = instanceGetter.invoke(codeSystem)
+                val count = localizedStrings.numberItems_.invoke(instance.size)
+                val joinedItems = if (instance.isEmpty()) null else instance.joinToString(
+                    separator =
+                    "\n", limit = 2, transform = ::formatInstance
+                )
+                joinedItems?.let { "$count: $it" } ?: count
+            }
 
         override fun compare(
             left: CodeSystem,
@@ -150,24 +165,40 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
     ) : MetadataListDiffItem<Identifier, String, String>(label, false, localizedStrings, { it.identifier }) {
 
         override fun getComparisonKey(value: Identifier): String = value.system ?: "null"
-        override fun getComparisonValue(value: Identifier): String = format(value)
+        override fun getComparisonValue(value: Identifier): String = formatInstance(value)
 
-        override val renderDisplay: (CodeSystem) -> String?
-            get() = { codeSystem ->
-                val count = localizedStrings.numberItems_.invoke(codeSystem.identifier.size)
-                val joinedItems = if (codeSystem.identifier.isEmpty()) null else codeSystem.identifier.joinToString(
-                    separator =
-                    "\n", limit = 2, transform = ::format
-                )
-                joinedItems?.let { "$count: $it" } ?: count
-            }
-
-        private fun format(identifier: Identifier): String = StringBuilder("• ").apply {
-            if (identifier.hasUse()) append("[${identifier.use.display}] ")
-            if (identifier.hasSystem()) append("(${identifier.system}) ")
-            if (identifier.hasValue()) append(identifier.value) else append("null")
+        override fun formatInstance(data: Identifier): String = StringBuilder("• ").apply {
+            if (data.hasUse()) append("[${data.use.display}] ")
+            if (data.hasSystem()) append("(${data.system}) ")
+            if (data.hasValue()) append(data.value) else append("null")
         }.trim().toString()
     }
 
+    class ContactComparisonItem(
+        label: LocalizedStrings.() -> String,
+        localizedStrings: LocalizedStrings
+    ) : MetadataListDiffItem<ContactDetail, String, String>(label, false, localizedStrings, { it.contact }) {
+
+        override fun getComparisonKey(value: ContactDetail): String = value.name ?: "null"
+
+        override fun getComparisonValue(value: ContactDetail): String = formatInstance(value)
+
+        override fun formatInstance(data: ContactDetail): String = StringBuilder("• ").apply {
+            if (data.hasName()) append(data.name)
+            if (data.hasTelecom()) {
+                val telecom =
+                    data.telecom.filterNotNull().joinToString(separator = "; ", limit = 2, transform = ::formatTelecom)
+                append(": $telecom")
+            }
+        }.trim().toString()
+
+        private fun formatTelecom(contact: ContactPoint): String = StringBuilder().apply {
+            if (contact.hasUse()) append("[${contact.use.display}] ")
+            if (contact.hasSystem()) append("(${contact.system.display}) ")
+            if (contact.hasValue()) append(contact.value)
+            if (contact.hasRank()) append(" @${contact.rank}")
+        }.trim().toString()
+
+    }
 
 }
