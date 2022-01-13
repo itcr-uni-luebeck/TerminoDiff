@@ -37,6 +37,8 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
         StringComparisonItem({ publisher }, false, localizedStrings) { it.publisher?.toString() },
         ContactComparisonItem({ contact }, localizedStrings),
         StringComparisonItem({ description }, false, localizedStrings) { it.description },
+        StringComparisonItem({ purpose }, false, localizedStrings) { it.purpose },
+        StringComparisonItem({ copyright }, false, localizedStrings) { it.copyright },
     )
 
     data class MetadataComparison(
