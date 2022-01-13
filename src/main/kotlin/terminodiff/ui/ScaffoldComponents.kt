@@ -3,7 +3,6 @@ package terminodiff.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
-import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TopAppBar
@@ -32,6 +31,7 @@ class AppIconResource {
         val icChangeLanguage: ImageRelativePath = "icons/ic-language.xml"
         val icLoadLeftFile: ImageRelativePath = "icons/ic-open-left.xml"
         val icLoadRightFile: ImageRelativePath = "icons/ic-open-right.xml"
+        val icReload: ImageRelativePath = "icons/ic-reload.xml"
 
         fun loadFile(relativePath: ImageRelativePath) =
             AppIconResource::class.java.classLoader.getResourceAsStream(relativePath)
@@ -51,7 +51,8 @@ fun TerminoDiffTopAppBar(
     onLocaleChange: () -> Unit,
     onLoadLeftFile: () -> Unit,
     onLoadRightFile: () -> Unit,
-    onChangeDarkTheme: () -> Unit
+    onChangeDarkTheme: () -> Unit,
+    onReload: () -> Unit
 ) {
 
     TopAppBar(
@@ -85,6 +86,13 @@ fun TerminoDiffTopAppBar(
                     onClick = onLoadRightFile,
                     imageRelativePath = AppIconResource.icLoadRightFile,
                     label = localizedStrings.loadRightFile
+                )
+            }
+            MouseOverPopup(localizedStrings.reload) {
+                IconActionButton(
+                    onClick = onReload,
+                    imageRelativePath = AppIconResource.icReload,
+                    label = localizedStrings.reload
                 )
             }
         }

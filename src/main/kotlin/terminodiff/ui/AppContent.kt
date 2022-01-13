@@ -57,6 +57,7 @@ fun TerminodiffAppContent(
         fhirContext = fhirContext,
         onLoadLeftFile = onLoadLeftFile,
         onLoadRightFile = onLoadRightFile,
+        onReload = { diffDataContainer.reload() },
         diffDataContainer = diffDataContainer
     )
 }
@@ -71,6 +72,7 @@ fun TerminodiffContentWindow(
     fhirContext: FhirContext,
     onLoadLeftFile: () -> Unit,
     onLoadRightFile: () -> Unit,
+    onReload: () -> Unit,
     diffDataContainer: DiffDataContainer
 ) {
 
@@ -82,7 +84,8 @@ fun TerminodiffContentWindow(
                     onLocaleChange = onLocaleChange,
                     onLoadLeftFile = onLoadLeftFile,
                     onLoadRightFile = onLoadRightFile,
-                    onChangeDarkTheme = onChangeDarkTheme
+                    onChangeDarkTheme = onChangeDarkTheme,
+                    onReload = onReload
                 )
             },
             backgroundColor = MaterialTheme.colorScheme.background

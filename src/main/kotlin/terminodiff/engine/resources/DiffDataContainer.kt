@@ -14,11 +14,13 @@ import terminodiff.engine.graph.CodeSystemDiffBuilder
 import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.i18n.LocalizedStrings
 import java.io.File
+import java.util.*
 
 private val logger: Logger = LoggerFactory.getILoggerFactory().getLogger("DiffDataContainer")
 
 class DiffDataContainer(private val fhirContext: FhirContext, private val localizedStrings: LocalizedStrings) {
 
+    var loadState: UUID by mutableStateOf(UUID.randomUUID())
     var leftFilename: File? by mutableStateOf(null)
     var rightFilename: File? by mutableStateOf(null)
 
@@ -32,6 +34,10 @@ class DiffDataContainer(private val fhirContext: FhirContext, private val locali
         buildDiff(
             leftGraphBuilder, rightGraphBuilder, localizedStrings
         )
+    }
+
+    fun reload() {
+        loadState = UUID.randomUUID()
     }
 
     enum class Side {
@@ -50,7 +56,9 @@ class DiffDataContainer(private val fhirContext: FhirContext, private val locali
                     null
                 }
             }.also {
-                if (it != null) logger.info("Loaded $side CodeSystem with URL ${it.url} and version '${it.version}'")
+                if (it != null) {
+                    logger.info("Loaded $side CodeSystem with URL ${it.url} and version '${it.version}', state = $loadState")
+                }
             }
         } catch (e: DataFormatException) {
             logger.error("The file at ${file.absolutePath} could not be parsed as FHIR", e)
