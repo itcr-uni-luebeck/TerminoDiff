@@ -18,8 +18,9 @@ import java.util.*
 
 private val logger: Logger = LoggerFactory.getILoggerFactory().getLogger("DiffDataContainer")
 
-class DiffDataContainer(private val fhirContext: FhirContext, private val localizedStrings: LocalizedStrings) {
+class DiffDataContainer(private val fhirContext: FhirContext, strings: LocalizedStrings) {
 
+    var localizedStrings by mutableStateOf(strings)
     var loadState: UUID by mutableStateOf(UUID.randomUUID())
     var leftFilename: File? by mutableStateOf(null)
     var rightFilename: File? by mutableStateOf(null)

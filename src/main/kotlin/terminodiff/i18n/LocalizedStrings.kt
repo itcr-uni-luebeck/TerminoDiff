@@ -10,16 +10,19 @@ import java.io.File
  * to recompose when the language changes.
  */
 abstract class LocalizedStrings(
+    val boolean_: (Boolean?) -> String,
     val bothListsAreEmpty: String,
     val bothValuesAreNull: String,
     val canonicalUrl: String,
+    val caseSensitive: String = "Case-Sensitive",
     val changeLanguage: String,
     val conceptDiff: String,
     val contact: String,
     val code: String = "Code",
     val comparison: String,
+    val compositional: String = "Compositional",
     val conceptDiffResults_: (ConceptDiffItem.ConceptDiffResultEnum) -> String,
-    val copyright : String = "Copyright",
+    val copyright: String = "Copyright",
     val date: String,
     val description: String,
     val definition: String = "Definition",
@@ -29,6 +32,7 @@ abstract class LocalizedStrings(
     val display: String = "Display",
     val displayAndInWhich_: (String?, DiffGraphElementKind) -> String,
     val experimental: String,
+    val hierarchyMeaning: String,
     val id: String = "ID",
     val identical: String,
     val identifiers: String,
@@ -68,6 +72,7 @@ abstract class LocalizedStrings(
     val toggleDarkTheme: String,
     val title: String,
     val terminoDiff: String = "TerminoDiff",
+    val valueSet : String = "ValueSet",
     val version: String = "Version",
     val leftFileOpenFilename_: (File) -> String,
     val rightFileOpenFilename_: (File) -> String,
@@ -83,6 +88,13 @@ enum class SupportedLocale {
 }
 
 class GermanStrings : LocalizedStrings(
+    boolean_ = {
+        when (it) {
+            null -> "null"
+            true -> "wahr"
+            false -> "falsch"
+        }
+    },
     bothListsAreEmpty = "Beide Listen sind leer",
     bothValuesAreNull = "Beide Werte sind null",
     canonicalUrl = "Kanonische URL",
@@ -109,6 +121,7 @@ class GermanStrings : LocalizedStrings(
         "'$display' ($where)"
     },
     experimental = "Experimentell?",
+    hierarchyMeaning = "Hierachie-Bedeutung",
     identical = "Identisch",
     identifiers = "IDs",
     jurisdiction = "Jurisdiktion",
@@ -150,6 +163,12 @@ class GermanStrings : LocalizedStrings(
 )
 
 class EnglishStrings : LocalizedStrings(
+    boolean_ = {
+        when (it) {
+            null -> "null"
+            true -> "true"
+            false -> "false"
+        }},
     bothListsAreEmpty = "Both lists are empty",
     bothValuesAreNull = "Both values are null",
     canonicalUrl = "Canonical URL",
@@ -176,6 +195,7 @@ class EnglishStrings : LocalizedStrings(
         "'$display' ($where)"
     },
     experimental = "Experimental?",
+    hierarchyMeaning = "Hierarchy Meaning",
     identical = "Identical",
     identifiers = "Identifiers",
     jurisdiction = "Jurisdiction",

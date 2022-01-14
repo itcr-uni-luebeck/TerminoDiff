@@ -6,11 +6,13 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
+import ca.uhn.fhir.context.FhirContext
 import com.formdev.flatlaf.FlatDarkLaf
 import com.formdev.flatlaf.FlatLightLaf
 import org.apache.commons.lang3.SystemUtils
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.SupportedLocale
 import terminodiff.i18n.getStrings
 import terminodiff.preferences.AppPreferences
@@ -39,27 +41,37 @@ fun main() = application {
 @Composable
 fun ThemedAppWindow(applicationScope: ApplicationScope) {
     var useDarkTheme by remember { mutableStateOf(AppPreferences.darkModeEnabled) }
-    AppWindow(applicationScope = applicationScope, useDarkTheme = useDarkTheme, onChangeDarkTheme = {
-        useDarkTheme = !useDarkTheme
-        AppPreferences.darkModeEnabled = useDarkTheme
-    })
+    AppWindow(
+        applicationScope = applicationScope,
+        useDarkTheme = useDarkTheme,
+        onChangeDarkTheme = {
+            useDarkTheme = !useDarkTheme
+            AppPreferences.darkModeEnabled = useDarkTheme
+        }
+    )
 }
 
 @Composable
-fun AppWindow(applicationScope: ApplicationScope, useDarkTheme: Boolean, onChangeDarkTheme: () -> Unit) {
+fun AppWindow(
+    applicationScope: ApplicationScope,
+    useDarkTheme: Boolean,
+    onChangeDarkTheme: () -> Unit,
+) {
     when (useDarkTheme && SystemUtils.IS_OS_WINDOWS) {
         //setting this does not make sense if not on windows
         true -> FlatDarkLaf.setup()
         else -> FlatLightLaf.setup()
     }
     var locale by remember { mutableStateOf(SupportedLocale.valueOf(AppPreferences.language)) }
-    var strings by remember { mutableStateOf(getStrings(locale)) }
+    val localizedStrings by derivedStateOf { getStrings(locale) }
     val scrollState = rememberScrollState()
     var hasResizedWindow by remember { mutableStateOf(false) }
+    val fhirContext = remember { FhirContext.forR4() }
+    val diffDataContainer = remember { DiffDataContainer(fhirContext, localizedStrings) }
     Window(
         onCloseRequest = { applicationScope.exitApplication() },
     ) {
-        this.window.title = strings.terminoDiff
+        this.window.title = localizedStrings.terminoDiff
         resourcesDir?.let {
             this.window.iconImage = ImageIO.read(it.resolve("terminodiff@0.5x.png"))
         }
@@ -80,7 +92,9 @@ fun AppWindow(applicationScope: ApplicationScope, useDarkTheme: Boolean, onChang
         }
 
         TerminodiffAppContent(
-            localizedStrings = strings,
+            localizedStrings = localizedStrings,
+            fhirContext = fhirContext,
+            diffDataContainer = diffDataContainer,
             scrollState = scrollState,
             useDarkTheme = useDarkTheme,
             onLocaleChange = {
@@ -88,9 +102,9 @@ fun AppWindow(applicationScope: ApplicationScope, useDarkTheme: Boolean, onChang
                     SupportedLocale.DE -> SupportedLocale.EN
                     SupportedLocale.EN -> SupportedLocale.DE
                 }
-                strings = getStrings(locale)
                 AppPreferences.language = locale.name
                 logger.info("changed locale to ${locale.name}")
+                diffDataContainer.localizedStrings = getStrings(locale)
             },
             onChangeDarkTheme = onChangeDarkTheme
         )

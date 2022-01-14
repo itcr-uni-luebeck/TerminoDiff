@@ -34,26 +34,22 @@ fun ConceptDiffPanel(
 
     val diffColors by remember { mutableStateOf(getDiffColors(useDarkTheme = useDarkTheme)) }
     var activeFilter by remember { mutableStateOf(ToggleableChipSpec.showDifferent) }
-    val tableData by remember { derivedStateOf { filterDiffItems(diffDataContainer, activeFilter) } }
+    val tableData by derivedStateOf { filterDiffItems(diffDataContainer, activeFilter) }
     val lazyListState = rememberLazyListState(0)
     val coroutineScope = rememberCoroutineScope()
-    val filterSpecs by remember {
-        mutableStateOf(
-            listOf(
-                ToggleableChipSpec(ToggleableChipSpec.showAll, localizedStrings.showAll),
-                ToggleableChipSpec(ToggleableChipSpec.showIdentical, localizedStrings.showIdentical),
-                ToggleableChipSpec(ToggleableChipSpec.showDifferent, localizedStrings.showDifferent),
-                ToggleableChipSpec(ToggleableChipSpec.onlyConceptDifferences, localizedStrings.onlyConceptDifferences),
-                ToggleableChipSpec(ToggleableChipSpec.onlyInLeft, localizedStrings.onlyInLeft),
-                ToggleableChipSpec(ToggleableChipSpec.onlyInRight, localizedStrings.onlyInRight)
-            )
+    val filterSpecs by derivedStateOf {
+        listOf(
+            ToggleableChipSpec(ToggleableChipSpec.showAll, localizedStrings.showAll),
+            ToggleableChipSpec(ToggleableChipSpec.showIdentical, localizedStrings.showIdentical),
+            ToggleableChipSpec(ToggleableChipSpec.showDifferent, localizedStrings.showDifferent),
+            ToggleableChipSpec(ToggleableChipSpec.onlyConceptDifferences, localizedStrings.onlyConceptDifferences),
+            ToggleableChipSpec(ToggleableChipSpec.onlyInLeft, localizedStrings.onlyInLeft),
+            ToggleableChipSpec(ToggleableChipSpec.onlyInRight, localizedStrings.onlyInRight)
         )
     }
-    val counts by remember {
-        derivedStateOf {
-            filterSpecs
-                .associate { it.name to filterDiffItems(diffDataContainer, it.name).shownCodes.size }
-        }
+    val counts by derivedStateOf {
+        filterSpecs
+            .associate { it.name to filterDiffItems(diffDataContainer, it.name).shownCodes.size }
     }
 
     Card(

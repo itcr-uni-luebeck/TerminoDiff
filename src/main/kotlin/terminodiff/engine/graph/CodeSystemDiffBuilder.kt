@@ -1,5 +1,8 @@
 package terminodiff.engine.graph
 
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import org.jgrapht.Graph
 import org.jgrapht.graph.builder.GraphTypeBuilder
 import org.slf4j.Logger
@@ -14,19 +17,24 @@ import java.util.*
 private val logger: Logger = LoggerFactory.getLogger("CodeSystemDiffBuilder")
 
 class CodeSystemDiffBuilder(
-    private val leftBuilder: CodeSystemGraphBuilder, private val rightBuilder: CodeSystemGraphBuilder, private val localizedStrings: LocalizedStrings
+    private val leftBuilder: CodeSystemGraphBuilder,
+    private val rightBuilder: CodeSystemGraphBuilder,
+    private val localizedStrings: LocalizedStrings
 ) {
 
-    val metadataDifferences = MetadataDiff(leftBuilder.codeSystem, rightBuilder.codeSystem, localizedStrings).also { metadataDiff ->
-        val count = metadataDiff.comparisons.count { it.result == MetadataDiff.MetadataComparisonResult.DIFFERENT }
-        logger.info("Built metadata diff, $count difference(-s)")
+    val metadataDifferences by derivedStateOf {
+        MetadataDiff(leftBuilder.codeSystem, rightBuilder.codeSystem, localizedStrings).also { metadataDiff ->
+            val count = metadataDiff.comparisons.count { it.result == MetadataDiff.MetadataComparisonResult.DIFFERENT }
+            logger.info("Built metadata diff, $count difference(-s)")
+        }
     }
-    val conceptDifferences = TreeMap<String, ConceptDiff>()
+    val conceptDifferences by mutableStateOf(TreeMap<String, ConceptDiff>())
     val onlyInLeftConcepts = mutableListOf<String>()
     val onlyInRightConcepts = mutableListOf<String>()
-    val differenceGraph: Graph<DiffNode, DiffEdge> =
+    val differenceGraph: Graph<DiffNode, DiffEdge> by derivedStateOf {
         GraphTypeBuilder.directed<DiffNode, DiffEdge>().allowingSelfLoops(true).allowingMultipleEdges(true)
             .weighted(false).edgeClass(DiffEdge::class.java).buildGraph()
+    }
 
     fun build(): CodeSystemDiffBuilder {
         leftBuilder.nodeTree.mapNotNull { (code, leftConcept) ->
