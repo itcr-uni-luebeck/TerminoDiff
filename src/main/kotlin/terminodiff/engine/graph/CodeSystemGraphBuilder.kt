@@ -12,14 +12,10 @@ import java.util.*
 
 private val logger: Logger = LoggerFactory.getLogger(CodeSystemGraphBuilder::class.java)
 
-enum class CodeSystemRole {
-    LEFT, RIGHT
-}
-
 typealias PropertyMap = Map<String, CodeSystem.PropertyType>
 
 class CodeSystemGraphBuilder(
-    val codeSystem: CodeSystem
+    val codeSystem: CodeSystem,
 ) {
 
     // store more detailed node data in a red-black tree, which can retrieve nodes in O(log n)
@@ -53,7 +49,7 @@ class CodeSystemGraphBuilder(
             }
 
     private fun generateNodesAndEdges(
-        theGraph: Graph<String, FhirConceptEdge>, edgePropertyCodes: List<String>, simplePropertyCodeTypes: PropertyMap
+        theGraph: Graph<String, FhirConceptEdge>, edgePropertyCodes: List<String>, simplePropertyCodeTypes: PropertyMap,
     ) {
         val allCodes = codeSystem.concept.map { it.code }
         codeSystem.concept.forEach { c ->
@@ -63,12 +59,15 @@ class CodeSystemGraphBuilder(
                 if (p.code in edgePropertyCodes) {
                     val to = p.valueCodeType.code
                         ?: throw UnsupportedOperationException("property ${p.code} for concept $from has no valueCode")
-                    when (p.code) {
-                        "child" -> addEdge(
+                    when {
+                        p.code == "child" -> addEdge(
                             theGraph = theGraph, from = to, to = from, code = "parent", logSuffix = "child edge"
                         ) // inverse order, since parent and child edges are semantically
                         // interchangeable, and dealing only with one kind is easier downstream
-                        //!in allCodes -> return@mapNotNull null //this is not an edge, but something like kind=category
+                        to !in allCodes -> {
+                            logger.debug("ignoring property '${p.code}' for concept ${c.code} -> value '$to' is not a code")
+                            return@mapNotNull null
+                        } //this is not an edge, but something like kind=category
                         else -> addEdge(theGraph, from, to, p.code, "${p.code} edge")
                     }
 
@@ -95,7 +94,7 @@ class CodeSystemGraphBuilder(
     }
 
     private fun addEdge(
-        theGraph: Graph<String, FhirConceptEdge>, from: String, to: String, code: String, logSuffix: String
+        theGraph: Graph<String, FhirConceptEdge>, from: String, to: String, code: String, logSuffix: String,
     ) {
         if (theGraph.addVertex(from)) logger.debug("added origin node $from")
         if (theGraph.addVertex(to)) // if already exists, no problem
@@ -108,7 +107,7 @@ class CodeSystemGraphBuilder(
 }
 
 data class FhirConceptEdge(
-    val from: String, val to: String, val propertyCode: String
+    val from: String, val to: String, val propertyCode: String,
 ) {
     fun getLabel(): String = "'$from' -> '$to' [$propertyCode]"
 
@@ -120,13 +119,13 @@ data class FhirConceptDetails(
     val display: String?,
     val definition: String?,
     val designation: List<FhirConceptDesignation>?,
-    val property: List<FhirConceptSimpleProperty>?
+    val property: List<FhirConceptSimpleProperty>?,
 )
 
 data class FhirConceptDesignation(
-    val language: String?, val use: Coding?, val value: String
+    val language: String?, val use: Coding?, val value: String,
 )
 
 data class FhirConceptSimpleProperty(
-    val propertyCode: String, val type: CodeSystem.PropertyType, val value: String
+    val propertyCode: String, val type: CodeSystem.PropertyType, val value: String,
 )

@@ -2,7 +2,7 @@ package terminodiff.i18n
 
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.graph.DiffGraphElementKind
-import terminodiff.terminodiff.engine.metadata.MetadataDiff
+import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
 import java.io.File
 
 /**
@@ -14,14 +14,16 @@ abstract class LocalizedStrings(
     val bothListsAreEmpty: String,
     val bothValuesAreNull: String,
     val canonicalUrl: String,
-    val caseSensitive: String = "Case-Sensitive",
+    val caseSensitive: String = "Case-Sensitive?",
     val changeLanguage: String,
-    val conceptDiff: String,
-    val contact: String,
     val code: String = "Code",
     val comparison: String,
-    val compositional: String = "Compositional",
+    val compositional: String,
+    val conceptDiff: String,
     val conceptDiffResults_: (ConceptDiffItem.ConceptDiffResultEnum) -> String,
+    val contact: String,
+    val content: String = "Content",
+    val count: String,
     val copyright: String = "Copyright",
     val date: String,
     val description: String,
@@ -43,7 +45,7 @@ abstract class LocalizedStrings(
     val keyIsDifferent_: (String) -> String,
     val rightValue: String,
     val metadataDiff: String,
-    val metadataDiffResults_: (MetadataDiff.MetadataComparisonResult) -> String,
+    val metadataDiffResults_: (MetadataComparisonResult) -> String,
     val name: String = "Name",
     val noDataLoadedTitle: String,
     val numberDifferent_: (Int) -> String,
@@ -61,19 +63,24 @@ abstract class LocalizedStrings(
     val overallComparison: String,
     val publisher: String,
     val purpose: String,
-    val property: String = "Property",
+    val property: String,
     val reload: String,
     val showAll: String,
     val showDifferent: String,
     val showIdentical: String,
     val showLeftGraphButton: String,
     val showRightGraphButton: String,
+    val supplements: String,
     val status: String = "Status",
     val toggleDarkTheme: String,
+    val textDifferent: String,
+    val textDifferentAndAnotherReason_: (String) -> String,
     val title: String,
     val terminoDiff: String = "TerminoDiff",
-    val valueSet : String = "ValueSet",
+    val useContext: String,
+    val valueSet: String = "ValueSet",
     val version: String = "Version",
+    val versionNeeded: String,
     val leftFileOpenFilename_: (File) -> String,
     val rightFileOpenFilename_: (File) -> String,
 )
@@ -91,8 +98,8 @@ class GermanStrings : LocalizedStrings(
     boolean_ = {
         when (it) {
             null -> "null"
-            true -> "wahr"
-            false -> "falsch"
+            true -> "WAHR"
+            false -> "FALSCH"
         }
     },
     bothListsAreEmpty = "Beide Listen sind leer",
@@ -102,6 +109,8 @@ class GermanStrings : LocalizedStrings(
     conceptDiff = "Konzept-Diff",
     contact = "Kontakt",
     comparison = "Vergleich",
+    compositional = "Kompositionell?",
+    count = "Anzahl",
     conceptDiffResults_ = {
         when (it) {
             ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> "Unterschiedlich"
@@ -133,8 +142,8 @@ class GermanStrings : LocalizedStrings(
     metadataDiff = "Metadaten-Diff",
     metadataDiffResults_ = {
         when (it) {
-            MetadataDiff.MetadataComparisonResult.IDENTICAL -> "identisch"
-            MetadataDiff.MetadataComparisonResult.DIFFERENT -> "unterschiedlich"
+            MetadataComparisonResult.IDENTICAL -> "Identisch"
+            MetadataComparisonResult.DIFFERENT -> "Unterschiedlich"
         }
     },
     noDataLoadedTitle = "Keine Daten geladen",
@@ -149,6 +158,7 @@ class GermanStrings : LocalizedStrings(
     onlyInRight = "Nur rechts",
     overallComparison = "Gesamt",
     publisher = "Herausgeber",
+    property = "Eigenschaft",
     purpose = "Zweck",
     reload = "Neu laden",
     showAll = "Alle",
@@ -156,8 +166,15 @@ class GermanStrings : LocalizedStrings(
     showIdentical = "Identische",
     showLeftGraphButton = "Linken Graphen zeigen",
     showRightGraphButton = "Rechten Graphen zeigen",
-    toggleDarkTheme = "Helles/Dunkles Thema",
+    supplements = "Ergänzt",
+    textDifferent = "Text ist unterschiedlich",
+    textDifferentAndAnotherReason_ = { otherReason ->
+        "Text ist unterschiedlich, und $otherReason"
+    },
     title = "Titel",
+    toggleDarkTheme = "Helles/Dunkles Thema",
+    useContext = "Nutzungskontext",
+    versionNeeded = "Version erforderlich?",
     leftFileOpenFilename_ = { file -> "Linke Datei geöffnet: ${file.absolutePath}" },
     rightFileOpenFilename_ = { file -> "Rechte Datei geöffnet: ${file.absolutePath}" }
 )
@@ -166,9 +183,10 @@ class EnglishStrings : LocalizedStrings(
     boolean_ = {
         when (it) {
             null -> "null"
-            true -> "true"
-            false -> "false"
-        }},
+            true -> "TRUE"
+            false -> "FALSE"
+        }
+    },
     bothListsAreEmpty = "Both lists are empty",
     bothValuesAreNull = "Both values are null",
     canonicalUrl = "Canonical URL",
@@ -176,6 +194,8 @@ class EnglishStrings : LocalizedStrings(
     conceptDiff = "Concept Diff",
     contact = "Contact",
     comparison = "Comparison",
+    compositional = "Compositional?",
+    count = "Count",
     conceptDiffResults_ = {
         when (it) {
             ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> "Different"
@@ -207,8 +227,8 @@ class EnglishStrings : LocalizedStrings(
     metadataDiff = "Metadata Diff",
     metadataDiffResults_ = {
         when (it) {
-            MetadataDiff.MetadataComparisonResult.IDENTICAL -> "identical"
-            MetadataDiff.MetadataComparisonResult.DIFFERENT -> "different"
+            MetadataComparisonResult.IDENTICAL -> "Identical"
+            MetadataComparisonResult.DIFFERENT -> "Different"
         }
     },
     noDataLoadedTitle = "No data loaded",
@@ -223,19 +243,25 @@ class EnglishStrings : LocalizedStrings(
     overallComparison = "Overall",
     publisher = "Publisher",
     purpose = "Purpose",
+    property = "Property",
     reload = "Reload",
     showAll = "All",
     showDifferent = "Different",
     showIdentical = "Identical",
     showLeftGraphButton = "Show left graph",
     showRightGraphButton = "Show right graph",
-    toggleDarkTheme = "Toggle dark theme",
+    supplements = "Supplements",
+    textDifferent = "Text is different",
+    textDifferentAndAnotherReason_ = { otherReason ->
+        "Text is different, and $otherReason"
+    },
     title = "Title",
+    toggleDarkTheme = "Toggle dark theme",
+    useContext = "Use context",
+    versionNeeded = "Version needed?",
     leftFileOpenFilename_ = { file -> "Left file open: ${file.absolutePath}" },
     rightFileOpenFilename_ = { file -> "Right file open: ${file.absolutePath}" },
 )
-
-val defaultStrings = getStrings()
 
 fun getStrings(locale: SupportedLocale = SupportedLocale.getDefaultLocale()): LocalizedStrings =
     when (locale) {
