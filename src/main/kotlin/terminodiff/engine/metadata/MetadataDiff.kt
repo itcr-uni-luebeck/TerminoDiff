@@ -1,6 +1,8 @@
 package terminodiff.terminodiff.engine.metadata
 
 
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import org.hl7.fhir.r4.model.CodeSystem
 import org.hl7.fhir.r4.model.ContactDetail
 import org.hl7.fhir.r4.model.ContactPoint
@@ -12,34 +14,49 @@ typealias StringResultPair = Pair<MetadataDiff.MetadataComparisonResult, String?
 
 class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: LocalizedStrings) {
 
-    val comparisons = runComparisons(left, right, localizedStrings)
+    private val comparisonDefinitions by derivedStateOf { generateComparisonDefinitions(localizedStrings) }
+
+    val comparisons by derivedStateOf { runComparisons(left, right, localizedStrings, comparisonDefinitions) }
 
     private fun runComparisons(
         left: CodeSystem,
         right: CodeSystem,
-        localizedStrings: LocalizedStrings
-    ): List<MetadataComparison> =
-        generateComparisonDefinitions(localizedStrings).map {
-            val (result, explanation) = it.compare(left, right)
-            MetadataComparison(it, result, explanation, localizedStrings)
-        }
+        localizedStrings: LocalizedStrings,
+        comparisonDefinitions: List<MetadataDiffItem>
+    ): List<MetadataComparison> = comparisonDefinitions.map {
+        val (result, explanation) = it.compare(left, right)
+        MetadataComparison(it, result, explanation, localizedStrings)
+    }
 
-    private fun generateComparisonDefinitions(localizedStrings: LocalizedStrings) = listOf(
-        StringComparisonItem({ id }, true, localizedStrings) { it.id },
-        StringComparisonItem({ canonicalUrl }, false, localizedStrings) { it.url },
-        IdentifierDiffItem({ identifiers }, localizedStrings),
-        StringComparisonItem({ version }, true, localizedStrings) { it.version },
-        StringComparisonItem({ name }, false, localizedStrings) { it.name },
-        StringComparisonItem({ title }, false, localizedStrings) { it.title },
-        StringComparisonItem({ status }, false, localizedStrings) { it.status.toString() },
-        StringComparisonItem({ experimental }, false, localizedStrings) { it.experimental.toString() },
-        StringComparisonItem({ date }, true, localizedStrings) { it.date?.toString() },
-        StringComparisonItem({ publisher }, false, localizedStrings) { it.publisher?.toString() },
-        ContactComparisonItem({ contact }, localizedStrings),
-        StringComparisonItem({ description }, false, localizedStrings) { it.description },
-        StringComparisonItem({ purpose }, false, localizedStrings) { it.purpose },
-        StringComparisonItem({ copyright }, false, localizedStrings) { it.copyright },
-    )
+    private fun generateComparisonDefinitions(localizedStrings: LocalizedStrings) =
+        listOf(StringComparisonItem({ id }, true, localizedStrings) { it.id },
+            StringComparisonItem({ canonicalUrl }, false, localizedStrings) { it.url },
+            IdentifierDiffItem({ identifiers }, localizedStrings),
+            StringComparisonItem({ version }, true, localizedStrings) { it.version },
+            StringComparisonItem({ name }, false, localizedStrings) { it.name },
+            StringComparisonItem({ title }, false, localizedStrings) { it.title },
+            StringComparisonItem({ status }, false, localizedStrings) { it.status.toString() },
+            StringComparisonItem(
+                { experimental },
+                false,
+                localizedStrings
+            ) { localizedStrings.boolean_(it.experimental) },
+            StringComparisonItem({ date }, true, localizedStrings) { it.date?.toString() },
+            StringComparisonItem({ publisher }, false, localizedStrings) { it.publisher?.toString() },
+            ContactComparisonItem({ contact }, localizedStrings),
+            StringComparisonItem({ description }, false, localizedStrings) { it.description },
+            StringComparisonItem({ purpose }, false, localizedStrings) { it.purpose },
+            StringComparisonItem({ copyright }, false, localizedStrings) { it.copyright },
+            StringComparisonItem(
+                { caseSensitive }, false, localizedStrings
+            ) { localizedStrings.boolean_(it.caseSensitive) },
+            StringComparisonItem({ valueSet }, false, localizedStrings) { it.valueSet },
+            StringComparisonItem({ hierarchyMeaning }, false, localizedStrings) { it.hierarchyMeaning.display },
+            StringComparisonItem(
+                { compositional },
+                false,
+                localizedStrings
+            ) { localizedStrings.boolean_(it.compositional) })
 
     data class MetadataComparison(
         val diffItem: MetadataDiffItem,
@@ -54,16 +71,14 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
         protected val localizedStrings: LocalizedStrings
     ) {
         abstract fun compare(
-            left: CodeSystem,
-            right: CodeSystem
+            left: CodeSystem, right: CodeSystem
         ): ResultPair
 
         abstract val renderDisplay: (CodeSystem) -> String?
     }
 
     enum class MetadataComparisonResult {
-        IDENTICAL,
-        DIFFERENT
+        IDENTICAL, DIFFERENT
     }
 
     class StringComparisonItem(
@@ -71,8 +86,7 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
         expectDifferences: Boolean,
         localizedStrings: LocalizedStrings,
         private val instanceGetter: (CodeSystem) -> String?
-    ) :
-        MetadataDiffItem(label, expectDifferences, localizedStrings) {
+    ) : MetadataDiffItem(label, expectDifferences, localizedStrings) {
         override val renderDisplay: (CodeSystem) -> String?
             get() = instanceGetter
 
@@ -99,9 +113,7 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
     ) : MetadataDiffItem(label, expectDifferences, localizedStrings) {
 
         protected open fun compareItem(
-            key: Key,
-            l: ComparisonValue,
-            r: ComparisonValue
+            key: Key, l: ComparisonValue, r: ComparisonValue
         ): Pair<MetadataComparisonResult, String?> = when (l == r) {
             true -> MetadataComparisonResult.IDENTICAL to null
             else -> MetadataComparisonResult.DIFFERENT to localizedStrings.keyIsDifferent_.invoke(key.toString())
@@ -129,8 +141,7 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
                 val instance = instanceGetter.invoke(codeSystem)
                 val count = localizedStrings.numberItems_.invoke(instance.size)
                 val joinedItems = if (instance.isEmpty()) null else instance.joinToString(
-                    separator =
-                    "\n", limit = 2, transform = ::formatInstance
+                    separator = "\n", limit = 2, transform = ::formatInstance
                 )
                 joinedItems?.let { "$count: $it" } ?: count
             }
@@ -151,8 +162,7 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
                         0 -> MetadataComparisonResult.IDENTICAL to null
                         else -> MetadataComparisonResult.DIFFERENT to {
                             numberDifferentReason_.invoke(
-                                countDifferent,
-                                differentValues
+                                countDifferent, differentValues
                             )
                         }
                     }
@@ -177,8 +187,7 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
     }
 
     class ContactComparisonItem(
-        label: LocalizedStrings.() -> String,
-        localizedStrings: LocalizedStrings
+        label: LocalizedStrings.() -> String, localizedStrings: LocalizedStrings
     ) : MetadataListDiffItem<ContactDetail, String, String>(label, false, localizedStrings, { it.contact }) {
 
         override fun getComparisonKey(value: ContactDetail): String = value.name ?: "null"

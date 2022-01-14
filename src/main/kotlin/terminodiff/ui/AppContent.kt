@@ -10,7 +10,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.remember
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -34,13 +34,13 @@ import javax.swing.filechooser.FileNameExtensionFilter
 @Composable
 fun TerminodiffAppContent(
     localizedStrings: LocalizedStrings,
+    diffDataContainer: DiffDataContainer,
+    fhirContext: FhirContext,
     scrollState: ScrollState,
     useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
     onChangeDarkTheme: () -> Unit
 ) {
-    val fhirContext = remember { FhirContext.forR4() }
-    val diffDataContainer = remember { DiffDataContainer(fhirContext, localizedStrings) }
     val onLoadLeftFile: () -> Unit = {
         diffDataContainer.leftFilename = showLoadFileDialog(localizedStrings.loadLeftFile)
     }
