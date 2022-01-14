@@ -16,6 +16,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.ConceptDiffResult
+import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
 import terminodiff.terminodiff.engine.metadata.MetadataDiff
 import terminodiff.ui.theme.DiffColors
 
@@ -87,6 +88,6 @@ fun colorPairForConceptDiffResult(
 fun colorPairForDiffResult(
     comparisonResult: MetadataDiff.MetadataComparison, diffColors: DiffColors
 ): Pair<Color, Color> = when (comparisonResult.result) {
-    MetadataDiff.MetadataComparisonResult.DIFFERENT -> if (comparisonResult.diffItem.expectDifferences) diffColors.yellowPair else diffColors.redPair
+    MetadataComparisonResult.DIFFERENT -> if (comparisonResult.diffItem.expectDifferences) diffColors.yellowPair else diffColors.redPair
     else -> diffColors.greenPair
 }
