@@ -38,37 +38,28 @@ fun ConceptDiffPanel(
     val lazyListState = rememberLazyListState(0)
     val coroutineScope = rememberCoroutineScope()
     val filterSpecs by derivedStateOf {
-        listOf(
-            ToggleableChipSpec(ToggleableChipSpec.showAll, localizedStrings.showAll),
+        listOf(ToggleableChipSpec(ToggleableChipSpec.showAll, localizedStrings.showAll),
             ToggleableChipSpec(ToggleableChipSpec.showIdentical, localizedStrings.showIdentical),
             ToggleableChipSpec(ToggleableChipSpec.showDifferent, localizedStrings.showDifferent),
             ToggleableChipSpec(ToggleableChipSpec.onlyConceptDifferences, localizedStrings.onlyConceptDifferences),
             ToggleableChipSpec(ToggleableChipSpec.onlyInLeft, localizedStrings.onlyInLeft),
-            ToggleableChipSpec(ToggleableChipSpec.onlyInRight, localizedStrings.onlyInRight)
-        )
+            ToggleableChipSpec(ToggleableChipSpec.onlyInRight, localizedStrings.onlyInRight))
     }
     val counts by derivedStateOf {
-        filterSpecs
-            .associate { it.name to filterDiffItems(diffDataContainer, it.name).shownCodes.size }
+        filterSpecs.associate { it.name to filterDiffItems(diffDataContainer, it.name).shownCodes.size }
     }
 
     Card(
-        modifier = Modifier.padding(8.dp).fillMaxWidth().fillMaxHeight(verticalWeight),
+        modifier = Modifier.padding(8.dp).fillMaxSize(),//.fillMaxHeight(verticalWeight),
         elevation = 8.dp,
         backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
     ) {
         Column(Modifier.padding(4.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(
-                localizedStrings.conceptDiff,
+            Text(localizedStrings.conceptDiff,
                 style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onTertiaryContainer
-            )
-            FilterGroup(
-                filterSpecs = filterSpecs,
-                filterCounts = counts,
-                activeFilter = activeFilter
-            ) {
+                color = MaterialTheme.colorScheme.onTertiaryContainer)
+            FilterGroup(filterSpecs = filterSpecs, filterCounts = counts, activeFilter = activeFilter) {
                 logger.info("changed filter to $it")
                 activeFilter = it
                 coroutineScope.launch {
@@ -76,13 +67,11 @@ fun ConceptDiffPanel(
                     lazyListState.scrollToItem(0)
                 }
             }
-            DiffDataTable(
-                diffDataContainer = diffDataContainer,
+            DiffDataTable(diffDataContainer = diffDataContainer,
                 tableData = tableData,
                 localizedStrings = localizedStrings,
                 diffColors = diffColors,
-                lazyListState = lazyListState
-            )
+                lazyListState = lazyListState)
         }
     }
 }
@@ -107,9 +96,12 @@ fun filterDiffItems(diffDataContainer: DiffDataContainer, activeFilter: String):
         else -> onlyInLeftConcepts.plus(onlyInRightConcepts).plus(conceptDiff.keys) // show all
     }.toSortedSet().toList()
 
-    return TableData(
-        onlyInLeftConcepts, onlyInRightConcepts, shownCodes, conceptDiff, leftGraphBuilder, rightGraphBuilder
-    )
+    return TableData(onlyInLeftConcepts,
+        onlyInRightConcepts,
+        shownCodes,
+        conceptDiff,
+        leftGraphBuilder,
+        rightGraphBuilder)
 
 }
 
@@ -119,7 +111,7 @@ data class TableData(
     val shownCodes: List<String>,
     val conceptDiff: TreeMap<String, ConceptDiff>,
     val leftGraphBuilder: CodeSystemGraphBuilder,
-    val rightGraphBuilder: CodeSystemGraphBuilder
+    val rightGraphBuilder: CodeSystemGraphBuilder,
 )
 
 @Composable
@@ -128,12 +120,10 @@ fun FilterGroup(
     filterCounts: Map<String, Int>,
     activeFilter: String,
     onFilterChange: (String) -> Unit,
-) = ToggleableChipGroup(
-    specs = filterSpecs,
+) = ToggleableChipGroup(specs = filterSpecs,
     selectedItem = activeFilter,
     onSelectionChanged = onFilterChange,
-    filterCounts = filterCounts
-)
+    filterCounts = filterCounts)
 
 @Composable
 fun DiffDataTable(
@@ -141,28 +131,24 @@ fun DiffDataTable(
     tableData: TableData,
     localizedStrings: LocalizedStrings,
     diffColors: DiffColors,
-    lazyListState: LazyListState
+    lazyListState: LazyListState,
 ) {
     if (diffDataContainer.codeSystemDiff == null) throw IllegalStateException("the diff data container is not initialized")
 
-    val columnSpecs = listOf(
-        ColumnSpec.codeColumnSpec(localizedStrings),
+    val columnSpecs = listOf(ColumnSpec.codeColumnSpec(localizedStrings),
         ColumnSpec.displayColumnSpec(localizedStrings, diffColors),
         ColumnSpec.definitionColumnSpec(localizedStrings, diffColors),
         ColumnSpec.propertyColumnSpec(localizedStrings, diffColors),
-        ColumnSpec.overallComparisonColumnSpec(localizedStrings, diffColors)
-    )
+        ColumnSpec.overallComparisonColumnSpec(localizedStrings, diffColors))
 
-    TableScreen(
-        tableData = tableData, lazyListState = lazyListState, columnSpecs = columnSpecs
-    )
+    TableScreen(tableData = tableData, lazyListState = lazyListState, columnSpecs = columnSpecs)
 }
 
 data class ConceptTableData(
     val code: String,
     val leftDetails: FhirConceptDetails?,
     val rightDetails: FhirConceptDetails?,
-    val diff: ConceptDiff?
+    val diff: ConceptDiff?,
 ) {
     fun isOnlyInLeft() = leftDetails != null && rightDetails == null
     fun isOnlyInRight() = leftDetails == null && rightDetails != null
@@ -171,21 +157,17 @@ data class ConceptTableData(
 
 @Composable
 fun TableScreen(
-    tableData: TableData, lazyListState: LazyListState, columnSpecs: List<ColumnSpec<ConceptTableData>>
+    tableData: TableData, lazyListState: LazyListState, columnSpecs: List<ColumnSpec<ConceptTableData>>,
 ) {
     val containedData: List<ConceptTableData> = tableData.shownCodes.map { code ->
-        ConceptTableData(
-            code = code,
+        ConceptTableData(code = code,
             leftDetails = tableData.leftGraphBuilder.nodeTree[code],
             rightDetails = tableData.rightGraphBuilder.nodeTree[code],
-            diff = tableData.conceptDiff[code]
-        )
+            diff = tableData.conceptDiff[code])
     }
-    LazyTable(
-        columnSpecs = columnSpecs,
+    LazyTable(columnSpecs = columnSpecs,
         lazyListState = lazyListState,
         tableData = containedData,
         keyFun = { it.code },
-        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer
-    )
+        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer)
 }

@@ -1,22 +1,25 @@
 package terminodiff.terminodiff.ui
 
 import androidx.compose.foundation.ScrollState
+import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
 import li.flor.nativejfilechooser.NativeJFileChooser
 import org.apache.commons.lang3.SystemUtils
+import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
+import org.jetbrains.compose.splitpane.SplitPaneState
+import org.jetbrains.compose.splitpane.VerticalSplitPane
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
@@ -27,10 +30,12 @@ import terminodiff.ui.panes.conceptdiff.ConceptDiffPanel
 import terminodiff.ui.panes.graph.ShowGraphsPanel
 import terminodiff.ui.panes.metadatadiff.MetadataDiffPanel
 import terminodiff.ui.theme.TerminoDiffTheme
+import java.awt.Cursor
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 
+@OptIn(ExperimentalSplitPaneApi::class)
 @Composable
 fun TerminodiffAppContent(
     localizedStrings: LocalizedStrings,
@@ -39,13 +44,18 @@ fun TerminodiffAppContent(
     scrollState: ScrollState,
     useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
-    onChangeDarkTheme: () -> Unit
+    onChangeDarkTheme: () -> Unit,
+    splitPaneState: SplitPaneState,
 ) {
     val onLoadLeftFile: () -> Unit = {
-        diffDataContainer.leftFilename = showLoadFileDialog(localizedStrings.loadLeftFile)
+        showLoadFileDialog(localizedStrings.loadLeftFile)?.let {
+            diffDataContainer.leftFilename = it
+        }
     }
     val onLoadRightFile: () -> Unit = {
-        diffDataContainer.rightFilename = showLoadFileDialog(localizedStrings.loadRightFile)
+        showLoadFileDialog(localizedStrings.loadRightFile)?.let {
+            diffDataContainer.rightFilename = it
+        }
     }
 
     TerminodiffContentWindow(
@@ -58,10 +68,12 @@ fun TerminodiffAppContent(
         onLoadLeftFile = onLoadLeftFile,
         onLoadRightFile = onLoadRightFile,
         onReload = { diffDataContainer.reload() },
-        diffDataContainer = diffDataContainer
+        diffDataContainer = diffDataContainer,
+        splitPaneState = splitPaneState,
     )
 }
 
+@OptIn(ExperimentalSplitPaneApi::class)
 @Composable
 fun TerminodiffContentWindow(
     localizedStrings: LocalizedStrings,
@@ -73,9 +85,9 @@ fun TerminodiffContentWindow(
     onLoadLeftFile: () -> Unit,
     onLoadRightFile: () -> Unit,
     onReload: () -> Unit,
-    diffDataContainer: DiffDataContainer
+    diffDataContainer: DiffDataContainer,
+    splitPaneState: SplitPaneState,
 ) {
-
     TerminoDiffTheme(useDarkTheme = useDarkTheme) {
         Scaffold(
             topBar = {
@@ -96,8 +108,8 @@ fun TerminodiffContentWindow(
                     scrollState = scrollState,
                     strings = localizedStrings,
                     useDarkTheme = useDarkTheme,
-                    fhirContext = fhirContext,
-                    diffDataContainer = diffDataContainer
+                    diffDataContainer = diffDataContainer,
+                    splitPaneState = splitPaneState,
                 )
                 false -> ContainerUninitializedContent(
                     modifier = Modifier.padding(scaffoldPadding),
@@ -181,17 +193,21 @@ private fun ContainerUninitializedContent(
             }
         }
     }
-
 }
 
+@OptIn(ExperimentalComposeUiApi::class)
+private fun Modifier.cursorForHorizontalResize(): Modifier =
+    pointerHoverIcon(PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR)))
+
+@OptIn(ExperimentalSplitPaneApi::class)
 @Composable
 private fun ContainerInitializedContent(
     modifier: Modifier = Modifier,
     scrollState: ScrollState,
     strings: LocalizedStrings,
     useDarkTheme: Boolean,
-    fhirContext: FhirContext,
-    diffDataContainer: DiffDataContainer
+    diffDataContainer: DiffDataContainer,
+    splitPaneState: SplitPaneState,
 ) {
     Column(
         modifier = modifier.scrollable(scrollState, Orientation.Vertical),
@@ -203,17 +219,41 @@ private fun ContainerInitializedContent(
             localizedStrings = strings,
             useDarkTheme = useDarkTheme,
         )
-        ConceptDiffPanel(
-            verticalWeight = 0.45f,
-            diffDataContainer = diffDataContainer,
-            localizedStrings = strings,
-            useDarkTheme = useDarkTheme
-        )
-        MetadataDiffPanel(
-            diffDataContainer = diffDataContainer,
-            localizedStrings = strings,
-            useDarkTheme = useDarkTheme,
-        )
+        VerticalSplitPane(splitPaneState = splitPaneState) {
+            first(100.dp) {
+                ConceptDiffPanel(
+                    verticalWeight = 0.45f,
+                    diffDataContainer = diffDataContainer,
+                    localizedStrings = strings,
+                    useDarkTheme = useDarkTheme
+                )
+            }
+            second(100.dp) {
+                MetadataDiffPanel(
+                    diffDataContainer = diffDataContainer,
+                    localizedStrings = strings,
+                    useDarkTheme = useDarkTheme,
+                )
+            }
+            splitter {
+                visiblePart {
+                    Box(Modifier.height(1.dp).fillMaxWidth()
+                        .background(MaterialTheme.colorScheme.primary))
+                }
+                handle {
+                    Box(
+                        Modifier
+                            .markAsHandle()
+                            .cursorForHorizontalResize()
+                            .background(color = MaterialTheme.colorScheme.primary)
+                            .height(9.dp)
+                            .fillMaxWidth()
+                    )
+                }
+            }
+        }
+
+
     }
 }
 

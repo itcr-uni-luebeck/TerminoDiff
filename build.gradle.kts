@@ -2,8 +2,6 @@ import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
-val composeVersion = "0.1.0"
-
 plugins {
     kotlin("jvm") version "1.5.31"
     id("org.jetbrains.compose") version "1.0.0"
@@ -19,7 +17,7 @@ repositories {
     mavenCentral()
 }
 
-val hapiVersion = "5.6.1"
+val hapiVersion = "5.6.2"
 val slf4jVersion = "1.7.32"
 val graphStreamVersion = "2.0"
 val jGraphTVersion = "1.5.1"
@@ -29,6 +27,7 @@ val jungraphtVersion = "1.3"
 dependencies {
     testImplementation(kotlin("test"))
     implementation(compose.desktop.currentOs)
+    implementation("org.jetbrains.compose.components:components-splitpane:1.0.1")
     implementation("org.jetbrains.compose.material3:material3-desktop:$material3DesktopVersion")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:$hapiVersion")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:$hapiVersion")

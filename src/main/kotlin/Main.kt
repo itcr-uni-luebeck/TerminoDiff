@@ -10,6 +10,8 @@ import ca.uhn.fhir.context.FhirContext
 import com.formdev.flatlaf.FlatDarkLaf
 import com.formdev.flatlaf.FlatLightLaf
 import org.apache.commons.lang3.SystemUtils
+import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
+import org.jetbrains.compose.splitpane.rememberSplitPaneState
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.engine.resources.DiffDataContainer
@@ -51,6 +53,7 @@ fun ThemedAppWindow(applicationScope: ApplicationScope) {
     )
 }
 
+@OptIn(ExperimentalSplitPaneApi::class)
 @Composable
 fun AppWindow(
     applicationScope: ApplicationScope,
@@ -68,6 +71,7 @@ fun AppWindow(
     var hasResizedWindow by remember { mutableStateOf(false) }
     val fhirContext = remember { FhirContext.forR4() }
     val diffDataContainer = remember { DiffDataContainer(fhirContext, localizedStrings) }
+    val splitPaneState = rememberSplitPaneState(initialPositionPercentage = 0.5f)
     Window(
         onCloseRequest = { applicationScope.exitApplication() },
     ) {
@@ -93,8 +97,8 @@ fun AppWindow(
 
         TerminodiffAppContent(
             localizedStrings = localizedStrings,
-            fhirContext = fhirContext,
             diffDataContainer = diffDataContainer,
+            fhirContext = fhirContext,
             scrollState = scrollState,
             useDarkTheme = useDarkTheme,
             onLocaleChange = {
@@ -106,7 +110,8 @@ fun AppWindow(
                 logger.info("changed locale to ${locale.name}")
                 diffDataContainer.localizedStrings = getStrings(locale)
             },
-            onChangeDarkTheme = onChangeDarkTheme
+            onChangeDarkTheme = onChangeDarkTheme,
+            splitPaneState = splitPaneState
         )
     }
 }
