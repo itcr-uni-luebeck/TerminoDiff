@@ -8,18 +8,22 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
-import ca.uhn.fhir.context.FhirContext
+import kotlinx.coroutines.launch
 import li.flor.nativejfilechooser.NativeJFileChooser
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.SplitPaneState
 import org.jetbrains.compose.splitpane.VerticalSplitPane
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
@@ -31,16 +35,20 @@ import terminodiff.ui.panes.graph.ShowGraphsPanel
 import terminodiff.ui.panes.metadatadiff.MetadataDiffPanel
 import terminodiff.ui.theme.TerminoDiffTheme
 import java.awt.Cursor
+import java.awt.Window
 import java.io.File
+import java.net.InetAddress
+import java.util.*
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
+
+private val logger: Logger = LoggerFactory.getLogger("TerminodiffAppContent")
 
 @OptIn(ExperimentalSplitPaneApi::class)
 @Composable
 fun TerminodiffAppContent(
     localizedStrings: LocalizedStrings,
     diffDataContainer: DiffDataContainer,
-    fhirContext: FhirContext,
     scrollState: ScrollState,
     useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
@@ -58,18 +66,28 @@ fun TerminodiffAppContent(
         }
     }
 
+    val coroutineScope = rememberCoroutineScope()
+    when (val hostname = InetAddress.getLocalHost().hostName.lowercase(Locale.getDefault())) {
+        "joshua-athena-windows" ->
+            coroutineScope.launch {
+                diffDataContainer.leftFilename = File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2020_10_01.json")
+                diffDataContainer.rightFilename = File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json")
+            }
+        else -> logger.info("hostname: $hostname")
+    }
+
+
     TerminodiffContentWindow(
         localizedStrings = localizedStrings,
         scrollState = scrollState,
         useDarkTheme = useDarkTheme,
         onLocaleChange = onLocaleChange,
         onChangeDarkTheme = onChangeDarkTheme,
-        fhirContext = fhirContext,
         onLoadLeftFile = onLoadLeftFile,
         onLoadRightFile = onLoadRightFile,
         onReload = { diffDataContainer.reload() },
         diffDataContainer = diffDataContainer,
-        splitPaneState = splitPaneState,
+        splitPaneState = splitPaneState
     )
 }
 
@@ -81,12 +99,11 @@ fun TerminodiffContentWindow(
     useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
     onChangeDarkTheme: () -> Unit,
-    fhirContext: FhirContext,
     onLoadLeftFile: () -> Unit,
     onLoadRightFile: () -> Unit,
     onReload: () -> Unit,
     diffDataContainer: DiffDataContainer,
-    splitPaneState: SplitPaneState,
+    splitPaneState: SplitPaneState
 ) {
     TerminoDiffTheme(useDarkTheme = useDarkTheme) {
         Scaffold(
@@ -109,7 +126,7 @@ fun TerminodiffContentWindow(
                     strings = localizedStrings,
                     useDarkTheme = useDarkTheme,
                     diffDataContainer = diffDataContainer,
-                    splitPaneState = splitPaneState,
+                    splitPaneState = splitPaneState
                 )
                 false -> ContainerUninitializedContent(
                     modifier = Modifier.padding(scaffoldPadding),
@@ -207,7 +224,7 @@ private fun ContainerInitializedContent(
     strings: LocalizedStrings,
     useDarkTheme: Boolean,
     diffDataContainer: DiffDataContainer,
-    splitPaneState: SplitPaneState,
+    splitPaneState: SplitPaneState
 ) {
     Column(
         modifier = modifier.scrollable(scrollState, Orientation.Vertical),
@@ -222,7 +239,6 @@ private fun ContainerInitializedContent(
         VerticalSplitPane(splitPaneState = splitPaneState) {
             first(100.dp) {
                 ConceptDiffPanel(
-                    verticalWeight = 0.45f,
                     diffDataContainer = diffDataContainer,
                     localizedStrings = strings,
                     useDarkTheme = useDarkTheme

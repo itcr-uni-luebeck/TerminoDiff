@@ -69,13 +69,13 @@ class DiffDataContainer(private val fhirContext: FhirContext, strings: Localized
 
     private fun buildCsGraph(codeSystem: CodeSystem?): CodeSystemGraphBuilder? = when (codeSystem) {
         null -> null
-        else -> CodeSystemGraphBuilder(codeSystem)
+        else -> CodeSystemGraphBuilder(codeSystem, localizedStrings)
     }
 
     private fun buildDiff(
         leftGraphBuilder: CodeSystemGraphBuilder?,
         rightGraphBuilder: CodeSystemGraphBuilder?,
-        localizedStrings: LocalizedStrings
+        localizedStrings: LocalizedStrings,
     ): CodeSystemDiffBuilder? {
         if (leftGraphBuilder == null || rightGraphBuilder == null) return null
         logger.info("building diff")

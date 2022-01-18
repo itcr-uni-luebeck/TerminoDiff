@@ -1,11 +1,13 @@
 package terminodiff.ui.panes.conceptdiff
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.OutlinedButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -19,6 +21,7 @@ import androidx.compose.ui.unit.dp
 import terminodiff.engine.concepts.ConceptDiff
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.ConceptDiffResult
+import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.ui.AppIconResource
@@ -28,72 +31,88 @@ import terminodiff.ui.util.DiffChip
 import terminodiff.ui.util.SelectableText
 import terminodiff.ui.util.colorPairForConceptDiffResult
 
-fun ColumnSpec.Companion.codeColumnSpec(localizedStrings: LocalizedStrings) =
+fun conceptDiffColumnSpecs(
+    localizedStrings: LocalizedStrings,
+    diffColors: DiffColors,
+    showPropertyDialog: (ConceptTableData) -> Unit,
+) = listOf(codeColumnSpec(localizedStrings),
+    displayColumnSpec(localizedStrings, diffColors),
+    definitionColumnSpec(localizedStrings, diffColors),
+    propertyColumnSpec(localizedStrings, diffColors, showPropertyDialog),
+    overallComparisonColumnSpec(localizedStrings, diffColors))
+
+private fun codeColumnSpec(localizedStrings: LocalizedStrings) =
     ColumnSpec<ConceptTableData>(title = localizedStrings.code, weight = 0.1f, content = {
         SelectableText(it.code, style = MaterialTheme.typography.bodyLarge, textAlign = TextAlign.Center)
     })
 
-fun ColumnSpec.Companion.displayColumnSpec(
-    localizedStrings: LocalizedStrings, diffColors: DiffColors
-) = columnSpecForProperty(
-    localizedStrings = localizedStrings,
+private fun displayColumnSpec(
+    localizedStrings: LocalizedStrings, diffColors: DiffColors,
+) = columnSpecForProperty(localizedStrings = localizedStrings,
     title = localizedStrings.display,
     diffColors = diffColors,
     labelToFind = localizedStrings.display,
     weight = 0.25f,
-    stringValueResolver = FhirConceptDetails::display
-)
+    stringValueResolver = FhirConceptDetails::display)
 
-fun ColumnSpec.Companion.definitionColumnSpec(
+private fun definitionColumnSpec(
     localizedStrings: LocalizedStrings,
     diffColors: DiffColors,
-) = ColumnSpec.columnSpecForProperty(
-    localizedStrings = localizedStrings,
+) = columnSpecForProperty(localizedStrings = localizedStrings,
     title = localizedStrings.definition,
     diffColors = diffColors,
     labelToFind = localizedStrings.definition,
     weight = 0.25f,
-    stringValueResolver = FhirConceptDetails::definition
-)
+    stringValueResolver = FhirConceptDetails::definition)
 
-fun ColumnSpec.Companion.propertyColumnSpec(
-    localizedStrings: LocalizedStrings, diffColors: DiffColors
-) = ColumnSpec<ConceptTableData>(
-    title = localizedStrings.property, weight = 0.25f, tooltipText = null
-) { data ->
+private fun propertyColumnSpec(
+    localizedStrings: LocalizedStrings, diffColors: DiffColors,
+    showPropertyDialog: (ConceptTableData) -> Unit,
+) = ColumnSpec<ConceptTableData>(title = localizedStrings.property, weight = 0.25f, tooltipText = null) { data ->
     when {
         data.isInBoth() -> {
-            when {
-                data.diff!!.propertyComparison.none() -> DiffChip(
-                    text = localizedStrings.identical, colorPair = diffColors.greenPair
-                )
+            when(val countDifferent = data.diff!!.propertyComparison.count { it.kind != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL}) {
+                0 -> Button(onClick = {showPropertyDialog(data)},
+                    elevation = ButtonDefaults.elevation(4.dp),
+                    colors = ButtonDefaults.buttonColors(diffColors.greenPair.first,
+                        diffColors.greenPair.second)) {
+                    Text(text = localizedStrings.identical,
+                        color = diffColors.yellowPair.second)
+                }
                 else -> {
-                    // TODO: 04/01/22
                     Row {
-                        Button(
-                            onClick = {},
+                        Button(onClick = {
+                            showPropertyDialog(data)
+                        },
                             elevation = ButtonDefaults.elevation(4.dp),
-                            colors = ButtonDefaults.buttonColors(
-                                diffColors.yellowPair.first, diffColors.yellowPair.second
-                            )
-                        ) {
-                            Text(localizedStrings.numberDifferent_.invoke(data.diff.propertyComparison.size))
+                            colors = ButtonDefaults.buttonColors(diffColors.yellowPair.first,
+                                diffColors.yellowPair.second)) {
+                            Text(text = localizedStrings.numberDifferent_.invoke(countDifferent),
+                                color = diffColors.yellowPair.second)
                         }
                     }
                 }
             }
         }
         else -> {
-            // TODO: 05/01/22
+            OutlinedButton(onClick = {
+                showPropertyDialog(data)
+            },
+                elevation = ButtonDefaults.elevation(4.dp),
+                colors = ButtonDefaults.outlinedButtonColors(backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
+                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onTertiaryContainer)) {
+                Text(localizedStrings.property, color = MaterialTheme.colorScheme.onTertiaryContainer)
+            }
         }
     }
 }
 
-fun ColumnSpec.Companion.overallComparisonColumnSpec(
-    localizedStrings: LocalizedStrings, diffColors: DiffColors
+private fun overallComparisonColumnSpec(
+    localizedStrings: LocalizedStrings, diffColors: DiffColors,
 ) = ColumnSpec<ConceptTableData>(
     title = localizedStrings.overallComparison,
-    weight = 0.1f,
+    weight = 0.25f,
     tooltipText = null,
 ) { data ->
     when (data.isInBoth()) {
@@ -106,9 +125,7 @@ fun ColumnSpec.Companion.overallComparisonColumnSpec(
                 if (anyDifferent) localizedStrings.conceptDiffResults_.invoke(ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT)
                 else localizedStrings.identical
 
-            DiffChip(
-                colorPair = colors, text = chipLabel, modifier = Modifier.fillMaxWidth(0.8f)
-            )
+            DiffChip(colorPair = colors, text = chipLabel, modifier = Modifier.fillMaxWidth(0.8f))
         }
         else -> {
             val chipLabel: String =
@@ -117,17 +134,15 @@ fun ColumnSpec.Companion.overallComparisonColumnSpec(
                 true -> AppIconResource.loadXmlImageVector(AppIconResource.icLoadLeftFile)
                 else -> AppIconResource.loadXmlImageVector(AppIconResource.icLoadRightFile)
             }
-            DiffChip(
-                modifier = Modifier.fillMaxWidth(0.8f),
+            DiffChip(modifier = Modifier.fillMaxWidth(0.8f),
                 colorPair = diffColors.redPair,
                 text = chipLabel,
-                icon = onlyOneVersionIcon
-            )
+                icon = onlyOneVersionIcon)
         }
     }
 }
 
-private fun ColumnSpec.Companion.columnSpecForProperty(
+private fun columnSpecForProperty(
     localizedStrings: LocalizedStrings,
     title: String,
     diffColors: DiffColors,
@@ -148,25 +163,22 @@ private fun ColumnSpec.Companion.columnSpecForProperty(
             else -> null
         }
         when {
-            data.isInBoth() -> contentWithText(
-                diff = data.diff!!,
+            data.isInBoth() -> contentWithText(diff = data.diff!!,
                 localizedStrings = localizedStrings,
                 diffColors = diffColors,
                 labelToFind = labelToFind,
-                text = tooltipTextFun(data).invoke()
-            )
+                text = tooltipTextFun(data).invoke())
             singleConcept != null -> { // else
                 val text = stringValueResolver.invoke(singleConcept)
-                SelectableText(
-                    text = text ?: "null", fontStyle = if (text == null) FontStyle.Italic else FontStyle.Normal
-                )
+                SelectableText(text = text ?: "null",
+                    fontStyle = if (text == null) FontStyle.Italic else FontStyle.Normal)
             }
         }
     }
 }
 
 private fun tooltipForConceptProperty(
-    leftConcept: FhirConceptDetails?, rightConcept: FhirConceptDetails?, property: (FhirConceptDetails) -> String?
+    leftConcept: FhirConceptDetails?, rightConcept: FhirConceptDetails?, property: (FhirConceptDetails) -> String?,
 ): () -> String? = {
     val leftValue = leftConcept?.let(property)
     val rightValue = rightConcept?.let(property)
@@ -181,19 +193,15 @@ private fun tooltipForConceptProperty(
 
 @Composable
 private fun contentWithText(
-    diff: ConceptDiff, localizedStrings: LocalizedStrings, diffColors: DiffColors, text: String?, labelToFind: String
+    diff: ConceptDiff, localizedStrings: LocalizedStrings, diffColors: DiffColors, text: String?, labelToFind: String,
 ) {
     Row(horizontalArrangement = Arrangement.Center, verticalAlignment = Alignment.CenterVertically) {
-        ChipForConceptDiffResult(
-            modifier = Modifier.padding(end = 2.dp),
+        ChipForConceptDiffResult(modifier = Modifier.padding(end = 2.dp),
             conceptComparison = diff.conceptComparison,
             labelToFind = labelToFind,
             localizedStrings = localizedStrings,
-            diffColors = diffColors
-        )
-        SelectableText(
-            text = text ?: "null", fontStyle = if (text == null) FontStyle.Italic else FontStyle.Normal
-        )
+            diffColors = diffColors)
+        SelectableText(text = text ?: "null", fontStyle = if (text == null) FontStyle.Italic else FontStyle.Normal)
     }
 }
 
@@ -203,15 +211,13 @@ private fun ChipForConceptDiffResult(
     conceptComparison: List<ConceptDiffResult>,
     labelToFind: String,
     localizedStrings: LocalizedStrings,
-    diffColors: DiffColors
+    diffColors: DiffColors,
 ) {
     val result = conceptComparison.find { it.diffItem.label.invoke(localizedStrings) == labelToFind } ?: return
     val colorsForResult = colorPairForConceptDiffResult(result, diffColors)
-    DiffChip(
-        modifier = modifier,
+    DiffChip(modifier = modifier,
         text = localizedStrings.conceptDiffResults_.invoke(result.result),
         backgroundColor = colorsForResult.first,
         textColor = colorsForResult.second,
-        icon = null
-    )
+        icon = null)
 }

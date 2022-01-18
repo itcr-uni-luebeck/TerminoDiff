@@ -15,11 +15,8 @@ import org.jgrapht.Graph
 import terminodiff.engine.graph.DiffEdge
 import terminodiff.engine.graph.DiffNode
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.java.ui.CodeSystemGraphJFrame
-import terminodiff.ui.graphs.CodeSystemGraphLayoutFrame
-import terminodiff.ui.graphs.CodeSystemGraphLayoutFrame2
-import terminodiff.ui.graphs.DiffGraphLayoutFrame
-import terminodiff.ui.graphs.DiffGraphLayoutFrame2
+import terminodiff.ui.graphs.codeSystemGraphLayoutFrame
+import terminodiff.ui.graphs.diffGraphLayoutFrame
 
 @Composable
 fun ShowGraphsPanel(
@@ -90,7 +87,7 @@ fun showDiffGraphSwingWindow(
     frameTitle: String,
     useDarkTheme: Boolean,
     localizedStrings: LocalizedStrings
-) = DiffGraphLayoutFrame2(diffGraph, useDarkTheme, localizedStrings)
+) = diffGraphLayoutFrame(diffGraph, useDarkTheme, localizedStrings)
 //    DiffGraphLayoutFrame(
 //        diffGraph = diffGraph,
 //        title = frameTitle,
@@ -104,4 +101,4 @@ fun showGraphSwingWindow(
     useDarkTheme: Boolean,
     localizedStrings: LocalizedStrings
 ) = //CodeSystemGraphLayoutFrame(codeSystem, frameTitle, useDarkTheme)
-    CodeSystemGraphLayoutFrame2(codeSystem, useDarkTheme, localizedStrings)
+    codeSystemGraphLayoutFrame(codeSystem, useDarkTheme, localizedStrings)

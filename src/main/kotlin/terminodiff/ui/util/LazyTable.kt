@@ -1,15 +1,21 @@
 package terminodiff.ui.util
 
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.Orientation
+import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.Divider
 import androidx.compose.material.Text
 import androidx.compose.material.contentColorFor
+import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocal
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -26,58 +32,65 @@ fun <T> LazyTable(
     cellHeight: Dp = 50.dp,
     cellBorderColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
     backgroundColor: Color,
+    foregroundColor: Color = contentColorFor(backgroundColor),
     lazyListState: LazyListState,
     tableData: List<T>,
-    keyFun: (T) -> Any
+    keyFun: (T) -> Any,
 ) {
-    val contentColor = contentColorFor(backgroundColor)
-    Column(modifier = modifier.padding(16.dp)) {
-        // draw the header cells
-        Row(modifier.fillMaxWidth()) {
-            columnSpecs.forEach { HeaderCell(it, cellBorderColor, contentColor) }
-        }
-        Divider(color = cellBorderColor, thickness = 1.dp)
+    CompositionLocalProvider(LocalContentColor provides foregroundColor) {
+        Column(modifier = modifier.padding(16.dp)) {
+            // draw the header cells
+            Row(modifier.fillMaxWidth()) {
+                columnSpecs.forEach { HeaderCell(it, cellBorderColor, foregroundColor) }
+            }
+            Divider(color = cellBorderColor, thickness = 1.dp)
 
-        // the actual cells, contained by LazyColumn
-        Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-            LazyColumn(state = lazyListState) {
-                items(items = tableData, key = keyFun) { data ->
-                    val skipped = mutableListOf<Int>()
-                    Row(Modifier.wrapContentHeight()) {
-                        columnSpecs.forEachIndexed { specIndex, spec ->
-                            if (specIndex in skipped) return@forEachIndexed
-                            if (spec.mergeIf != null) {
-                                if (spec.mergeIf.invoke(data)) {
-                                    val nextSpec = columnSpecs.getOrNull(specIndex + 1) ?: return@forEachIndexed
-                                    TableCell(
-                                        modifier = modifier.height(cellHeight),
-                                        weight = spec.weight + nextSpec.weight,
-                                        tooltipText = spec.tooltipText?.invoke(data),
-                                        content = {
-                                            spec.content(data)
-                                        }
-                                    )
-                                    skipped.add(specIndex + 1)
-                                    return@forEachIndexed
+            // the actual cells, contained by LazyColumn
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                LazyColumn(state = lazyListState) {
+                    items(items = tableData, key = {
+                        "$keyFun-$it"
+                    }) { data ->
+                        //items(items = tableData, key = keyFun) { data ->
+                        val skipped = mutableListOf<Int>()
+                        Row(Modifier.wrapContentHeight()) {
+                            columnSpecs.forEachIndexed { specIndex, spec ->
+                                if (specIndex in skipped) return@forEachIndexed
+                                if (spec.mergeIf != null) {
+                                    if (spec.mergeIf.invoke(data)) {
+                                        val nextSpec = columnSpecs.getOrNull(specIndex + 1) ?: return@forEachIndexed
+                                        TableCell(
+                                            modifier = modifier.height(cellHeight),
+                                            weight = spec.weight + nextSpec.weight,
+                                            tooltipText = spec.tooltipText?.invoke(data),
+                                            content = {
+                                                CompositionLocalProvider(LocalContentColor provides foregroundColor) {
+                                                    spec.content(data)
+                                                }
+                                            }
+                                        )
+                                        skipped.add(specIndex + 1)
+                                        return@forEachIndexed
+                                    }
                                 }
+                                TableCell(
+                                    modifier = Modifier.height(cellHeight),
+                                    weight = spec.weight,
+                                    tooltipText = spec.tooltipText?.invoke(data),
+                                    content = {
+                                        spec.content(data)
+                                    }
+                                )
                             }
-                            TableCell(
-                                modifier = Modifier.height(cellHeight),
-                                weight = spec.weight,
-                                tooltipText = spec.tooltipText?.invoke(data),
-                                content = {
-                                    spec.content(data)
-                                }
-                            )
                         }
                     }
                 }
+                Carousel(
+                    state = lazyListState,
+                    colors = CarouselDefaults.colors(cellBorderColor),
+                    modifier = Modifier.padding(8.dp).width(8.dp).fillMaxHeight(0.9f)
+                )
             }
-            Carousel(
-                state = lazyListState,
-                colors = CarouselDefaults.colors(cellBorderColor),
-                modifier = Modifier.padding(8.dp).width(8.dp).fillMaxHeight(0.9f)
-            )
         }
     }
 }
@@ -86,7 +99,7 @@ fun <T> LazyTable(
 fun RowScope.HeaderCell(
     spec: ColumnSpec<*>,
     cellBorderColor: Color,
-    contentColor: Color
+    contentColor: Color,
 ) {
     Box(
         Modifier.border(1.dp, cellBorderColor).weight(spec.weight).padding(2.dp)
@@ -105,7 +118,7 @@ fun RowScope.HeaderCell(
 
 @Composable
 fun RowScope.TableCell(
-    modifier: Modifier = Modifier, weight: Float, tooltipText: (() -> String?)? = null, content: @Composable () -> Unit
+    modifier: Modifier = Modifier, weight: Float, tooltipText: (() -> String?)? = null, content: @Composable () -> Unit,
 ) {
     Row(
         modifier = modifier.border(1.dp, MaterialTheme.colorScheme.onTertiaryContainer).weight(weight).padding(2.dp),

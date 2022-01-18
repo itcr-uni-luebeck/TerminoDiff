@@ -2,16 +2,15 @@ package terminodiff.engine.concepts
 
 import org.hl7.fhir.r4.model.CodeSystem
 import terminodiff.engine.graph.FhirConceptDetails
-import terminodiff.engine.graph.PropertyMap
 import terminodiff.i18n.LocalizedStrings
 
 typealias FhirConcept = CodeSystem.ConceptDefinitionComponent
 
-typealias PropertyDiff = MutableList<KeyedListDiffResult<String>>
+typealias PropertyDiff = MutableList<KeyedListDiffResult<String, String>>
 
 data class ConceptDiff(
     val conceptComparison: List<ConceptDiffResult>,
-    val propertyComparison: PropertyDiff
+    val propertyComparison: PropertyDiff,
 ) {
     fun toString(localizedStrings: LocalizedStrings): String {
         return "ConceptDiff(conceptComparison=[${conceptComparison.map { it.toString(localizedStrings) }}], " +
@@ -20,7 +19,7 @@ data class ConceptDiff(
 
     companion object {
 
-        val diffItems = listOf(
+        private val diffItems = listOf(
             ConceptDiffItem({ display }, { display }),
             ConceptDiffItem({ definition }, { definition })
         )
@@ -28,8 +27,6 @@ data class ConceptDiff(
         fun compareConcept(
             leftConcept: FhirConceptDetails,
             rightConcept: FhirConceptDetails,
-            leftProperties: PropertyMap,
-            rightProperties: PropertyMap
         ): ConceptDiff {
             val conceptDiff = diffItems.map { di ->
                 di.compare(leftConcept, rightConcept)
@@ -40,7 +37,7 @@ data class ConceptDiff(
                 left = leftProperty,
                 right = rightProperty,
                 getKey = { propertyCode },
-                getValue = { this.value } // TODO: 23/12/21 depending on the type of the property, we will need to retrieve the type from PropertyMap
+                getStringValue = { this.value } // TODO: 23/12/21 depending on the type of the property, we will need to retrieve the type from PropertyMap
                 // and use the valueCoding, etc. instances for comparison. This may require merging the left and right property lists beforehand.
             )
             return ConceptDiff(conceptDiff, propertyDiff)
@@ -50,7 +47,7 @@ data class ConceptDiff(
 
 data class ConceptDiffResult(
     val diffItem: ConceptDiffItem,
-    val result: ConceptDiffItem.ConceptDiffResultEnum
+    val result: ConceptDiffItem.ConceptDiffResultEnum,
 ) {
     fun toString(localizedStrings: LocalizedStrings): String {
         return "ConceptDiffResult(diffItem=${diffItem.toString(localizedStrings)}, result=$result)"
@@ -59,7 +56,7 @@ data class ConceptDiffResult(
 
 data class ConceptDiffItem(
     val label: LocalizedStrings.() -> String,
-    private val instanceGetter: FhirConceptDetails.() -> String?
+    private val instanceGetter: FhirConceptDetails.() -> String?,
 ) {
     fun compare(c1: FhirConceptDetails, c2: FhirConceptDetails): ConceptDiffResult {
         val left = instanceGetter.invoke(c1)
@@ -85,9 +82,9 @@ fun <T, K> keyedListDiff(
     left: List<T>,
     right: List<T>,
     getKey: T.() -> K,
-    getValue: T.() -> Any
-): MutableList<KeyedListDiffResult<K>> {
-    val diffResult = mutableListOf<KeyedListDiffResult<K>>()
+    getStringValue: T.() -> String?,
+): MutableList<KeyedListDiffResult<K, String>> {
+    val diffResult = mutableListOf<KeyedListDiffResult<K, String>>()
     val leftKeys = left.map { it.getKey() }.toSet()
     val rightKeys = right.map { it.getKey() }.toSet()
     val onlyInLeft = leftKeys.filter { it !in rightKeys }.toSet()
@@ -109,33 +106,35 @@ fun <T, K> keyedListDiff(
         )
     }
     val inBoth = leftKeys.plus(rightKeys).minus(onlyInLeft).minus(onlyInRight)
-    left.filter { it.getKey() in inBoth }.forEach { l ->
-        val valueLeft = l.getValue()
-        val matchingRight = right.find { r -> r.getKey() == l.getKey() }!!
-        val valueRight = matchingRight.getValue()
-        if (valueLeft != valueRight) {
-            diffResult.add(
-                KeyedListDiffResult(
-                    kind = KeyedListDiffResult.KeyedListDiffResultKind.VALUE_DIFFERENT,
-                    key = l.getKey(),
-                    leftValue = valueLeft,
-                    rightValue = valueRight
-                )
-            )
-        }
-    }
+    diffResult.addAll(left.filter { it.getKey() in inBoth }.groupBy(getKey).map { l ->
+        val valueLeft = l.value.map(getStringValue)
+        val matchingRight = right.filter { r -> r.getKey() == l.key }
+        val valueRight = matchingRight.map(getStringValue)
+        val result =
+            when {
+                valueLeft != valueRight -> KeyedListDiffResult.KeyedListDiffResultKind.VALUE_DIFFERENT
+                else -> KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL
+            }
+        KeyedListDiffResult(
+            kind = result,
+            key = l.key,
+            leftValue = valueLeft,
+            rightValue = valueRight
+        )
+    })
     return diffResult
 }
 
-data class KeyedListDiffResult<K>(
+data class KeyedListDiffResult<K, V>(
     val kind: KeyedListDiffResultKind,
     val key: K,
-    val leftValue: Any? = null,
-    val rightValue: Any? = null
+    val leftValue: List<V?>? = null,
+    val rightValue: List<V?>? = null,
 ) {
     enum class KeyedListDiffResultKind {
         KEY_ONLY_IN_LEFT,
         KEY_ONLY_IN_RIGHT,
-        VALUE_DIFFERENT
+        VALUE_DIFFERENT,
+        IDENTICAL,
     }
 }

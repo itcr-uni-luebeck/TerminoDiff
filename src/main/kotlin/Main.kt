@@ -3,6 +3,7 @@ package terminodiff
 
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.*
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
@@ -33,6 +34,7 @@ class TerminoDiffApp
 
 val resourcesDir = System.getProperty("compose.application.resources.dir")?.let {
     // this only works in the native distribution, or when running via `runDistributable` in Gradle/IntelliJ
+    // otherwise, resourcesDir will be null
     File(it)
 }
 
@@ -53,17 +55,19 @@ fun ThemedAppWindow(applicationScope: ApplicationScope) {
     )
 }
 
-@OptIn(ExperimentalSplitPaneApi::class)
+@OptIn(ExperimentalSplitPaneApi::class, ExperimentalComposeUiApi::class)
 @Composable
 fun AppWindow(
     applicationScope: ApplicationScope,
     useDarkTheme: Boolean,
     onChangeDarkTheme: () -> Unit,
 ) {
-    when (useDarkTheme && SystemUtils.IS_OS_WINDOWS) {
+
+    when (SystemUtils.IS_OS_WINDOWS) {
+        //when (useDarkTheme && SystemUtils.IS_OS_WINDOWS) {
         //setting this does not make sense if not on windows
         true -> FlatDarkLaf.setup()
-        else -> FlatLightLaf.setup()
+        //else -> FlatLightLaf.setup()
     }
     var locale by remember { mutableStateOf(SupportedLocale.valueOf(AppPreferences.language)) }
     val localizedStrings by derivedStateOf { getStrings(locale) }
@@ -79,9 +83,12 @@ fun AppWindow(
         resourcesDir?.let {
             this.window.iconImage = ImageIO.read(it.resolve("terminodiff@0.5x.png"))
         }
-        when (useDarkTheme && SystemUtils.IS_OS_WINDOWS) {
-            false -> UIManager.setLookAndFeel(FlatLightLaf())
-            else -> UIManager.setLookAndFeel(FlatDarkLaf())
+        UIManager.setLookAndFeel(FlatDarkLaf())
+        when (SystemUtils.IS_OS_WINDOWS) {
+            //when (useDarkTheme && SystemUtils.IS_OS_WINDOWS) {
+            /*false -> UIManager.setLookAndFeel(FlatLightLaf())
+            else -> UIManager.setLookAndFeel(FlatDarkLaf())*/
+            true -> UIManager.setLookAndFeel(FlatDarkLaf())
         }
 
         if (!hasResizedWindow) {
@@ -98,7 +105,6 @@ fun AppWindow(
         TerminodiffAppContent(
             localizedStrings = localizedStrings,
             diffDataContainer = diffDataContainer,
-            fhirContext = fhirContext,
             scrollState = scrollState,
             useDarkTheme = useDarkTheme,
             onLocaleChange = {

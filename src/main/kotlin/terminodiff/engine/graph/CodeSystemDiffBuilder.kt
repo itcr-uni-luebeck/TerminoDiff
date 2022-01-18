@@ -46,9 +46,7 @@ class CodeSystemDiffBuilder(
             }
             code to ConceptDiff.compareConcept(
                 leftConcept = leftConcept,
-                rightConcept = rightConcept,
-                leftProperties = leftBuilder.simplePropertyCodeTypes,
-                rightProperties = rightBuilder.simplePropertyCodeTypes
+                rightConcept = rightConcept
             )
         }.forEach { (code, conceptDiff) ->
             conceptDifferences[code] = conceptDiff

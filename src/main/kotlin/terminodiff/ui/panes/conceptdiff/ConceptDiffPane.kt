@@ -1,5 +1,6 @@
 package terminodiff.ui.panes.conceptdiff
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material.*
@@ -7,19 +8,26 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
+import androidx.compose.ui.window.WindowPosition
+import androidx.compose.ui.window.rememberDialogState
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.engine.concepts.ConceptDiff
 import terminodiff.engine.concepts.ConceptDiffItem
+import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.terminodiff.ui.panes.conceptdiff.PropertyDialog
 import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.theme.getDiffColors
 import terminodiff.ui.util.*
+import java.awt.Window
 import java.util.*
 
 private val logger: Logger = LoggerFactory.getLogger("conceptdiffpanel")
@@ -29,13 +37,11 @@ fun ConceptDiffPanel(
     diffDataContainer: DiffDataContainer,
     localizedStrings: LocalizedStrings,
     useDarkTheme: Boolean,
-    verticalWeight: Float,
 ) {
-
     val diffColors by remember { mutableStateOf(getDiffColors(useDarkTheme = useDarkTheme)) }
     var activeFilter by remember { mutableStateOf(ToggleableChipSpec.showDifferent) }
     val tableData by derivedStateOf { filterDiffItems(diffDataContainer, activeFilter) }
-    val lazyListState = rememberLazyListState(0)
+    val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
     val coroutineScope = rememberCoroutineScope()
     val filterSpecs by derivedStateOf {
         listOf(ToggleableChipSpec(ToggleableChipSpec.showAll, localizedStrings.showAll),
@@ -47,6 +53,14 @@ fun ConceptDiffPanel(
     }
     val counts by derivedStateOf {
         filterSpecs.associate { it.name to filterDiffItems(diffDataContainer, it.name).shownCodes.size }
+    }
+
+    var propertyDialogData: ConceptTableData? by remember { mutableStateOf(null) }
+
+    propertyDialogData?.let { conceptTableData ->
+        PropertyDialog(conceptTableData, localizedStrings, useDarkTheme) {
+            propertyDialogData = null
+        }
     }
 
     Card(
@@ -71,7 +85,11 @@ fun ConceptDiffPanel(
                 tableData = tableData,
                 localizedStrings = localizedStrings,
                 diffColors = diffColors,
-                lazyListState = lazyListState)
+                lazyListState = lazyListState,
+                showPropertyDialog = {
+                    propertyDialogData = it
+                    logger.info("showing details dialog for concept ${it.code}")
+                })
         }
     }
 }
@@ -83,7 +101,11 @@ fun filterDiffItems(diffDataContainer: DiffDataContainer, activeFilter: String):
     val onlyInRightConcepts = diffDataContainer.codeSystemDiff?.onlyInRightConcepts ?: throw NullPointerException()
     val conceptDiff = diffDataContainer.codeSystemDiff?.conceptDifferences ?: throw NullPointerException()
     val differentCodesInDiff = conceptDiff.filterValues { diff ->
-        diff.conceptComparison.any { c -> c.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT } || diff.propertyComparison.any()
+        when {
+            diff.conceptComparison.any { c -> c.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT } -> true
+            diff.propertyComparison.any { p -> p.kind != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL } -> true
+            else -> false
+        }
     }.keys
     val sameCodesInDiff = conceptDiff.keys.minus(differentCodesInDiff)
 
@@ -132,14 +154,11 @@ fun DiffDataTable(
     localizedStrings: LocalizedStrings,
     diffColors: DiffColors,
     lazyListState: LazyListState,
+    showPropertyDialog: (ConceptTableData) -> Unit,
 ) {
     if (diffDataContainer.codeSystemDiff == null) throw IllegalStateException("the diff data container is not initialized")
 
-    val columnSpecs = listOf(ColumnSpec.codeColumnSpec(localizedStrings),
-        ColumnSpec.displayColumnSpec(localizedStrings, diffColors),
-        ColumnSpec.definitionColumnSpec(localizedStrings, diffColors),
-        ColumnSpec.propertyColumnSpec(localizedStrings, diffColors),
-        ColumnSpec.overallComparisonColumnSpec(localizedStrings, diffColors))
+    val columnSpecs = conceptDiffColumnSpecs(localizedStrings, diffColors, showPropertyDialog)
 
     TableScreen(tableData = tableData, lazyListState = lazyListState, columnSpecs = columnSpecs)
 }
