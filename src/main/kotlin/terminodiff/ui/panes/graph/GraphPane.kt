@@ -87,18 +87,11 @@ fun showDiffGraphSwingWindow(
     frameTitle: String,
     useDarkTheme: Boolean,
     localizedStrings: LocalizedStrings
-) = diffGraphLayoutFrame(diffGraph, useDarkTheme, localizedStrings)
-//    DiffGraphLayoutFrame(
-//        diffGraph = diffGraph,
-//        title = frameTitle,
-//        useDarkTheme = useDarkTheme,
-//        localizedStrings = localizedStrings
-//    )
+) = diffGraphLayoutFrame(diffGraph, useDarkTheme, localizedStrings, frameTitle)
 
 fun showGraphSwingWindow(
     codeSystem: CodeSystem,
     frameTitle: String,
     useDarkTheme: Boolean,
     localizedStrings: LocalizedStrings
-) = //CodeSystemGraphLayoutFrame(codeSystem, frameTitle, useDarkTheme)
-    codeSystemGraphLayoutFrame(codeSystem, useDarkTheme, localizedStrings)
+) = codeSystemGraphLayoutFrame(codeSystem, useDarkTheme, localizedStrings, frameTitle)

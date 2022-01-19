@@ -124,8 +124,8 @@ data class FhirConceptDetails(
     val code: String,
     val display: String?,
     val definition: String?,
-    val designation: List<FhirConceptDesignation>?,
-    val property: List<FhirConceptProperty>?,
+    val designation: List<FhirConceptDesignation>,
+    val property: List<FhirConceptProperty>,
 )
 
 data class FhirConceptDesignation(

@@ -15,9 +15,10 @@ public class CodeSystemGraphJFrame extends GraphJFrame<String, FhirConceptEdge> 
     public CodeSystemGraphJFrame(Graph<String, FhirConceptEdge> graph,
                                  Boolean isDarkTheme,
                                  LocalizedStrings localizedStrings,
+                                 String frameTitle,
                                  Function<String, String> getDisplay
     ) {
-        super(graph, isDarkTheme, localizedStrings);
+        super(graph, isDarkTheme, localizedStrings, frameTitle);
         this.getDisplay = getDisplay;
     }
 

@@ -3,6 +3,8 @@ package terminodiff.ui
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.TooltipArea
 import androidx.compose.foundation.TooltipPlacement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TopAppBar
@@ -14,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
@@ -21,17 +25,19 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.xml.sax.InputSource
 import terminodiff.i18n.LocalizedStrings
+import java.awt.Cursor
 import java.io.InputStream
 
 typealias ImageRelativePath = String
 
 class AppIconResource {
     companion object {
-        val icDarkMode: ImageRelativePath = "icons/ic-dark-mode.xml"
-        val icChangeLanguage: ImageRelativePath = "icons/ic-language.xml"
-        val icLoadLeftFile: ImageRelativePath = "icons/ic-open-left.xml"
-        val icLoadRightFile: ImageRelativePath = "icons/ic-open-right.xml"
-        val icReload: ImageRelativePath = "icons/ic-reload.xml"
+        const val icDarkMode: ImageRelativePath = "icons/ic-dark-mode.xml"
+        const val icChangeLanguage: ImageRelativePath = "icons/ic-language.xml"
+        const val icLoadLeftFile: ImageRelativePath = "icons/ic-open-left.xml"
+        const val icLoadRightFile: ImageRelativePath = "icons/ic-open-right.xml"
+        const val icReload: ImageRelativePath = "icons/ic-reload.xml"
+        const val icUniLuebeck: ImageRelativePath = "uzl-logo.xml"
 
         fun loadFile(relativePath: ImageRelativePath) =
             AppIconResource::class.java.classLoader.getResourceAsStream(relativePath)
@@ -52,51 +58,51 @@ fun TerminoDiffTopAppBar(
     onLoadLeftFile: () -> Unit,
     onLoadRightFile: () -> Unit,
     onChangeDarkTheme: () -> Unit,
-    onReload: () -> Unit
+    onReload: () -> Unit,
 ) {
 
-    TopAppBar(
-        title = { Text(localizedStrings.terminoDiff, color = MaterialTheme.colorScheme.onPrimaryContainer) },
+    TopAppBar(title = {
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(modifier = Modifier.padding(end = 16.dp),
+                text = localizedStrings.terminoDiff,
+                color = MaterialTheme.colorScheme.onPrimaryContainer)
+            AppImageIcon(
+                relativePath = AppIconResource.icUniLuebeck,
+                label = localizedStrings.uniLuebeck,
+                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                modifier = Modifier.fillMaxHeight(0.8f)
+            )
+        }
+    },
         backgroundColor = MaterialTheme.colorScheme.primaryContainer,
         contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
         actions = {
             MouseOverPopup(localizedStrings.toggleDarkTheme) {
-                IconActionButton(
-                    onClick = onChangeDarkTheme,
+                IconActionButton(onClick = onChangeDarkTheme,
                     imageRelativePath = AppIconResource.icDarkMode,
-                    label = localizedStrings.toggleDarkTheme
-                )
+                    label = localizedStrings.toggleDarkTheme)
             }
             MouseOverPopup(localizedStrings.changeLanguage) {
-                IconActionButton(
-                    onClick = onLocaleChange,
+                IconActionButton(onClick = onLocaleChange,
                     imageRelativePath = AppIconResource.icChangeLanguage,
-                    label = localizedStrings.changeLanguage
-                )
+                    label = localizedStrings.changeLanguage)
             }
             MouseOverPopup(localizedStrings.loadLeftFile) {
-                IconActionButton(
-                    onClick = onLoadLeftFile,
+                IconActionButton(onClick = onLoadLeftFile,
                     imageRelativePath = AppIconResource.icLoadLeftFile,
-                    label = localizedStrings.loadLeftFile
-                )
+                    label = localizedStrings.loadLeftFile)
             }
             MouseOverPopup(localizedStrings.loadRightFile) {
-                IconActionButton(
-                    onClick = onLoadRightFile,
+                IconActionButton(onClick = onLoadRightFile,
                     imageRelativePath = AppIconResource.icLoadRightFile,
-                    label = localizedStrings.loadRightFile
-                )
+                    label = localizedStrings.loadRightFile)
             }
             MouseOverPopup(localizedStrings.reload) {
-                IconActionButton(
-                    onClick = onReload,
+                IconActionButton(onClick = onReload,
                     imageRelativePath = AppIconResource.icReload,
-                    label = localizedStrings.reload
-                )
+                    label = localizedStrings.reload)
             }
-        }
-    )
+        })
 }
 
 @Composable
@@ -114,16 +120,14 @@ private fun IconActionButton(
 fun AppImageIcon(
     relativePath: ImageRelativePath,
     label: String,
-    tint: Color = MaterialTheme.colorScheme.onPrimaryContainer
+    tint: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    modifier: Modifier = Modifier,
 ) {
     AppIconResource.loadFile(relativePath)?.let { iconStream ->
-        Icon(
-            loadXmlImageVector(
-                iconStream,
-                LocalDensity.current
-            ), label,
-            tint = tint
-        )
+        Icon(modifier = modifier,
+            imageVector = AppIconResource.loadXmlImageVector(iconStream, LocalDensity.current),
+            contentDescription = label,
+            tint = tint)
     }
 }
 
@@ -136,24 +140,20 @@ fun MouseOverPopup(
     text: String,
     backgroundColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
     foregroundColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
-    content: @Composable () -> Unit
-) = TooltipArea(
-    tooltip = {
-        Surface(
-            modifier = Modifier.shadow(4.dp),
-            color = backgroundColor,
-            shape = RoundedCornerShape(4.dp)
-        ) {
-            Text(text = text, color = foregroundColor, modifier = Modifier.padding(10.dp))
-        }
-    },
+    content: @Composable () -> Unit,
+) = TooltipArea(tooltip = {
+    Surface(modifier = Modifier.shadow(4.dp), color = backgroundColor, shape = RoundedCornerShape(4.dp)) {
+        Text(text = text, color = foregroundColor, modifier = Modifier.padding(10.dp))
+    }
+},
     delayMillis = 750,
-    tooltipPlacement = TooltipPlacement.CursorPoint(
-        offset = DpOffset(10.dp, 10.dp),
-        alignment = Alignment.BottomEnd
-    ),
-    content = content
-)
+    tooltipPlacement = TooltipPlacement.CursorPoint(offset = DpOffset(10.dp, 10.dp), alignment = Alignment.BottomEnd),
+    content = content)/*
 
 fun loadXmlImageVector(stream: InputStream, density: Density): ImageVector =
-    stream.buffered().use { loadXmlImageVector(InputSource(it), density) }
+    stream.buffered().use { loadXmlImageVector(InputSource(it), density) }*/
+
+
+@OptIn(ExperimentalComposeUiApi::class)
+fun Modifier.cursorForHorizontalResize(): Modifier =
+    pointerHoverIcon(PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR)))

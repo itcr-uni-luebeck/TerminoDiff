@@ -18,6 +18,7 @@ import java.util.List;
 /**
  * combined implementation from the samples in jungraph-visualization: SatelliteViewRefactoredMouseDemo and
  * EiglspergerWithGhidraGraphInputExp
+ *
  * @param <V> the vertex class
  * @param <E> the edge class
  */
@@ -44,32 +45,18 @@ public abstract class GraphJFrame<V, E> extends JFrame {
     protected void configureSatelliteViewer(VisualizationViewer<V, E> satelliteViewer) {
     }
 
-    public GraphJFrame(Graph<V, E> graph,
-                       Boolean isDarkTheme,
-                       LocalizedStrings localizedStrings) {
-        this(new Dimension(1000, 1000), new Dimension(200, 200), new Dimension(1000, 100), graph, isDarkTheme, localizedStrings);
+    public GraphJFrame(Graph<V, E> graph, Boolean isDarkTheme, LocalizedStrings localizedStrings, String frameTitle) {
+        this(new Dimension(1000, 1000), new Dimension(200, 200), new Dimension(1000, 100), graph, isDarkTheme, localizedStrings, frameTitle);
     }
 
-    public GraphJFrame(Dimension preferredSizeMain,
-                       Dimension preferredSizeSatellite,
-                       Dimension layoutSize,
-                       Graph<V, E> graph,
-                       Boolean isDarkTheme,
-                       LocalizedStrings localizedStrings) {
+    public GraphJFrame(Dimension preferredSizeMain, Dimension preferredSizeSatellite, Dimension layoutSize, Graph<V, E> graph, Boolean isDarkTheme, LocalizedStrings localizedStrings, String frameTitle) {
         this.isDarkTheme = isDarkTheme;
         this.localizedStrings = localizedStrings;
         visualizationModel = configureVisualizationModel(graph, layoutSize);
         visualizationModel.setLayoutAlgorithm(layoutAlgorithm);
 
-        mainVisualizationViewer = VisualizationViewer.builder(visualizationModel)
-                .graphMouse(graphMouse)
-                .viewSize(preferredSizeMain)
-                .build();
-        satelliteVisualizationViewer = SatelliteVisualizationViewer.builder(mainVisualizationViewer)
-                .viewSize(preferredSizeSatellite)
-                .graphMouse(DefaultSatelliteGraphMouse.builder().build())
-                .transparent(false)
-                .build();
+        mainVisualizationViewer = VisualizationViewer.builder(visualizationModel).graphMouse(graphMouse).viewSize(preferredSizeMain).build();
+        satelliteVisualizationViewer = SatelliteVisualizationViewer.builder(mainVisualizationViewer).viewSize(preferredSizeSatellite).graphMouse(DefaultSatelliteGraphMouse.builder().build()).transparent(false).build();
 
         configureViewers(mainVisualizationViewer, satelliteVisualizationViewer);
 
@@ -85,15 +72,14 @@ public abstract class GraphJFrame<V, E> extends JFrame {
         configureResizeHandler(mainVisualizationViewer, satelliteVisualizationViewer, satelliteVisualizationViewerSize);
 
         JPanel controlPanel = new JPanel(new GridLayout(1, 1));
-        JComponent top = ControlHelpers.getContainer(Box.createHorizontalBox(),
-                ControlHelpers.getCenteredContainer("Layouts", layoutComboBox)
-        );
+        JComponent top = ControlHelpers.getContainer(Box.createHorizontalBox(), ControlHelpers.getCenteredContainer("Layouts", layoutComboBox));
         controlPanel.add(top);
 
         container.add(controlPanel, BorderLayout.NORTH);
         container.add(mainVisualizationViewer.getComponent(), BorderLayout.CENTER);
         getContentPane().add(container);
         setDefaultCloseOperation(WindowConstants.DISPOSE_ON_CLOSE);
+        setTitle(frameTitle);
         pack();
         setVisible(true);
     }
@@ -106,15 +92,13 @@ public abstract class GraphJFrame<V, E> extends JFrame {
 
     @SuppressWarnings("unchecked")
     private void configureLayoutComboBox() {
-        layoutComboBox.addActionListener(e ->
-                SwingUtilities.invokeLater(() -> {
-                    LayoutHelperDirectedGraphs.Layouts layoutType =
-                            (LayoutHelperDirectedGraphs.Layouts) layoutComboBox.getSelectedItem();
-                    assert layoutType != null;
-                    LayoutAlgorithm<V> layoutAlgorithm = layoutType.getLayoutAlgorithm();
+        layoutComboBox.addActionListener(e -> SwingUtilities.invokeLater(() -> {
+            LayoutHelperDirectedGraphs.Layouts layoutType = (LayoutHelperDirectedGraphs.Layouts) layoutComboBox.getSelectedItem();
+            assert layoutType != null;
+            LayoutAlgorithm<V> layoutAlgorithm = layoutType.getLayoutAlgorithm();
 
-                    visualizationModel.setLayoutAlgorithm(layoutAlgorithm);
-                }));
+            visualizationModel.setLayoutAlgorithm(layoutAlgorithm);
+        }));
         layoutComboBox.setSelectedItem(LayoutHelperDirectedGraphs.Layouts.EIGLSPERGERLP);
     }
 
@@ -141,10 +125,7 @@ public abstract class GraphJFrame<V, E> extends JFrame {
 
     @SuppressWarnings("unchecked")
     private VisualizationModel<V, E> configureVisualizationModel(Graph<V, E> graph, Dimension layoutSize) {
-        return VisualizationModel.builder(graph)
-                .layoutAlgorithm(layoutAlgorithm)
-                .layoutSize(layoutSize)
-                .build();
+        return VisualizationModel.builder(graph).layoutAlgorithm(layoutAlgorithm).layoutSize(layoutSize).build();
     }
 
 }
