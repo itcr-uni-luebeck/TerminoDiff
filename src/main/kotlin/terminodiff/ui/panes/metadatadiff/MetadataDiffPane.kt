@@ -19,6 +19,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import org.hl7.fhir.r4.model.CodeSystem
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.i18n.SupportedLocale
@@ -32,6 +34,7 @@ import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.theme.getDiffColors
 import terminodiff.ui.util.*
 
+private val logger: Logger = LoggerFactory.getLogger("MetadataDiffPanel")
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -74,10 +77,10 @@ fun MetadataDiffTable(
     diffColors: DiffColors,
 ) {
 
-    val columnSpecs = listOf(ColumnSpec.propertyColumnSpec(localizedStrings),
-        ColumnSpec.resultColumnSpec(localizedStrings, diffColors),
-        ColumnSpec.leftValueColumnSpec(localizedStrings, diffDataContainer.leftCodeSystem!!),
-        ColumnSpec.rightValueColumnSpec(localizedStrings, diffDataContainer.rightCodeSystem!!))
+    val columnSpecs = listOf(propertyColumnSpec(localizedStrings),
+        resultColumnSpec(localizedStrings, diffColors),
+        leftValueColumnSpec(localizedStrings, diffDataContainer.leftCodeSystem!!),
+        rightValueColumnSpec(localizedStrings, diffDataContainer.rightCodeSystem!!))
     diffDataContainer.codeSystemDiff?.metadataDifferences?.comparisons?.let { comparisons ->
         LazyTable(columnSpecs = columnSpecs,
             lazyListState = lazyListState,
@@ -88,7 +91,7 @@ fun MetadataDiffTable(
     }
 }
 
-private fun ColumnSpec.Companion.propertyColumnSpec(localizedStrings: LocalizedStrings): ColumnSpec<MetadataDiff.MetadataComparison> {
+private fun propertyColumnSpec(localizedStrings: LocalizedStrings): ColumnSpec<MetadataDiff.MetadataComparison> {
     val defaultStrings = getStrings(SupportedLocale.getDefaultLocale())
     val selectableContent: @Composable (MetadataDiff.MetadataComparison) -> Unit = { comparison ->
         SelectableText(comparison.diffItem.label.invoke(localizedStrings),
@@ -109,7 +112,7 @@ private fun ColumnSpec.Companion.propertyColumnSpec(localizedStrings: LocalizedS
     })
 }
 
-private fun ColumnSpec.Companion.resultColumnSpec(localizedStrings: LocalizedStrings, diffColors: DiffColors) =
+private fun resultColumnSpec(localizedStrings: LocalizedStrings, diffColors: DiffColors) =
     ColumnSpec<MetadataDiff.MetadataComparison>(title = localizedStrings.comparison, weight = 0.2f) { comparison ->
         val (backgroundColor, foregroundColor) = colorPairForDiffResult(comparison, diffColors)
         val resultText = localizedStrings.metadataDiffResults_.invoke(comparison.result)
@@ -126,13 +129,21 @@ private fun ColumnSpec.Companion.resultColumnSpec(localizedStrings: LocalizedStr
         @Composable
         fun renderDiffButton() {
             Button(
-                onClick = {},
+                onClick = {
+                    if (comparison.diffItem is MetadataListDiffItem<*, *, *>) {
+                        logger.warn("clicked diff button for ${comparison.diffItem.label.invoke(localizedStrings)}")
+                        // TODO: 19/01/22 nyi dialog -> this can be achieved by displaying the three params of MetadataListDiffItem as columns :)
+                    }
+                },
                 elevation = ButtonDefaults.elevation(4.dp),
                 colors = ButtonDefaults.buttonColors(
                     diffColors.yellowPair.first, diffColors.yellowPair.second
                 )
             ) {
-                Text(text = resultText, style = MaterialTheme.typography.bodyMedium, fontStyle = fontStyle)
+                Text(text = resultText,
+                    style = MaterialTheme.typography.bodyMedium,
+                    fontStyle = fontStyle,
+                    color = diffColors.yellowPair.second)
             }
         }
 
@@ -155,14 +166,14 @@ private fun TextForLeftRightValue(
     codeSystem: CodeSystem,
 ) {
     val text: String? = result.diffItem.renderDisplay.invoke(codeSystem)
-    SelectableText(text = text ?: "null", fontStyle = when {
+    SelectableText(text = text, fontStyle = when {
         text == null -> FontStyle.Italic
         result.diffItem is StringComparisonItem && result.diffItem.drawItalic -> FontStyle.Italic
         else -> FontStyle.Normal
     })
 }
 
-private fun ColumnSpec.Companion.leftValueColumnSpec(
+private fun leftValueColumnSpec(
     localizedStrings: LocalizedStrings,
     leftCodeSystem: CodeSystem,
 ) = ColumnSpec<MetadataDiff.MetadataComparison>(title = localizedStrings.leftValue,
@@ -173,7 +184,7 @@ private fun ColumnSpec.Companion.leftValueColumnSpec(
     TextForLeftRightValue(it, leftCodeSystem)
 }
 
-private fun ColumnSpec.Companion.rightValueColumnSpec(
+private fun rightValueColumnSpec(
     localizedStrings: LocalizedStrings,
     rightCodeSystem: CodeSystem,
 ) = ColumnSpec<MetadataDiff.MetadataComparison>(title = localizedStrings.rightValue, weight = 0.25f) {

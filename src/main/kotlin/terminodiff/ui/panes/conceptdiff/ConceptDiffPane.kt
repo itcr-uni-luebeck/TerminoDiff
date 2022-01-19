@@ -18,7 +18,7 @@ import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.terminodiff.ui.panes.conceptdiff.property.PropertyDialog
+import terminodiff.terminodiff.ui.panes.conceptdiff.propertydesignation.PropertyDesignationDialog
 import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.theme.getDiffColors
 import terminodiff.ui.util.*
@@ -52,7 +52,7 @@ fun ConceptDiffPanel(
     var propertyDialogData: ConceptTableData? by remember { mutableStateOf(null) }
 
     propertyDialogData?.let { conceptTableData ->
-        PropertyDialog(conceptTableData, localizedStrings, useDarkTheme) {
+        PropertyDesignationDialog(conceptTableData, localizedStrings, useDarkTheme) {
             propertyDialogData = null
         }
     }
@@ -98,6 +98,7 @@ fun filterDiffItems(diffDataContainer: DiffDataContainer, activeFilter: String):
         when {
             diff.conceptComparison.any { c -> c.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT } -> true
             diff.propertyComparison.any { p -> p.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL } -> true
+            diff.designationComparison.any { d -> d.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL } -> true
             else -> false
         }
     }.keys

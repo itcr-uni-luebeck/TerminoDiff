@@ -172,10 +172,12 @@ private fun formatEntity(init: String? = null, builder: StringBuilder.() -> Unit
     else -> StringBuilder(init)
 }.apply(builder).trim().toString()
 
-private fun formatCoding(coding: Coding) = formatEntity {
+fun formatCoding(coding: Coding) = formatEntity {
     if (coding.hasSystem()) append("(${coding.system}) ")
     if (coding.hasVersion()) append("(@${coding.version}) ")
-    if (coding.hasCode()) append(coding.code)
+    if (coding.hasCode()) append("${coding.code}: ")
+    if (coding.hasDisplay()) append(coding.display)
+    trimEnd(':', ' ')
 }
 
 private fun formatQuantity(quantity: Quantity) = formatEntity {

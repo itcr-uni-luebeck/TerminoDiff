@@ -10,10 +10,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
-import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.input.pointer.PointerIcon
-import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import li.flor.nativejfilechooser.NativeJFileChooser
@@ -29,11 +26,11 @@ import terminodiff.preferences.AppPreferences
 import terminodiff.ui.AppIconResource
 import terminodiff.ui.AppImageIcon
 import terminodiff.ui.TerminoDiffTopAppBar
+import terminodiff.ui.cursorForHorizontalResize
 import terminodiff.ui.panes.conceptdiff.ConceptDiffPanel
 import terminodiff.ui.panes.graph.ShowGraphsPanel
 import terminodiff.ui.panes.metadatadiff.MetadataDiffPanel
 import terminodiff.ui.theme.TerminoDiffTheme
-import java.awt.Cursor
 import java.io.File
 import java.net.InetAddress
 import java.util.*
@@ -68,8 +65,14 @@ fun TerminodiffAppContent(
     when (val hostname = InetAddress.getLocalHost().hostName.lowercase(Locale.getDefault())) {
         "joshua-athena-windows" ->
             coroutineScope.launch {
-                diffDataContainer.leftFilename = File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2020_10_01.json")
-                diffDataContainer.rightFilename = File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json")
+                diffDataContainer.leftFilename =
+                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2020_10_01.json")
+                diffDataContainer.rightFilename =
+                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json")
+                diffDataContainer.leftFilename =
+                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\icd10gm2010_dimdi.fhir.json")
+                diffDataContainer.rightFilename =
+                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\icd10gm2010_bfarm.fhir.json")
             }
         else -> logger.info("hostname: $hostname")
     }
@@ -101,7 +104,7 @@ fun TerminodiffContentWindow(
     onLoadRightFile: () -> Unit,
     onReload: () -> Unit,
     diffDataContainer: DiffDataContainer,
-    splitPaneState: SplitPaneState
+    splitPaneState: SplitPaneState,
 ) {
     TerminoDiffTheme(useDarkTheme = useDarkTheme) {
         Scaffold(
@@ -210,10 +213,6 @@ private fun ContainerUninitializedContent(
     }
 }
 
-@OptIn(ExperimentalComposeUiApi::class)
-private fun Modifier.cursorForHorizontalResize(): Modifier =
-    pointerHoverIcon(PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR)))
-
 @OptIn(ExperimentalSplitPaneApi::class)
 @Composable
 private fun ContainerInitializedContent(
@@ -222,7 +221,7 @@ private fun ContainerInitializedContent(
     strings: LocalizedStrings,
     useDarkTheme: Boolean,
     diffDataContainer: DiffDataContainer,
-    splitPaneState: SplitPaneState
+    splitPaneState: SplitPaneState,
 ) {
     Column(
         modifier = modifier.scrollable(scrollState, Orientation.Vertical),

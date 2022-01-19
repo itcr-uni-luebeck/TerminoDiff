@@ -29,6 +29,7 @@ abstract class LocalizedStrings(
     val description: String,
     val definition: String = "Definition",
     val designation: String = "Designation",
+    val designations: String,
     val differentValue: String,
     val diffGraph: String,
     val display: String = "Display",
@@ -42,13 +43,13 @@ abstract class LocalizedStrings(
     val loadLeftFile: String,
     val loadRightFile: String,
     val leftValue: String,
+    val language: String,
     val keyIsDifferent_: (String) -> String,
     val rightValue: String,
     val metadataDiff: String,
     val metadataDiffResults_: (MetadataComparisonResult) -> String,
     val name: String = "Name",
     val noDataLoadedTitle: String,
-    val numberDifferent_: (Int) -> String,
     val numberDifferentReason_: (Int, List<String?>) -> String,
     val numberItems_: (Int) -> String = {
         when (it) {
@@ -65,6 +66,9 @@ abstract class LocalizedStrings(
     val purpose: String,
     val property: String,
     val properties: String,
+    val propertiesDesignations: String,
+    val propertiesDesignationsCount: (Int, Int) -> String,
+    val propertiesDesignationsCountDelta: (Pair<Int, Int>, Pair<Int, Int>) -> String,
     val propertyDesignationForCode_: (String) -> String,
     val propertyType: String,
     val reload: String,
@@ -91,39 +95,38 @@ abstract class LocalizedStrings(
 )
 
 enum class SupportedLocale {
-    EN,
-    DE;
+    EN, DE;
 
     companion object {
         fun getDefaultLocale() = EN
     }
 }
 
-class GermanStrings : LocalizedStrings(
-    boolean_ = {
-        when (it) {
-            null -> "null"
-            true -> "WAHR"
-            false -> "FALSCH"
-        }
-    },
+class GermanStrings : LocalizedStrings(boolean_ = {
+    when (it) {
+        null -> "null"
+        true -> "WAHR"
+        false -> "FALSCH"
+    }
+},
     bothListsAreEmpty = "Beide Listen sind leer",
     bothValuesAreNull = "Beide Werte sind null",
     canonicalUrl = "Kanonische URL",
     changeLanguage = "Sprache wechseln",
-    conceptDiff = "Konzept-Diff",
-    contact = "Kontakt",
     comparison = "Vergleich",
     compositional = "Kompositionell?",
-    count = "Anzahl",
+    conceptDiff = "Konzept-Diff",
     conceptDiffResults_ = {
         when (it) {
             ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> "Unterschiedlich"
             ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identisch"
         }
     },
+    contact = "Kontakt",
+    count = "Anzahl",
     date = "Datum",
     description = "Beschreibung",
+    designations = "Bezeichnungen",
     differentValue = "Unterschiedliche Werte",
     diffGraph = "Differenz-Graph",
     displayAndInWhich_ = { display, inWhich ->
@@ -142,6 +145,7 @@ class GermanStrings : LocalizedStrings(
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
     leftValue = "Linker Wert",
+    language = "Sprache",
     keyIsDifferent_ = { "Schlüssel '$it' ist unterschiedlich" },
     rightValue = "Rechter Wert",
     metadataDiff = "Metadaten-Diff",
@@ -152,7 +156,6 @@ class GermanStrings : LocalizedStrings(
         }
     },
     noDataLoadedTitle = "Keine Daten geladen",
-    numberDifferent_ = { "$it unterschiedlich" },
     numberDifferentReason_ = { count, differences ->
         val reason = differences.filterNotNull().joinToString(separator = "; ", limit = 3)
         "$count unterschiedlich: $reason"
@@ -163,11 +166,20 @@ class GermanStrings : LocalizedStrings(
     onlyInRight = "Nur rechts",
     overallComparison = "Gesamt",
     publisher = "Herausgeber",
+    purpose = "Zweck",
     property = "Eigenschaft",
     properties = "Eigenschaften",
+    propertiesDesignations = "Eigenschaften / Bezeichnungen",
+    propertiesDesignationsCount = { p, d -> "$p E / $d B" },
+    propertiesDesignationsCountDelta = { p, d ->
+        when {
+            p.second == 0 && d.second != 0 -> "${p.first} E / ${d.first} Δ${d.second} B"
+            p.second != 0 && d.second == 0 -> "${p.first} Δ${p.second} E / ${d.first} B"
+            else -> "${p.first} Δ${p.second} E / ${d.first} Δ${d.second} B"
+        }
+    },
     propertyDesignationForCode_ = { code -> "Eigenschaften und Bezeichnungen für Konzept '$code'" },
     propertyType = "Typ",
-    purpose = "Zweck",
     reload = "Neu laden",
     showAll = "Alle",
     showDifferent = "Unterschiedliche",
@@ -175,19 +187,18 @@ class GermanStrings : LocalizedStrings(
     showLeftGraphButton = "Linken Graphen zeigen",
     showRightGraphButton = "Rechten Graphen zeigen",
     supplements = "Ergänzt",
+    toggleDarkTheme = "Helles/Dunkles Thema",
     textDifferent = "Text ist unterschiedlich",
     textDifferentAndAnotherReason_ = { otherReason ->
         "Text ist unterschiedlich, und $otherReason"
     },
     title = "Titel",
-    toggleDarkTheme = "Helles/Dunkles Thema",
     uniLuebeck = "Universität zu Lübeck",
     useContext = "Nutzungskontext",
     value = "Wert",
     versionNeeded = "Version erforderlich?",
     leftFileOpenFilename_ = { file -> "Linke Datei geöffnet: ${file.absolutePath}" },
-    rightFileOpenFilename_ = { file -> "Rechte Datei geöffnet: ${file.absolutePath}" }
-)
+    rightFileOpenFilename_ = { file -> "Rechte Datei geöffnet: ${file.absolutePath}" })
 
 class EnglishStrings : LocalizedStrings(
     boolean_ = {
@@ -201,19 +212,20 @@ class EnglishStrings : LocalizedStrings(
     bothValuesAreNull = "Both values are null",
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
-    conceptDiff = "Concept Diff",
-    contact = "Contact",
     comparison = "Comparison",
     compositional = "Compositional?",
-    count = "Count",
+    conceptDiff = "Concept Diff",
     conceptDiffResults_ = {
         when (it) {
             ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT -> "Different"
             ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identical"
         }
     },
+    contact = "Contact",
+    count = "Count",
     date = "Date",
     description = "Description",
+    designations = "Designations",
     differentValue = "Different value",
     diffGraph = "Difference Graph",
     displayAndInWhich_ = { display, inWhich ->
@@ -232,6 +244,7 @@ class EnglishStrings : LocalizedStrings(
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
     leftValue = "Left value",
+    language = "Language",
     keyIsDifferent_ = { "Key '$it' is different" },
     rightValue = "Right value",
     metadataDiff = "Metadata Diff",
@@ -242,7 +255,6 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     noDataLoadedTitle = "No data loaded",
-    numberDifferent_ = { "$it different" },
     numberDifferentReason_ = { count, differences ->
         "$count different: ${differences.joinToString(separator = "; ", limit = 3)}"
     },
@@ -255,6 +267,15 @@ class EnglishStrings : LocalizedStrings(
     purpose = "Purpose",
     property = "Property",
     properties = "Properties",
+    propertiesDesignations = "Properties / Designations",
+    propertiesDesignationsCount = { p, d -> "$p P / $d D" },
+    propertiesDesignationsCountDelta = { p, d ->
+        when {
+            p.second == 0 && d.second != 0 -> "${p.first} P / ${d.first} Δ${d.second} D"
+            p.second != 0 && d.second == 0 -> "${p.first} Δ${p.second} P / ${d.first} D"
+            else -> "${p.first} Δ${p.second} P / ${d.first} Δ${d.second} D"
+        }
+    },
     propertyDesignationForCode_ = { code -> "Properties and designations for concept '$code'" },
     propertyType = "Type",
     reload = "Reload",
@@ -264,12 +285,12 @@ class EnglishStrings : LocalizedStrings(
     showLeftGraphButton = "Show left graph",
     showRightGraphButton = "Show right graph",
     supplements = "Supplements",
+    toggleDarkTheme = "Toggle dark theme",
     textDifferent = "Text is different",
     textDifferentAndAnotherReason_ = { otherReason ->
         "Text is different, and $otherReason"
     },
     title = "Title",
-    toggleDarkTheme = "Toggle dark theme",
     uniLuebeck = "University of Luebeck",
     useContext = "Use context",
     value = "Value",
@@ -278,8 +299,7 @@ class EnglishStrings : LocalizedStrings(
     rightFileOpenFilename_ = { file -> "Right file open: ${file.absolutePath}" },
 )
 
-fun getStrings(locale: SupportedLocale = SupportedLocale.getDefaultLocale()): LocalizedStrings =
-    when (locale) {
-        SupportedLocale.DE -> GermanStrings()
-        SupportedLocale.EN -> EnglishStrings()
-    }
+fun getStrings(locale: SupportedLocale = SupportedLocale.getDefaultLocale()): LocalizedStrings = when (locale) {
+    SupportedLocale.DE -> GermanStrings()
+    SupportedLocale.EN -> EnglishStrings()
+}

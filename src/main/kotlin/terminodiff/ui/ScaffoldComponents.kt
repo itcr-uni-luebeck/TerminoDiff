@@ -16,6 +16,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerIcon
+import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadXmlImageVector
 import androidx.compose.ui.unit.Density
@@ -23,6 +25,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.xml.sax.InputSource
 import terminodiff.i18n.LocalizedStrings
+import java.awt.Cursor
 import java.io.InputStream
 
 typealias ImageRelativePath = String
@@ -149,3 +152,8 @@ fun MouseOverPopup(
 
 fun loadXmlImageVector(stream: InputStream, density: Density): ImageVector =
     stream.buffered().use { loadXmlImageVector(InputSource(it), density) }*/
+
+
+@OptIn(ExperimentalComposeUiApi::class)
+fun Modifier.cursorForHorizontalResize(): Modifier =
+    pointerHoverIcon(PointerIcon(Cursor(Cursor.N_RESIZE_CURSOR)))

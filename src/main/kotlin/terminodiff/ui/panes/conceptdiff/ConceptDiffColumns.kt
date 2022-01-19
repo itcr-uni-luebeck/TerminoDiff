@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import terminodiff.engine.concepts.ConceptDiff
@@ -38,7 +37,7 @@ fun conceptDiffColumnSpecs(
 ) = listOf(codeColumnSpec(localizedStrings),
     displayColumnSpec(localizedStrings, diffColors),
     definitionColumnSpec(localizedStrings, diffColors),
-    propertyColumnSpec(localizedStrings, diffColors, showPropertyDialog),
+    propertyDesignationColumnSpec(localizedStrings, diffColors, showPropertyDialog),
     overallComparisonColumnSpec(localizedStrings, diffColors))
 
 private fun codeColumnSpec(localizedStrings: LocalizedStrings) =
@@ -65,19 +64,26 @@ private fun definitionColumnSpec(
     weight = 0.25f,
     stringValueResolver = FhirConceptDetails::definition)
 
-private fun propertyColumnSpec(
+private fun propertyDesignationColumnSpec(
     localizedStrings: LocalizedStrings, diffColors: DiffColors,
     showPropertyDialog: (ConceptTableData) -> Unit,
-) = ColumnSpec<ConceptTableData>(title = localizedStrings.properties, weight = 0.25f, tooltipText = null) { data ->
+) = ColumnSpec<ConceptTableData>(title = localizedStrings.propertiesDesignations,
+    weight = 0.25f,
+    tooltipText = null) { data ->
     when {
         data.isInBoth() -> {
-            when(val countDifferent = data.diff!!.propertyComparison.count { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL}) {
-                0 -> Button(onClick = {showPropertyDialog(data)},
+            val propertyDifferenceCount =
+                data.diff!!.propertyComparison.count { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }
+            val designationDifferenceCount =
+                data.diff.designationComparison.count { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }
+            when {
+                propertyDifferenceCount == 0 && designationDifferenceCount == 0 -> Button(onClick = {
+                    showPropertyDialog(data)
+                },
                     elevation = ButtonDefaults.elevation(4.dp),
-                    colors = ButtonDefaults.buttonColors(diffColors.greenPair.first,
-                        diffColors.greenPair.second)) {
-                    Text(text = localizedStrings.identical,
-                        color = diffColors.yellowPair.second)
+                    colors = ButtonDefaults.buttonColors(diffColors.greenPair.first, diffColors.greenPair.second)) {
+                    Text(text = localizedStrings.propertiesDesignationsCount(data.diff.propertyComparison.count(),
+                        data.diff.designationComparison.count()), color = diffColors.yellowPair.second)
                 }
                 else -> {
                     Row {
@@ -87,7 +93,8 @@ private fun propertyColumnSpec(
                             elevation = ButtonDefaults.elevation(4.dp),
                             colors = ButtonDefaults.buttonColors(diffColors.yellowPair.first,
                                 diffColors.yellowPair.second)) {
-                            Text(text = localizedStrings.numberDifferent_.invoke(countDifferent),
+                            Text(text = localizedStrings.propertiesDesignationsCountDelta.invoke(data.diff.propertyComparison.count() to propertyDifferenceCount,
+                                data.diff.designationComparison.count() to designationDifferenceCount),
                                 color = diffColors.yellowPair.second)
                         }
                     }
@@ -102,7 +109,14 @@ private fun propertyColumnSpec(
                 colors = ButtonDefaults.outlinedButtonColors(backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.onTertiaryContainer)) {
-                Text(localizedStrings.properties, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                val text = when (data.isOnlyInLeft()) {
+                    true -> data.leftDetails!!
+                    else -> data.rightDetails!!
+                }.let { details ->
+                    localizedStrings.propertiesDesignationsCount.invoke(details.property.count(),
+                        details.designation.count())
+                }
+                Text(text = text, color = MaterialTheme.colorScheme.onTertiaryContainer)
             }
         }
     }
@@ -119,7 +133,8 @@ private fun overallComparisonColumnSpec(
         true -> {
             val anyDifferent = data.diff!!.conceptComparison.any {
                 it.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT
-            }
+            } || data.diff.propertyComparison.any { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }
+                    || data.diff.designationComparison.any { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }
             val colors: Pair<Color, Color> = if (anyDifferent) diffColors.yellowPair else diffColors.greenPair
             val chipLabel: String =
                 if (anyDifferent) localizedStrings.conceptDiffResults_.invoke(ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT)
@@ -169,9 +184,7 @@ private fun columnSpecForProperty(
                 labelToFind = labelToFind,
                 text = tooltipTextFun(data).invoke())
             singleConcept != null -> { // else
-                val text = stringValueResolver.invoke(singleConcept)
-                SelectableText(text = text ?: "null",
-                    fontStyle = if (text == null) FontStyle.Italic else FontStyle.Normal)
+                SelectableText(text = stringValueResolver.invoke(singleConcept))
             }
         }
     }
@@ -201,7 +214,7 @@ private fun contentWithText(
             labelToFind = labelToFind,
             localizedStrings = localizedStrings,
             diffColors = diffColors)
-        SelectableText(text = text ?: "null", fontStyle = if (text == null) FontStyle.Italic else FontStyle.Normal)
+        SelectableText(text = text)
     }
 }
 
