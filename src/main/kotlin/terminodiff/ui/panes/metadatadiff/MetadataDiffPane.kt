@@ -83,6 +83,7 @@ fun MetadataDiffTable(
             lazyListState = lazyListState,
             tableData = comparisons,
             backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+            zebraStripingColor = MaterialTheme.colorScheme.primaryContainer,
             keyFun = { it.diffItem.label.invoke(localizedStrings) })
     }
 }

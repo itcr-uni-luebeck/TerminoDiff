@@ -5,6 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontStyle
+import org.hl7.fhir.r4.model.CodeSystem
 import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.engine.graph.FhirConceptProperty
 import terminodiff.i18n.LocalizedStrings
@@ -21,13 +22,14 @@ fun columnSpecsDifferentProperties(
     diffColors: DiffColors,
 ): List<ColumnSpec<PropDiffData>> = listOf(propertyCodeColumnSpec(localizedStrings) { it.key },
     propertyComparisonColumnSpec(localizedStrings, diffColors),
+    propertyTypeColumnSpec(localizedStrings) { it.propertyType },
     leftValueColumnSpec(localizedStrings),
     rightValueColumnSpec(localizedStrings))
 
 fun columnSpecsIdenticalProperties(
     localizedStrings: LocalizedStrings,
 ): List<ColumnSpec<FhirConceptProperty>> = listOf(propertyCodeColumnSpec(localizedStrings) { it.propertyCode },
-    propertyTypeColumnSpec(localizedStrings),
+    propertyTypeColumnSpec(localizedStrings) { it.type },
     propertyValueColumnSpec(localizedStrings))
 
 private fun <T> propertyCodeColumnSpec(localizedStrings: LocalizedStrings, codeGetter: (T) -> String) =
@@ -35,16 +37,14 @@ private fun <T> propertyCodeColumnSpec(localizedStrings: LocalizedStrings, codeG
         SelectableText(codeGetter.invoke(it), color = MaterialTheme.colorScheme.onPrimaryContainer)
     }
 
-private fun propertyTypeColumnSpec(localizedStrings: LocalizedStrings) =
-    ColumnSpec<FhirConceptProperty>(localizedStrings.property, weight = 0.2f) {
-        textForLeftRightValue(it.type.name)
-        // TODO: 18/01/22 localized string
+private fun <T> propertyTypeColumnSpec(localizedStrings: LocalizedStrings, typeGetter: (T) -> CodeSystem.PropertyType) =
+    ColumnSpec<T>(localizedStrings.propertyType, weight = 0.2f) {
+        textForLeftRightValue(typeGetter.invoke(it).name)
     }
 
 private fun propertyValueColumnSpec(localizedStrings: LocalizedStrings) =
-    ColumnSpec<FhirConceptProperty>(localizedStrings.rightValue, weight = 0.6f) {
+    ColumnSpec<FhirConceptProperty>(localizedStrings.value, weight = 0.6f) {
         textForLeftRightValue(it.value)
-        // TODO: 18/01/22 localized string
     }
 
 private fun propertyComparisonColumnSpec(localizedStrings: LocalizedStrings, diffColors: DiffColors) =
@@ -52,7 +52,7 @@ private fun propertyComparisonColumnSpec(localizedStrings: LocalizedStrings, dif
         val colorPair: Pair<Color, Color>
         val chipText: String
         var chipIcon: ImageVector? = null
-        when (diffData.kind) {
+        when (diffData.result) {
             KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL -> {
                 colorPair = diffColors.greenPair
                 chipText = localizedStrings.identical
@@ -78,15 +78,15 @@ private fun propertyComparisonColumnSpec(localizedStrings: LocalizedStrings, dif
 private fun leftValueColumnSpec(localizedStrings: LocalizedStrings) =
     ColumnSpec<PropDiffData>(title = localizedStrings.leftValue,
         weight = 0.4f,
-        mergeIf = { it.kind == KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }) {
-        if (it.kind != KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_LEFT) {
+        mergeIf = { it.result == KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }) {
+        if (it.result != KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_LEFT) {
             textForLeftRightValue(it.leftValue?.joinToString())
         }
     }
 
 private fun rightValueColumnSpec(localizedStrings: LocalizedStrings) =
     ColumnSpec<PropDiffData>(title = localizedStrings.rightValue, weight = 0.4f) {
-        if (it.kind != KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT) textForLeftRightValue(it.rightValue?.joinToString())
+        if (it.result != KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT) textForLeftRightValue(it.rightValue?.joinToString())
     }
 
 @Composable

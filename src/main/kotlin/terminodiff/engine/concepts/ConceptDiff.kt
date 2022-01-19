@@ -1,12 +1,15 @@
 package terminodiff.engine.concepts
 
 import org.hl7.fhir.r4.model.CodeSystem
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import terminodiff.engine.graph.FhirConceptDetails
+import terminodiff.engine.graph.PropertyMap
 import terminodiff.i18n.LocalizedStrings
 
-typealias FhirConcept = CodeSystem.ConceptDefinitionComponent
-
 typealias PropertyDiff = MutableList<KeyedListDiffResult<String, String>>
+
+private val logger: Logger = LoggerFactory.getLogger("ConceptDiff")
 
 data class ConceptDiff(
     val conceptComparison: List<ConceptDiffResult>,
@@ -27,6 +30,8 @@ data class ConceptDiff(
         fun compareConcept(
             leftConcept: FhirConceptDetails,
             rightConcept: FhirConceptDetails,
+            leftProperties: PropertyMap,
+            rightProperties: PropertyMap,
         ): ConceptDiff {
             val conceptDiff = diffItems.map { di ->
                 di.compare(leftConcept, rightConcept)
@@ -36,10 +41,10 @@ data class ConceptDiff(
             val propertyDiff: PropertyDiff = keyedListDiff(
                 left = leftProperty,
                 right = rightProperty,
-                getKey = { propertyCode },
-                getStringValue = { this.value } // TODO: 23/12/21 depending on the type of the property, we will need to retrieve the type from PropertyMap
-                // and use the valueCoding, etc. instances for comparison. This may require merging the left and right property lists beforehand.
-            )
+                leftProperties = leftProperties,
+                rightProperties = rightProperties,
+                getKey = { propertyCode }
+            ) { this.value }
             return ConceptDiff(conceptDiff, propertyDiff)
         }
     }
@@ -82,6 +87,9 @@ fun <T, K> keyedListDiff(
     left: List<T>,
     right: List<T>,
     getKey: T.() -> K,
+    leftProperties: PropertyMap,
+    rightProperties: PropertyMap,
+    getStringKey: (K) -> String = { it.toString() },
     getStringValue: T.() -> String?,
 ): MutableList<KeyedListDiffResult<K, String>> {
     val diffResult = mutableListOf<KeyedListDiffResult<K, String>>()
@@ -91,8 +99,9 @@ fun <T, K> keyedListDiff(
     onlyInLeft.forEach {
         diffResult.add(
             KeyedListDiffResult(
-                kind = KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_LEFT,
-                key = it
+                result = KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_LEFT,
+                key = it,
+                propertyType = leftProperties[getStringKey(it)]!!
             )
         )
     }
@@ -100,13 +109,14 @@ fun <T, K> keyedListDiff(
     onlyInRight.forEach {
         diffResult.add(
             KeyedListDiffResult(
-                kind = KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT,
-                key = it
+                result = KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT,
+                key = it,
+                propertyType = rightProperties[getStringKey(it)]!!
             )
         )
     }
     val inBoth = leftKeys.plus(rightKeys).minus(onlyInLeft).minus(onlyInRight)
-    diffResult.addAll(left.filter { it.getKey() in inBoth }.groupBy(getKey).map { l ->
+    diffResult.addAll(left.filter { it.getKey() in inBoth }.groupBy(getKey).mapNotNull { l ->
         val valueLeft = l.value.map(getStringValue)
         val matchingRight = right.filter { r -> r.getKey() == l.key }
         val valueRight = matchingRight.map(getStringValue)
@@ -115,19 +125,33 @@ fun <T, K> keyedListDiff(
                 valueLeft != valueRight -> KeyedListDiffResult.KeyedListDiffResultKind.VALUE_DIFFERENT
                 else -> KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL
             }
-        KeyedListDiffResult(
-            kind = result,
-            key = l.key,
-            leftValue = valueLeft,
-            rightValue = valueRight
-        )
+        val stringKey = getStringKey(l.key)
+        val propertyType = leftProperties[stringKey]
+        when {
+            propertyType == null -> {
+                logger.warn("The property type for prop-code='$stringKey' is null, this is not supported")
+                return@mapNotNull null
+            }
+            propertyType != rightProperties[stringKey] -> {
+                logger.warn("The property type for prop-code='$stringKey' is different, this is not supported")
+                return@mapNotNull null
+            }
+            else -> KeyedListDiffResult(
+                result = result,
+                key = l.key,
+                propertyType = propertyType,
+                leftValue = valueLeft,
+                rightValue = valueRight
+            )
+        }
     })
     return diffResult
 }
 
 data class KeyedListDiffResult<K, V>(
-    val kind: KeyedListDiffResultKind,
+    val result: KeyedListDiffResultKind,
     val key: K,
+    val propertyType: CodeSystem.PropertyType,
     val leftValue: List<V?>? = null,
     val rightValue: List<V?>? = null,
 ) {

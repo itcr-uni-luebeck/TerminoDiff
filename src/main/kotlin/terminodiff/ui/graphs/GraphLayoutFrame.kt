@@ -14,10 +14,11 @@ import terminodiff.java.ui.DiffGraphJFrame
 fun codeSystemGraphLayoutFrame(
     codeSystem: CodeSystem,
     useDarkTheme: Boolean,
-    localizedStrings: LocalizedStrings
+    localizedStrings: LocalizedStrings,
+    frameTitle: String
 ) {
     val graphBuilder = CodeSystemGraphBuilder(codeSystem = codeSystem, localizedStrings)
-    CodeSystemGraphJFrame(graphBuilder.graph, useDarkTheme, localizedStrings) { c: String ->
+    CodeSystemGraphJFrame(graphBuilder.graph, useDarkTheme, localizedStrings, frameTitle) { c: String ->
         graphBuilder.nodeTree[c]?.display ?: "no display"
     }
 }
@@ -25,5 +26,6 @@ fun codeSystemGraphLayoutFrame(
 fun diffGraphLayoutFrame(
     diffGraph: Graph<DiffNode, DiffEdge>,
     useDarkTheme: Boolean,
-    localizedStrings: LocalizedStrings
-) = DiffGraphJFrame(diffGraph, useDarkTheme, localizedStrings)
+    localizedStrings: LocalizedStrings,
+    frameTitle: String
+) = DiffGraphJFrame(diffGraph, useDarkTheme, localizedStrings, frameTitle)

@@ -1,15 +1,12 @@
 package terminodiff.ui.util
 
-import androidx.compose.animation.core.AnimationSpec
-import androidx.compose.animation.core.SpringSpec
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.MutatePriority
 import androidx.compose.foundation.gestures.*
-import androidx.compose.foundation.interaction.InteractionSource
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.*
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.Saver
@@ -116,13 +113,6 @@ class CarouselScrollState(initial: Int) : ScrollableState {
             _length.value = length
         }
 
-    /**
-     * [InteractionSource] that will be used to dispatch drag events when this
-     * list is being dragged. If you want to know whether the fling (or smooth scroll) is in
-     * progress, use [isScrollInProgress].
-     */
-    val interactionSource: InteractionSource get() = internalInteractionSource
-
     internal val internalInteractionSource: MutableInteractionSource = MutableInteractionSource()
 
     private var _maxValueState = mutableStateOf(Int.MAX_VALUE, structuralEqualityPolicy())
@@ -159,33 +149,6 @@ class CarouselScrollState(initial: Int) : ScrollableState {
     override val isScrollInProgress: Boolean
         get() = scrollableState.isScrollInProgress
 
-    /**
-     * Scroll to position in pixels with animation.
-     *
-     * @param value target value in pixels to smooth scroll to, value will be coerced to
-     * 0..maxPosition
-     * @param animationSpec animation curve for smooth scroll animation
-     */
-    suspend fun animateScrollTo(
-        value: Int,
-        animationSpec: AnimationSpec<Float> = SpringSpec(),
-    ) {
-        this.animateScrollBy((value - this.value).toFloat(), animationSpec)
-    }
-
-    /**
-     * Instantly jump to the given position in pixels.
-     *
-     * Cancels the currently running scroll, if any, and suspends until the cancellation is
-     * complete.
-     *
-     * @see animateScrollTo for an animated version
-     *
-     * @param value number of pixels to scroll by
-     * @return the amount of scroll consumed
-     */
-    suspend fun scrollTo(value: Int): Float = this.scrollBy((value - this.value).toFloat())
-
     companion object {
         /**
          * The default [Saver] implementation for [CarouselScrollState].
@@ -200,8 +163,6 @@ class CarouselScrollState(initial: Int) : ScrollableState {
 /**
  * Modify element to allow to scroll vertically when height of the content is bigger than max
  * constraints allow.
- *
- * @sample androidx.compose.foundation.samples.VerticalScrollExample
  *
  * In order to use this modifier, you need to create and own [CarouselScrollState]
  * @see [rememberCarouselScrollState]
@@ -556,7 +517,7 @@ fun Carousel(
  * **NOTE: Use this when items are of different sizes and were known to calculate scroll length**
  *
  * @param state is the state of the scroll using [LazyListState]
- * @param totalLength is the total length of all item combined in [Px] along the main axis.
+ * @param totalLength is the total length of all item combined in Px along the main axis.
  * @param modifier [Modifier] to be applied to the View. If size (width or height) is not
  * set, then it takes the default values [DefaultCarouselWidth] and [DefaultCarouselHeight]
  * for width and height respectively.
@@ -566,7 +527,7 @@ fun Carousel(
  * be. percentage is with respective to the width of the bar.
  * @param colors [CarouselColors] that accepts color and brush for thumb and bg to draw
  * based on the [LazyListState.isScrollInProgress]
- * @param scrolled is a lambda to calculate the amount that scrolled along main axis in [Px]
+ * @param scrolled is a lambda to calculate the amount that scrolled along main axis in Px
  *
  * @see rememberLazyListState
  *
@@ -722,9 +683,9 @@ object CarouselDefaults {
 
     @Composable
     fun colors(
-        thumbColor: Color = MaterialTheme.colorScheme.onSecondaryContainer,
+        thumbColor: Color = colorScheme.onSecondaryContainer,
         scrollingThumbColor: Color = thumbColor,
-        backgroundColor: Color = contentColorFor(thumbColor).copy(alpha = BgAlpha),
+        backgroundColor: Color = colorScheme.contentColorFor(thumbColor).copy(alpha = BgAlpha),
         scrollingBackgroundColor: Color = backgroundColor,
     ): CarouselColors = DefaultCarousalColors(
         thumbBrush = SolidColor(thumbColor),
@@ -733,7 +694,7 @@ object CarouselDefaults {
         scrollingBackgroundBrush = SolidColor(scrollingBackgroundColor)
     )
 
-    const val BgAlpha = 0.5f
+    private const val BgAlpha = 0.5f
 }
 
 @Immutable

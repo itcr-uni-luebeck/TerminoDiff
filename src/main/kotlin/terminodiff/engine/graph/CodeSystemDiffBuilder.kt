@@ -46,7 +46,9 @@ class CodeSystemDiffBuilder(
             }
             code to ConceptDiff.compareConcept(
                 leftConcept = leftConcept,
-                rightConcept = rightConcept
+                rightConcept = rightConcept,
+                leftProperties = leftBuilder.simplePropertyCodeTypes,
+                rightProperties = rightBuilder.simplePropertyCodeTypes
             )
         }.forEach { (code, conceptDiff) ->
             conceptDifferences[code] = conceptDiff
@@ -74,11 +76,11 @@ class CodeSystemDiffBuilder(
             val fromConcept = graphBuilder.nodeTree[edge.from]
             when {
                 toConcept == null -> {
-                    logger.warn("the code '${edge.to}' for property '${edge.propertyCode}' was not found in $kind")
+                    logger.warn("the target code '${edge.to}' for property '${edge.propertyCode}' (from ${edge.from}) was not found in $kind")
                     return@mapNotNull null
                 }
                 fromConcept == null -> {
-                    logger.warn("the code '${edge.from}' for property '${edge.propertyCode}' was not found in $kind")
+                    logger.warn("the origin code '${edge.from}' for property '${edge.propertyCode}' (to ${edge.to}) was not found in $kind")
                     return@mapNotNull null
                 }
                 else -> DiffEdge(

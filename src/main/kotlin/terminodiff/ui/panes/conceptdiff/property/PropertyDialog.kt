@@ -1,13 +1,13 @@
-package terminodiff.terminodiff.ui.panes.conceptdiff
+package terminodiff.terminodiff.ui.panes.conceptdiff.property
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material3.LocalContentColor
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -21,9 +21,6 @@ import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.engine.graph.FhirConceptProperty
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.terminodiff.ui.panes.conceptdiff.property.PropDiffData
-import terminodiff.terminodiff.ui.panes.conceptdiff.property.columnSpecsDifferentProperties
-import terminodiff.terminodiff.ui.panes.conceptdiff.property.columnSpecsIdenticalProperties
 import terminodiff.ui.panes.conceptdiff.ConceptTableData
 import terminodiff.ui.theme.getDiffColors
 import terminodiff.ui.util.ColumnSpec
@@ -48,11 +45,9 @@ fun PropertyDialog(
                 when {
                     conceptData.isInBoth() -> DiffPropertyTable(conceptData.diff!!, diffColumnSpecs, listState)
                     conceptData.isOnlyInLeft() -> SingleConceptPropertyTable(conceptData.leftDetails!!,
-                        localizedStrings,
                         identicalColumnSpecs,
                         listState)
                     conceptData.isOnlyInRight() -> SingleConceptPropertyTable(conceptData.rightDetails!!,
-                        localizedStrings,
                         identicalColumnSpecs,
                         listState)
                 }
@@ -64,16 +59,17 @@ fun PropertyDialog(
 @Composable
 fun SingleConceptPropertyTable(
     details: FhirConceptDetails,
-    localizedStrings: LocalizedStrings,
     identicalColumnSpecs: List<ColumnSpec<FhirConceptProperty>>,
     lazyListState: LazyListState,
 ) =
     details.property?.let { tableData ->
-        LazyTable(columnSpecs = identicalColumnSpecs,
+        LazyTable(
+            modifier = Modifier.padding(8.dp),
+            columnSpecs = identicalColumnSpecs,
             lazyListState = lazyListState,
             tableData = tableData,
             backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-            foregroundColor = MaterialTheme.colorScheme.onPrimaryContainer
+            zebraStripingColor = MaterialTheme.colorScheme.tertiaryContainer
         ) { it.propertyCode }
     }
 
@@ -84,9 +80,10 @@ fun DiffPropertyTable(
     diffColumnSpecs: List<ColumnSpec<KeyedListDiffResult<String, String>>>,
     lazyListState: LazyListState,
 ) = LazyTable(
+    modifier = Modifier.padding(8.dp),
     columnSpecs = diffColumnSpecs,
     lazyListState = lazyListState,
     tableData = conceptDiff.propertyComparison,
     backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-    foregroundColor = MaterialTheme.colorScheme.onPrimaryContainer,
+    zebraStripingColor = MaterialTheme.colorScheme.tertiaryContainer
 ) { it.key }

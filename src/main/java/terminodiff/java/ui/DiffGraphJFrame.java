@@ -12,8 +12,8 @@ import java.awt.*;
 
 public class DiffGraphJFrame extends GraphJFrame<DiffNode, DiffEdge> {
 
-    public DiffGraphJFrame(Graph<DiffNode, DiffEdge> graph, Boolean isDarkTheme, LocalizedStrings localizedStrings) {
-        super(graph, isDarkTheme, localizedStrings);
+    public DiffGraphJFrame(Graph<DiffNode, DiffEdge> graph, Boolean isDarkTheme, LocalizedStrings localizedStrings, String frameTitle) {
+        super(graph, isDarkTheme, localizedStrings, frameTitle);
     }
 
     @Override

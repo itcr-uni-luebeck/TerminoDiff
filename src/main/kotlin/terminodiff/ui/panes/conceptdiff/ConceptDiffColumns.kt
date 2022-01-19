@@ -68,10 +68,10 @@ private fun definitionColumnSpec(
 private fun propertyColumnSpec(
     localizedStrings: LocalizedStrings, diffColors: DiffColors,
     showPropertyDialog: (ConceptTableData) -> Unit,
-) = ColumnSpec<ConceptTableData>(title = localizedStrings.property, weight = 0.25f, tooltipText = null) { data ->
+) = ColumnSpec<ConceptTableData>(title = localizedStrings.properties, weight = 0.25f, tooltipText = null) { data ->
     when {
         data.isInBoth() -> {
-            when(val countDifferent = data.diff!!.propertyComparison.count { it.kind != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL}) {
+            when(val countDifferent = data.diff!!.propertyComparison.count { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL}) {
                 0 -> Button(onClick = {showPropertyDialog(data)},
                     elevation = ButtonDefaults.elevation(4.dp),
                     colors = ButtonDefaults.buttonColors(diffColors.greenPair.first,
@@ -102,7 +102,7 @@ private fun propertyColumnSpec(
                 colors = ButtonDefaults.outlinedButtonColors(backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
                     contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
                 border = BorderStroke(1.dp, MaterialTheme.colorScheme.onTertiaryContainer)) {
-                Text(localizedStrings.property, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                Text(localizedStrings.properties, color = MaterialTheme.colorScheme.onTertiaryContainer)
             }
         }
     }
@@ -147,7 +147,7 @@ private fun columnSpecForProperty(
     title: String,
     diffColors: DiffColors,
     labelToFind: String,
-    weight: Float,
+    @Suppress("SameParameterValue") weight: Float,
     stringValueResolver: (FhirConceptDetails) -> String?,
 ): ColumnSpec<ConceptTableData> {
     val tooltipTextFun: (ConceptTableData) -> () -> String? =

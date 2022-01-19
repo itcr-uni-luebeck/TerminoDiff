@@ -1,6 +1,5 @@
 package terminodiff.ui.panes.conceptdiff
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.*
 import androidx.compose.material.*
@@ -8,11 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.rememberDialogState
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -23,11 +18,10 @@ import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.terminodiff.ui.panes.conceptdiff.PropertyDialog
+import terminodiff.terminodiff.ui.panes.conceptdiff.property.PropertyDialog
 import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.theme.getDiffColors
 import terminodiff.ui.util.*
-import java.awt.Window
 import java.util.*
 
 private val logger: Logger = LoggerFactory.getLogger("conceptdiffpanel")
@@ -103,7 +97,7 @@ fun filterDiffItems(diffDataContainer: DiffDataContainer, activeFilter: String):
     val differentCodesInDiff = conceptDiff.filterValues { diff ->
         when {
             diff.conceptComparison.any { c -> c.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT } -> true
-            diff.propertyComparison.any { p -> p.kind != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL } -> true
+            diff.propertyComparison.any { p -> p.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL } -> true
             else -> false
         }
     }.keys
@@ -188,5 +182,6 @@ fun TableScreen(
         lazyListState = lazyListState,
         tableData = containedData,
         keyFun = { it.code },
-        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer)
+        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+        zebraStripingColor = MaterialTheme.colorScheme.primaryContainer)
 }

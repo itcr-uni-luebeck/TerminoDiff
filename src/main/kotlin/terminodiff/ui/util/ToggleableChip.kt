@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.selection.toggleable
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.contentColorFor
@@ -23,7 +24,7 @@ fun ToggleableChip(
     isSelected: Boolean = false,
     onSelectionChanged: (String) -> Unit = {},
 ) {
-    val chipColor = MaterialTheme.colorScheme.primary.copy(alpha = if (isSelected) 1f else 0.5f)
+    val chipColor = colorScheme.primary.copy(alpha = if (isSelected) 1f else 0.5f)
     Surface(
         modifier = modifier.padding(4.dp),
         color = chipColor,
@@ -34,7 +35,7 @@ fun ToggleableChip(
             Text(
                 text = text,
                 style = MaterialTheme.typography.bodyMedium,
-                color = contentColorFor(chipColor),
+                color = colorScheme.contentColorFor(chipColor),
                 modifier = Modifier.padding(8.dp)
             )
         }

@@ -14,7 +14,6 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
-import androidx.compose.ui.text.toLowerCase
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import li.flor.nativejfilechooser.NativeJFileChooser
@@ -35,7 +34,6 @@ import terminodiff.ui.panes.graph.ShowGraphsPanel
 import terminodiff.ui.panes.metadatadiff.MetadataDiffPanel
 import terminodiff.ui.theme.TerminoDiffTheme
 import java.awt.Cursor
-import java.awt.Window
 import java.io.File
 import java.net.InetAddress
 import java.util.*
@@ -253,7 +251,7 @@ private fun ContainerInitializedContent(
             }
             splitter {
                 visiblePart {
-                    Box(Modifier.height(1.dp).fillMaxWidth()
+                    Box(Modifier.height(3.dp).fillMaxWidth()
                         .background(MaterialTheme.colorScheme.primary))
                 }
                 handle {
@@ -261,7 +259,7 @@ private fun ContainerInitializedContent(
                         Modifier
                             .markAsHandle()
                             .cursorForHorizontalResize()
-                            .background(color = MaterialTheme.colorScheme.primary)
+                            .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
                             .height(9.dp)
                             .fillMaxWidth()
                     )
