@@ -28,7 +28,7 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
     private fun generateComparisonDefinitions(localizedStrings: LocalizedStrings) = listOf(
         StringComparisonItem({ id }, true, localizedStrings) { it.id },
         StringComparisonItem({ canonicalUrl }, false, localizedStrings) { it.url },
-        IdentifierDiffItem(localizedStrings),
+        IdentifierListDiffItem(localizedStrings),
         StringComparisonItem({ version }, true, localizedStrings) { it.version },
         StringComparisonItem({ name }, false, localizedStrings) { it.name },
         StringComparisonItem({ title }, false, localizedStrings) { it.title },
@@ -41,7 +41,7 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
         ContactComparisonItem(localizedStrings),
         StringComparisonItem({ description }, false, localizedStrings) { it.description },
         UsageContextComparisonItem(localizedStrings),
-        CodeableConceptComparisonItem({jurisdiction}, localizedStrings, false) {it.jurisdictionFirstRep},
+        CodeableConceptComparisonItem({jurisdiction}, localizedStrings, false) {it.jurisdiction},
         StringComparisonItem({ purpose }, false, localizedStrings) { it.purpose },
         StringComparisonItem({ copyright }, false, localizedStrings) { it.copyright },
         BooleanComparisonItem({ caseSensitive }, false, localizedStrings) { it.caseSensitive },

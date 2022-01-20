@@ -27,7 +27,7 @@ import terminodiff.i18n.SupportedLocale
 import terminodiff.i18n.getStrings
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
 import terminodiff.terminodiff.engine.metadata.MetadataDiff
-import terminodiff.terminodiff.engine.metadata.MetadataListDiffItem
+import terminodiff.terminodiff.engine.metadata.MetadataKeyedListDiffItem
 import terminodiff.terminodiff.engine.metadata.StringComparisonItem
 import terminodiff.ui.MouseOverPopup
 import terminodiff.ui.theme.DiffColors
@@ -130,26 +130,25 @@ private fun resultColumnSpec(localizedStrings: LocalizedStrings, diffColors: Dif
         fun renderDiffButton() {
             Button(
                 onClick = {
-                    if (comparison.diffItem is MetadataListDiffItem<*, *, *>) {
+                    if (comparison.diffItem is MetadataKeyedListDiffItem<*, *>) {
                         logger.warn("clicked diff button for ${comparison.diffItem.label.invoke(localizedStrings)}")
                         // TODO: 19/01/22 nyi dialog -> this can be achieved by displaying the three params of MetadataListDiffItem as columns :)
                     }
                 },
                 elevation = ButtonDefaults.elevation(4.dp),
-                colors = ButtonDefaults.buttonColors(
-                    diffColors.yellowPair.first, diffColors.yellowPair.second
-                )
+                colors = ButtonDefaults.buttonColors(backgroundColor, foregroundColor)
             ) {
                 Text(text = resultText,
                     style = MaterialTheme.typography.bodyMedium,
                     fontStyle = fontStyle,
-                    color = diffColors.yellowPair.second)
+                    color = foregroundColor)
             }
         }
 
         val render: @Composable () -> Unit = {
-            when {
-                comparison.diffItem is MetadataListDiffItem<*, *, *> && comparison.result == MetadataComparisonResult.DIFFERENT -> renderDiffButton()
+            when (comparison.diffItem) {
+                is MetadataKeyedListDiffItem<*, *> -> renderDiffButton()
+                //comparison.diffItem is MetadataListDiffItem<*, *, *> && comparison.result == MetadataComparisonResult.DIFFERENT -> renderDiffButton()
                 else -> renderDiffChip()
             }
         }
@@ -165,7 +164,7 @@ private fun TextForLeftRightValue(
     result: MetadataDiff.MetadataComparison,
     codeSystem: CodeSystem,
 ) {
-    val text: String? = result.diffItem.renderDisplay.invoke(codeSystem)
+    val text: String? = result.diffItem.getRenderDisplay(codeSystem)
     SelectableText(text = text, fontStyle = when {
         text == null -> FontStyle.Italic
         result.diffItem is StringComparisonItem && result.diffItem.drawItalic -> FontStyle.Italic

@@ -65,10 +65,10 @@ fun TerminodiffAppContent(
     when (val hostname = InetAddress.getLocalHost().hostName.lowercase(Locale.getDefault())) {
         "joshua-athena-windows" ->
             coroutineScope.launch {
-                diffDataContainer.leftFilename =
-                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2020_10_01.json")
+                /*diffDataContainer.leftFilename =
+                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2017_06_21.json")
                 diffDataContainer.rightFilename =
-                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json")
+                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json")*/
                 diffDataContainer.leftFilename =
                     File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\icd10gm2010_dimdi.fhir.json")
                 diffDataContainer.rightFilename =
