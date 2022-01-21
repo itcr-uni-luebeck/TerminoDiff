@@ -1,6 +1,8 @@
 package terminodiff.i18n
 
 import terminodiff.engine.concepts.ConceptDiffItem
+import terminodiff.engine.concepts.KeyedListDiffResult
+import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.engine.graph.DiffGraphElementKind
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
 import java.io.File
@@ -11,11 +13,11 @@ import java.io.File
  */
 abstract class LocalizedStrings(
     val boolean_: (Boolean?) -> String,
-    val bothListsAreEmpty: String,
     val bothValuesAreNull: String,
     val canonicalUrl: String,
     val caseSensitive: String = "Case-Sensitive?",
     val changeLanguage: String,
+    val clickForDetails: String,
     val code: String = "Code",
     val comparison: String,
     val compositional: String,
@@ -40,17 +42,16 @@ abstract class LocalizedStrings(
     val identical: String,
     val identifiers: String,
     val jurisdiction: String,
+    val keyedListResult_: (List<KeyedListDiffResult<*, *>>) -> String,
     val loadLeftFile: String,
     val loadRightFile: String,
     val leftValue: String,
     val language: String,
-    val keyIsDifferent_: (String) -> String,
     val rightValue: String,
     val metadataDiff: String,
     val metadataDiffResults_: (MetadataComparisonResult) -> String,
     val name: String = "Name",
     val noDataLoadedTitle: String,
-    val numberDifferentReason_: (Int, List<String?>) -> String,
     val numberItems_: (Int) -> String = {
         when (it) {
             1 -> "1 item"
@@ -79,12 +80,13 @@ abstract class LocalizedStrings(
     val showRightGraphButton: String,
     val supplements: String,
     val status: String = "Status",
+    val system: String = "System",
     val toggleDarkTheme: String,
-    val textDifferent: String,
-    val textDifferentAndAnotherReason_: (String) -> String,
+    val text: String = "Text",
     val title: String,
     val terminoDiff: String = "TerminoDiff",
     val uniLuebeck: String,
+    val use: String,
     val useContext: String,
     val value: String,
     val valueSet: String = "ValueSet",
@@ -109,10 +111,10 @@ class GermanStrings : LocalizedStrings(boolean_ = {
         false -> "FALSCH"
     }
 },
-    bothListsAreEmpty = "Beide Listen sind leer",
     bothValuesAreNull = "Beide Werte sind null",
     canonicalUrl = "Kanonische URL",
     changeLanguage = "Sprache wechseln",
+    clickForDetails = "Für Details klicken",
     comparison = "Vergleich",
     compositional = "Kompositionell?",
     conceptDiff = "Konzept-Diff",
@@ -126,7 +128,7 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     count = "Anzahl",
     date = "Datum",
     description = "Beschreibung",
-    designations = "Bezeichnungen",
+    designations = "Designationen",
     differentValue = "Unterschiedliche Werte",
     diffGraph = "Differenz-Graph",
     displayAndInWhich_ = { display, inWhich ->
@@ -142,11 +144,20 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     identical = "Identisch",
     identifiers = "IDs",
     jurisdiction = "Jurisdiktion",
+    keyedListResult_ = { results ->
+        results.map { it.result }.groupingBy { it }.eachCount().let { eachCount ->
+            listOfNotNull(
+                if (KeyedListDiffResultKind.IDENTICAL in eachCount.keys) "${eachCount[KeyedListDiffResultKind.IDENTICAL]} identisch" else null,
+                if (KeyedListDiffResultKind.VALUE_DIFFERENT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.VALUE_DIFFERENT]} unterschiedlich" else null,
+                if (KeyedListDiffResultKind.KEY_ONLY_IN_LEFT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.KEY_ONLY_IN_LEFT]} nur links" else null,
+                if (KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT]} nur rechts" else null,
+            )
+        }.joinToString()
+    },
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
     leftValue = "Linker Wert",
     language = "Sprache",
-    keyIsDifferent_ = { "Schlüssel '$it' ist unterschiedlich" },
     rightValue = "Rechter Wert",
     metadataDiff = "Metadaten-Diff",
     metadataDiffResults_ = {
@@ -156,10 +167,6 @@ class GermanStrings : LocalizedStrings(boolean_ = {
         }
     },
     noDataLoadedTitle = "Keine Daten geladen",
-    numberDifferentReason_ = { count, differences ->
-        val reason = differences.filterNotNull().joinToString(separator = "; ", limit = 3)
-        "$count unterschiedlich: $reason"
-    },
     oneValueIsNull = "Ein Wert ist null",
     onlyInLeft = "Nur links",
     onlyConceptDifferences = "Konzeptunterschiede",
@@ -169,16 +176,16 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     purpose = "Zweck",
     property = "Eigenschaft",
     properties = "Eigenschaften",
-    propertiesDesignations = "Eigenschaften / Bezeichnungen",
-    propertiesDesignationsCount = { p, d -> "$p E / $d B" },
+    propertiesDesignations = "Eigenschaften / Designationen",
+    propertiesDesignationsCount = { p, d -> "$p E / $d D" },
     propertiesDesignationsCountDelta = { p, d ->
         when {
-            p.second == 0 && d.second != 0 -> "${p.first} E / ${d.first} Δ${d.second} B"
-            p.second != 0 && d.second == 0 -> "${p.first} Δ${p.second} E / ${d.first} B"
-            else -> "${p.first} Δ${p.second} E / ${d.first} Δ${d.second} B"
+            p.second == 0 && d.second != 0 -> "${p.first} E / ${d.first} Δ${d.second} D"
+            p.second != 0 && d.second == 0 -> "${p.first} Δ${p.second} E / ${d.first} D"
+            else -> "${p.first} Δ${p.second} E / ${d.first} Δ${d.second} D"
         }
     },
-    propertyDesignationForCode_ = { code -> "Eigenschaften und Bezeichnungen für Konzept '$code'" },
+    propertyDesignationForCode_ = { code -> "Eigenschaften und Designationen für Konzept '$code'" },
     propertyType = "Typ",
     reload = "Neu laden",
     showAll = "Alle",
@@ -188,12 +195,9 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     showRightGraphButton = "Rechten Graphen zeigen",
     supplements = "Ergänzt",
     toggleDarkTheme = "Helles/Dunkles Thema",
-    textDifferent = "Text ist unterschiedlich",
-    textDifferentAndAnotherReason_ = { otherReason ->
-        "Text ist unterschiedlich, und $otherReason"
-    },
     title = "Titel",
     uniLuebeck = "Universität zu Lübeck",
+    use = "Zweck",
     useContext = "Nutzungskontext",
     value = "Wert",
     versionNeeded = "Version erforderlich?",
@@ -208,10 +212,10 @@ class EnglishStrings : LocalizedStrings(
             false -> "FALSE"
         }
     },
-    bothListsAreEmpty = "Both lists are empty",
     bothValuesAreNull = "Both values are null",
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
+    clickForDetails = "Click for details",
     comparison = "Comparison",
     compositional = "Compositional?",
     conceptDiff = "Concept Diff",
@@ -241,11 +245,20 @@ class EnglishStrings : LocalizedStrings(
     identical = "Identical",
     identifiers = "Identifiers",
     jurisdiction = "Jurisdiction",
+    keyedListResult_ = { results ->
+        results.map { it.result }.groupingBy { it }.eachCount().let { eachCount ->
+            listOfNotNull(
+                if (KeyedListDiffResultKind.IDENTICAL in eachCount.keys) "${eachCount[KeyedListDiffResultKind.IDENTICAL]} identical" else null,
+                if (KeyedListDiffResultKind.VALUE_DIFFERENT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.VALUE_DIFFERENT]} different" else null,
+                if (KeyedListDiffResultKind.KEY_ONLY_IN_LEFT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.KEY_ONLY_IN_LEFT]} only left" else null,
+                if (KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT]} only right" else null,
+            )
+        }.joinToString()
+    },
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
     leftValue = "Left value",
     language = "Language",
-    keyIsDifferent_ = { "Key '$it' is different" },
     rightValue = "Right value",
     metadataDiff = "Metadata Diff",
     metadataDiffResults_ = {
@@ -255,9 +268,6 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     noDataLoadedTitle = "No data loaded",
-    numberDifferentReason_ = { count, differences ->
-        "$count different: ${differences.joinToString(separator = "; ", limit = 3)}"
-    },
     oneValueIsNull = "One value is null",
     onlyInLeft = "Only left",
     onlyConceptDifferences = "Concept differences",
@@ -286,12 +296,9 @@ class EnglishStrings : LocalizedStrings(
     showRightGraphButton = "Show right graph",
     supplements = "Supplements",
     toggleDarkTheme = "Toggle dark theme",
-    textDifferent = "Text is different",
-    textDifferentAndAnotherReason_ = { otherReason ->
-        "Text is different, and $otherReason"
-    },
     title = "Title",
     uniLuebeck = "University of Luebeck",
+    use = "Use",
     useContext = "Use context",
     value = "Value",
     versionNeeded = "Version needed?",

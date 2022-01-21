@@ -1,7 +1,14 @@
 package terminodiff.terminodiff.engine.metadata
 
 import org.hl7.fhir.r4.model.*
+import terminodiff.engine.concepts.KeyedListDiff
+import terminodiff.engine.concepts.KeyedListDiffResult
+import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.ui.theme.DiffColors
+import terminodiff.ui.util.ColumnSpec
+import terminodiff.ui.util.chipForDiffResult
+import terminodiff.ui.util.textForValue
 
 abstract class MetadataDiffItem(
     val label: LocalizedStrings.() -> String,
@@ -12,7 +19,7 @@ abstract class MetadataDiffItem(
         left: CodeSystem, right: CodeSystem,
     ): ResultPair
 
-    abstract val renderDisplay: (CodeSystem) -> String?
+    abstract fun getRenderDisplay(codeSystem: CodeSystem): String?
 }
 
 enum class MetadataComparisonResult {
@@ -26,9 +33,7 @@ open class StringComparisonItem(
     val drawItalic: Boolean = false,
     private val instanceGetter: (CodeSystem) -> String?,
 ) : MetadataDiffItem(label, expectDifferences, localizedStrings) {
-    override val renderDisplay: (CodeSystem) -> String?
-        get() = instanceGetter
-
+    override fun getRenderDisplay(codeSystem: CodeSystem): String? = instanceGetter.invoke(codeSystem)
     override fun compare(
         left: CodeSystem,
         right: CodeSystem,
@@ -64,97 +69,119 @@ class NumericComparisonItem(
     numericGetter(it).toString()
 })
 
-abstract class MetadataListDiffItem<Type, Key : Comparable<Key>, ComparisonValue : Comparable<ComparisonValue>>(
+abstract class MetadataKeyedListDiffItem<ItemType, KeyType>(
     label: LocalizedStrings.() -> String,
     expectDifferences: Boolean,
     localizedStrings: LocalizedStrings,
-    private val instanceGetter: (CodeSystem) -> List<Type>,
+    private val instanceGetter: (CodeSystem) -> List<ItemType>,
+    private val displayLimit: Int = 3,
 ) : MetadataDiffItem(label, expectDifferences, localizedStrings) {
 
-    protected open fun compareItem(
-        key: Key, l: ComparisonValue, r: ComparisonValue,
-    ): Pair<MetadataComparisonResult, String?> = when (l == r) {
-        true -> MetadataComparisonResult.IDENTICAL to null
-        else -> MetadataComparisonResult.DIFFERENT to localizedStrings.keyIsDifferent_.invoke(key.toString())
-    }
+    abstract fun getKey(instance: ItemType): KeyType
+    abstract fun getStringValue(instance: ItemType): String?
 
-    open fun deepCompare(leftValue: List<Type>, rightValue: List<Type>): Map<Key, StringResultPair> {
-        val left = leftValue.associate { getComparisonKey(it) to getComparisonValue(it) }
-        val right = rightValue.associate { getComparisonKey(it) to getComparisonValue(it) }
-        val allKeysMatch = left.keys.toSortedSet() == right.keys.toSortedSet()
-        val commonKeys = left.keys.intersect(right.keys)
-        val differentKeys = left.keys.plus(right.keys).minus(commonKeys)
-        val keyComparisons = commonKeys.associateWith { compareItem(it, left[it]!!, right[it]!!) }
-        return when (allKeysMatch) {
-            true -> keyComparisons
-            else -> keyComparisons.plus(differentKeys.associateWith { MetadataComparisonResult.DIFFERENT to localizedStrings.oneValueIsNull })
-        }
-    }
+    abstract fun getKeyColumns(
+        localizedStrings: LocalizedStrings,
+    ): List<ColumnSpec<KeyedListDiffResult<KeyType, String>>>
 
-    abstract fun getComparisonKey(value: Type): Key
-    abstract fun getComparisonValue(value: Type): ComparisonValue?
-    abstract fun formatInstance(data: Type): String
+    fun getColumns(
+        localizedStrings: LocalizedStrings,
+        diffColors: DiffColors,
+    ): List<ColumnSpec<KeyedListDiffResult<KeyType, String>>> =
+        getKeyColumns(localizedStrings).plus(getCommonColumns(localizedStrings, diffColors))
 
-    override val renderDisplay: (CodeSystem) -> String?
-        get() = { codeSystem ->
-            val instance = instanceGetter.invoke(codeSystem)
-            val count = localizedStrings.numberItems_.invoke(instance.size)
-            val joinedItems = if (instance.isEmpty()) null else instance.joinToString(separator = "; ",
-                limit = 2,
-                transform = ::formatInstance)
-            joinedItems?.let { "$count: $it" } ?: count
-        }
+    private fun getCommonColumns(
+        localizedStrings: LocalizedStrings,
+        diffColors: DiffColors,
+    ): List<ColumnSpec<KeyedListDiffResult<KeyType, String>>> = listOf(ColumnSpec(localizedStrings.comparison, 0.1f) {
+        chipForDiffResult(localizedStrings, diffColors, it.result)
+    }, ColumnSpec(localizedStrings.leftValue, 0.2f) {
+        textForValue(it.leftValue?.joinToString())
+    }, ColumnSpec(localizedStrings.rightValue, 0.2f) {
+        textForValue(it.rightValue?.joinToString())
+    })
 
-    override fun compare(
+    private fun detailedCompare(
         left: CodeSystem,
         right: CodeSystem,
-    ): ResultPair {
+    ): MutableList<KeyedListDiffResult<KeyType, String>> {
         val leftValue = instanceGetter.invoke(left)
         val rightValue = instanceGetter.invoke(right)
+        return KeyedListDiff(leftValue, rightValue, ::getKey, ::getStringValue).executeDiff()
+    }
+
+    abstract fun mapComparisonResult(
+        result: MetadataComparisonResult,
+        explanation: (LocalizedStrings.() -> String)?,
+        detailedCompare: MutableList<KeyedListDiffResult<KeyType, String>>,
+    ): MetadataListComparison<ItemType, KeyType>
+
+    fun getComparisonResult(left: CodeSystem, right: CodeSystem) = compare(left, right).let { (result, explanation) ->
+        mapComparisonResult(result, explanation, detailedCompare(left, right))
+    }
+
+
+    override fun getRenderDisplay(codeSystem: CodeSystem): String =
+        instanceGetter.invoke(codeSystem).mapNotNull(::getLongDisplayValue).joinToString("; ", limit = displayLimit)
+
+    override fun compare(left: CodeSystem, right: CodeSystem): ResultPair {
+        val detailedResult = detailedCompare(left, right)
         return when {
-            leftValue.isEmpty() && rightValue.isEmpty() -> MetadataComparisonResult.IDENTICAL to { bothListsAreEmpty }
-            else -> {
-                val deep = deepCompare(leftValue, rightValue)
-                val differentValues =
-                    deep.values.filter { it.first == MetadataComparisonResult.DIFFERENT }.mapNotNull { it.second }
-                when (val countDifferent = deep.values.count { it.first == MetadataComparisonResult.DIFFERENT }) {
-                    0 -> MetadataComparisonResult.IDENTICAL to null
-                    else -> MetadataComparisonResult.DIFFERENT to {
-                        numberDifferentReason_.invoke(countDifferent, differentValues)
-                    }
-                }
-            }
+            detailedResult.any { it.result != KeyedListDiffResultKind.IDENTICAL } -> MetadataComparisonResult.DIFFERENT to null
+            else -> MetadataComparisonResult.IDENTICAL to null
         }
     }
+
+    abstract fun getLongDisplayValue(instance: ItemType): String?
 }
 
-class IdentifierDiffItem(
-    localizedStrings: LocalizedStrings,
-) : MetadataListDiffItem<Identifier, String, String>({ identifiers }, false, localizedStrings, { it.identifier }) {
+typealias IdentifierKeyType = Pair<Identifier.IdentifierUse, String>
 
-    override fun getComparisonKey(value: Identifier): String = value.system ?: "null"
-    override fun getComparisonValue(value: Identifier): String = formatInstance(value)
+class IdentifierListDiffItem(localizedStrings: LocalizedStrings) :
+    MetadataKeyedListDiffItem<Identifier, IdentifierKeyType>(label = { identifiers },
+        expectDifferences = false,
+        localizedStrings = localizedStrings,
+        instanceGetter = { it.identifier }) {
 
-    override fun formatInstance(data: Identifier): String = formatEntity {
-        if (data.hasUse()) append("[${data.use.display}] ")
-        if (data.hasSystem()) append("(${data.system}) ")
-        if (data.hasValue()) append(data.value) else append("null")
+    override fun getKey(instance: Identifier): IdentifierKeyType = instance.use to instance.system
+
+    override fun getStringValue(instance: Identifier): String? = instance.value
+
+    override fun getLongDisplayValue(instance: Identifier): String = formatIdentifier(instance)
+
+    override fun mapComparisonResult(
+        result: MetadataComparisonResult,
+        explanation: (LocalizedStrings.() -> String)?,
+        detailedCompare: MutableList<KeyedListDiffResult<IdentifierKeyType, String>>,
+    ): MetadataListComparison<Identifier, IdentifierKeyType> = IdentifierListComparison(listDiffItem = this,
+        result = result,
+        explanation = explanation,
+        detailedResult = detailedCompare)
+
+    override fun getKeyColumns(
+        localizedStrings: LocalizedStrings,
+    ): List<ColumnSpec<KeyedListDiffResult<IdentifierKeyType, String>>> {
+        return listOf(ColumnSpec(localizedStrings.use, 0.1f) { textForValue(it.key.first) },
+            ColumnSpec(localizedStrings.system, 0.1f) { textForValue(it.key.second) })
     }
 }
 
 class ContactComparisonItem(
     localizedStrings: LocalizedStrings,
-) : MetadataListDiffItem<ContactDetail, String, String>({ contact }, false, localizedStrings, { it.contact }) {
+) : MetadataKeyedListDiffItem<ContactDetail, String>({ contact }, false, localizedStrings, { it.contact }) {
+    override fun getKey(instance: ContactDetail): String = instance.name
 
-    override fun getComparisonKey(value: ContactDetail): String = value.name ?: "null"
+    override fun getStringValue(instance: ContactDetail): String = formatDisplay(instance)
 
-    override fun getComparisonValue(value: ContactDetail): String = formatInstance(value)
+    override fun getLongDisplayValue(instance: ContactDetail): String = formatDisplay(instance, limit = 2)
 
-    override fun formatInstance(data: ContactDetail): String = formatEntity {
-        if (data.hasName()) append(data.name)
-        if (data.hasTelecom()) {
-            val telecom =
-                data.telecom.filterNotNull().joinToString(separator = "; ", limit = 2, transform = ::formatTelecom)
+    private fun formatDisplay(instance: ContactDetail, limit: Int? = null) = formatEntity {
+        if (instance.hasName()) append(instance.name)
+        if (instance.hasTelecom()) {
+            val notNullInstances = instance.telecom.filterNotNull()
+            val telecom = notNullInstances.joinToString(separator = "; ",
+                limit = limit ?: notNullInstances.size,
+                transform = ::formatTelecom)
             append(": $telecom")
         }
     }
@@ -165,19 +192,45 @@ class ContactComparisonItem(
         if (contact.hasValue()) append(contact.value)
         if (contact.hasRank()) append(" @${contact.rank}")
     }
+
+    override fun getKeyColumns(
+        localizedStrings: LocalizedStrings,
+    ): List<ColumnSpec<KeyedListDiffResult<String, String>>> = listOf(ColumnSpec(localizedStrings.name, 0.15f) {
+        textForValue(it.key)
+    })
+
+    override fun mapComparisonResult(
+        result: MetadataComparisonResult,
+        explanation: (LocalizedStrings.() -> String)?,
+        detailedCompare: MutableList<KeyedListDiffResult<String, String>>,
+    ): MetadataListComparison<ContactDetail, String> = ContactListComparison(listDiffItem = this,
+        result = result,
+        explanation = explanation,
+        detailedResult = detailedCompare)
 }
 
-private fun formatEntity(init: String? = null, builder: StringBuilder.() -> Unit) = when (init) {
+private fun formatEntity(
+    init: String? = null,
+    postProcessing: (String.() -> String)? = null,
+    builder: StringBuilder.() -> Unit,
+) = when (init) {
     null -> StringBuilder()
     else -> StringBuilder(init)
-}.apply(builder).trim().toString()
+}.apply(builder).toString().let { s ->
+    postProcessing?.invoke(s) ?: s
+}.trim()
 
-fun formatCoding(coding: Coding) = formatEntity {
+fun formatIdentifier(identifier: Identifier) = formatEntity {
+    if (identifier.hasUse()) append("[${identifier.use.display}] ")
+    if (identifier.hasSystem()) append("(${identifier.system}) ")
+    if (identifier.hasValue()) append(identifier.value) else append("null")
+}
+
+fun formatCoding(coding: Coding) = formatEntity(postProcessing = { trimStart(':') }) {
     if (coding.hasSystem()) append("(${coding.system}) ")
     if (coding.hasVersion()) append("(@${coding.version}) ")
-    if (coding.hasCode()) append("${coding.code}: ")
-    if (coding.hasDisplay()) append(coding.display)
-    trimEnd(':', ' ')
+    if (coding.hasCode()) append(coding.code)
+    if (coding.hasDisplay()) append(": ${coding.display}")
 }
 
 private fun formatQuantity(quantity: Quantity) = formatEntity {
@@ -189,79 +242,86 @@ private fun formatQuantity(quantity: Quantity) = formatEntity {
     }
 }
 
+private fun formatRange(range: Range): String = formatEntity {
+    if (range.hasLow()) append("${formatQuantity(range.low)} - ")
+    if (range.hasHigh()) append(formatQuantity(range.high))
+}
+
+private fun formatReference(reference: Reference): String = formatEntity {
+    if (reference.hasType()) append("${reference.type} ")
+    if (reference.hasReference()) append(reference.reference)
+    if (reference.hasIdentifier()) append(" (${formatIdentifier(reference.identifier)})")
+}
+
 class CodeableConceptComparisonItem(
     label: LocalizedStrings.() -> String,
     localizedStrings: LocalizedStrings,
     expectDifferences: Boolean = false,
-    private val instanceGetter: (CodeSystem) -> CodeableConcept,
-) : MetadataDiffItem(label,
-    expectDifferences,
-    localizedStrings) {
+    instanceGetter: (CodeSystem) -> List<CodeableConcept>,
+) : MetadataKeyedListDiffItem<CodeableConcept, String>(label, expectDifferences, localizedStrings, instanceGetter) {
 
-    private val codingDiffItem =
-        CodingComparisonItem(label, localizedStrings, expectDifferences) { instanceGetter.invoke(it).coding }
+    override fun getKey(instance: CodeableConcept): String = instance.text ?: "null"
 
-    override fun compare(left: CodeSystem, right: CodeSystem): ResultPair {
-        val leftValue = instanceGetter.invoke(left)
-        val rightValue = instanceGetter.invoke(right)
-        val codingComparison = codingDiffItem.compare(left, right)
-        val textNotEqual = leftValue.text != rightValue.text
-        return when {
-            leftValue.hasText() && rightValue.hasText() -> when {
-                textNotEqual -> when (codingComparison.first) {
-                    MetadataComparisonResult.DIFFERENT -> MetadataComparisonResult.DIFFERENT to {
-                        textDifferentAndAnotherReason_.invoke(codingComparison.second!!.invoke(localizedStrings))
-                    }
-                    else -> MetadataComparisonResult.DIFFERENT to { textDifferent }
-                }
-                else -> codingComparison
-            }
-            else -> codingComparison
-        }
-    }
+    override fun getStringValue(instance: CodeableConcept): String = formatCodingList(instance.coding)
 
-    override val renderDisplay: (CodeSystem) -> String?
-        get() = { codeSystem ->
-            val instance = instanceGetter.invoke(codeSystem)
-            formatEntity {
-                if (instance.hasText()) append(instance.text)
-                if (instance.hasCoding()) append(": ", instance.coding.joinToString(limit = 2) { formatCoding(it) })
-                trimStart(':')
-            }
-        }
+    private fun formatCodingList(codings: List<Coding>, limit: Int = codings.size) =
+        codings.joinToString(limit = limit, transform = ::formatCoding)
+
+    override fun getLongDisplayValue(instance: CodeableConcept): String = formatCodingList(instance.coding, 2)
+
+    override fun getKeyColumns(
+        localizedStrings: LocalizedStrings,
+    ): List<ColumnSpec<KeyedListDiffResult<String, String>>> = listOf(ColumnSpec(localizedStrings.text, 0.3f) {
+        textForValue(it.key)
+    })
+
+    override fun mapComparisonResult(
+        result: MetadataComparisonResult,
+        explanation: (LocalizedStrings.() -> String)?,
+        detailedCompare: MutableList<KeyedListDiffResult<String, String>>,
+    ): MetadataListComparison<CodeableConcept, String> = CodeableConceptComparison(listDiffItem = this,
+        result = result,
+        explanation = explanation,
+        detailedResult = detailedCompare)
+
 }
-
-class CodingComparisonItem(
-    label: LocalizedStrings.() -> String,
-    localizedStrings: LocalizedStrings,
-    expectDifferences: Boolean = false,
-    instanceGetter: (CodeSystem) -> List<Coding>,
-) : MetadataListDiffItem<Coding, String, String>(label, expectDifferences, localizedStrings, instanceGetter) {
-    override fun getComparisonKey(value: Coding): String = value.system ?: "null"
-
-    override fun getComparisonValue(value: Coding): String = formatCoding(coding = value)
-
-    override fun formatInstance(data: Coding): String = formatCoding(coding = data)
-}
-
 
 class UsageContextComparisonItem(
     localizedStrings: LocalizedStrings,
-) : MetadataListDiffItem<UsageContext, String, String>({ useContext }, false, localizedStrings, { it.useContext }) {
-    override fun getComparisonKey(value: UsageContext): String = formatCoding(value.code)
-
-    override fun getComparisonValue(value: UsageContext): String? = formatValue(value)
-
-    override fun formatInstance(data: UsageContext): String = when (val formatValue = formatValue(data)) {
-        null -> getComparisonKey(data)
-        else -> "${getComparisonKey(data)} - $formatValue}"
+) : MetadataKeyedListDiffItem<UsageContext, String>({ useContext },
+    expectDifferences = false,
+    localizedStrings,
+    { it.useContext }) {
+    override fun getKey(instance: UsageContext): String {
+        return formatCoding(instance.code)
     }
+
+    override fun getStringValue(instance: UsageContext): String? = formatValue(instance)
+
+    override fun getLongDisplayValue(instance: UsageContext): String? = formatValue(instance)
 
     private fun formatValue(usageContext: UsageContext) = when {
         usageContext.hasValueCodeableConcept() -> "${usageContext.valueCodeableConcept.text} - ${
             usageContext.valueCodeableConcept.coding.joinToString(limit = 2) { formatCoding(it) }
         }"
         usageContext.hasValueQuantity() -> formatQuantity(usageContext.valueQuantity)
+        usageContext.hasValueRange() -> formatRange(usageContext.valueRange)
+        usageContext.hasValueReference() -> formatReference(usageContext.valueReference)
         else -> null
     }
+
+    override fun getKeyColumns(
+        localizedStrings: LocalizedStrings,
+    ): List<ColumnSpec<KeyedListDiffResult<String, String>>> = listOf(ColumnSpec(localizedStrings.code, 0.3f) {
+        textForValue(it.key)
+    })
+
+    override fun mapComparisonResult(
+        result: MetadataComparisonResult,
+        explanation: (LocalizedStrings.() -> String)?,
+        detailedCompare: MutableList<KeyedListDiffResult<String, String>>,
+    ): MetadataListComparison<UsageContext, String> = UsageContextComparison(listDiffItem = this,
+        result = result,
+        explanation = explanation,
+        detailedResult = detailedCompare)
 }

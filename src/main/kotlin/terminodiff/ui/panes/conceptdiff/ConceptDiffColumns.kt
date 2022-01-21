@@ -20,7 +20,7 @@ import androidx.compose.ui.unit.dp
 import terminodiff.engine.concepts.ConceptDiff
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.ConceptDiffResult
-import terminodiff.engine.concepts.KeyedListDiffResult
+import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.ui.AppIconResource
@@ -69,58 +69,59 @@ private fun propertyDesignationColumnSpec(
     showPropertyDialog: (ConceptTableData) -> Unit,
 ) = ColumnSpec<ConceptTableData>(title = localizedStrings.propertiesDesignations,
     weight = 0.25f,
-    tooltipText = null) { data ->
-    when {
-        data.isInBoth() -> {
-            val propertyDifferenceCount =
-                data.diff!!.propertyComparison.count { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }
-            val designationDifferenceCount =
-                data.diff.designationComparison.count { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }
-            when {
-                propertyDifferenceCount == 0 && designationDifferenceCount == 0 -> Button(onClick = {
-                    showPropertyDialog(data)
-                },
-                    elevation = ButtonDefaults.elevation(4.dp),
-                    colors = ButtonDefaults.buttonColors(diffColors.greenPair.first, diffColors.greenPair.second)) {
-                    Text(text = localizedStrings.propertiesDesignationsCount(data.diff.propertyComparison.count(),
-                        data.diff.designationComparison.count()), color = diffColors.yellowPair.second)
-                }
-                else -> {
-                    Row {
-                        Button(onClick = {
-                            showPropertyDialog(data)
-                        },
-                            elevation = ButtonDefaults.elevation(4.dp),
-                            colors = ButtonDefaults.buttonColors(diffColors.yellowPair.first,
-                                diffColors.yellowPair.second)) {
-                            Text(text = localizedStrings.propertiesDesignationsCountDelta.invoke(data.diff.propertyComparison.count() to propertyDifferenceCount,
-                                data.diff.designationComparison.count() to designationDifferenceCount),
-                                color = diffColors.yellowPair.second)
+    tooltipText = { localizedStrings.clickForDetails },
+    content = { data ->
+        when {
+            data.isInBoth() -> {
+                val propertyDifferenceCount =
+                    data.diff!!.propertyComparison.count { it.result != KeyedListDiffResultKind.IDENTICAL }
+                val designationDifferenceCount =
+                    data.diff.designationComparison.count { it.result != KeyedListDiffResultKind.IDENTICAL }
+                when {
+                    propertyDifferenceCount == 0 && designationDifferenceCount == 0 -> Button(onClick = {
+                        showPropertyDialog(data)
+                    },
+                        elevation = ButtonDefaults.elevation(4.dp),
+                        colors = ButtonDefaults.buttonColors(diffColors.greenPair.first, diffColors.greenPair.second)) {
+                        Text(text = localizedStrings.propertiesDesignationsCount(data.diff.propertyComparison.count(),
+                            data.diff.designationComparison.count()), color = diffColors.yellowPair.second)
+                    }
+                    else -> {
+                        Row {
+                            Button(onClick = {
+                                showPropertyDialog(data)
+                            },
+                                elevation = ButtonDefaults.elevation(4.dp),
+                                colors = ButtonDefaults.buttonColors(diffColors.yellowPair.first,
+                                    diffColors.yellowPair.second)) {
+                                Text(text = localizedStrings.propertiesDesignationsCountDelta.invoke(data.diff.propertyComparison.count() to propertyDifferenceCount,
+                                    data.diff.designationComparison.count() to designationDifferenceCount),
+                                    color = diffColors.yellowPair.second)
+                            }
                         }
                     }
                 }
             }
-        }
-        else -> {
-            OutlinedButton(onClick = {
-                showPropertyDialog(data)
-            },
-                elevation = ButtonDefaults.elevation(4.dp),
-                colors = ButtonDefaults.outlinedButtonColors(backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-                    contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
-                border = BorderStroke(1.dp, MaterialTheme.colorScheme.onTertiaryContainer)) {
-                val text = when (data.isOnlyInLeft()) {
-                    true -> data.leftDetails!!
-                    else -> data.rightDetails!!
-                }.let { details ->
-                    localizedStrings.propertiesDesignationsCount.invoke(details.property.count(),
-                        details.designation.count())
+            else -> {
+                OutlinedButton(onClick = {
+                    showPropertyDialog(data)
+                },
+                    elevation = ButtonDefaults.elevation(4.dp),
+                    colors = ButtonDefaults.outlinedButtonColors(backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
+                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onTertiaryContainer)) {
+                    val text = when (data.isOnlyInLeft()) {
+                        true -> data.leftDetails!!
+                        else -> data.rightDetails!!
+                    }.let { details ->
+                        localizedStrings.propertiesDesignationsCount.invoke(details.property.count(),
+                            details.designation.count())
+                    }
+                    Text(text = text, color = MaterialTheme.colorScheme.onTertiaryContainer)
                 }
-                Text(text = text, color = MaterialTheme.colorScheme.onTertiaryContainer)
             }
         }
-    }
-}
+    })
 
 private fun overallComparisonColumnSpec(
     localizedStrings: LocalizedStrings, diffColors: DiffColors,
@@ -133,8 +134,7 @@ private fun overallComparisonColumnSpec(
         true -> {
             val anyDifferent = data.diff!!.conceptComparison.any {
                 it.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT
-            } || data.diff.propertyComparison.any { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }
-                    || data.diff.designationComparison.any { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }
+            } || data.diff.propertyComparison.any { it.result != KeyedListDiffResultKind.IDENTICAL } || data.diff.designationComparison.any { it.result != KeyedListDiffResultKind.IDENTICAL }
             val colors: Pair<Color, Color> = if (anyDifferent) diffColors.yellowPair else diffColors.greenPair
             val chipLabel: String =
                 if (anyDifferent) localizedStrings.conceptDiffResults_.invoke(ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT)
@@ -165,7 +165,7 @@ private fun columnSpecForProperty(
     @Suppress("SameParameterValue") weight: Float,
     stringValueResolver: (FhirConceptDetails) -> String?,
 ): ColumnSpec<ConceptTableData> {
-    val tooltipTextFun: (ConceptTableData) -> () -> String? =
+    val tooltipTextFun: (ConceptTableData) -> String? =
         { data -> tooltipForConceptProperty(data.leftDetails, data.rightDetails, stringValueResolver) }
     return ColumnSpec(
         title = title,
@@ -182,7 +182,7 @@ private fun columnSpecForProperty(
                 localizedStrings = localizedStrings,
                 diffColors = diffColors,
                 labelToFind = labelToFind,
-                text = tooltipTextFun(data).invoke())
+                text = tooltipTextFun(data))
             singleConcept != null -> { // else
                 SelectableText(text = stringValueResolver.invoke(singleConcept))
             }
@@ -192,10 +192,10 @@ private fun columnSpecForProperty(
 
 private fun tooltipForConceptProperty(
     leftConcept: FhirConceptDetails?, rightConcept: FhirConceptDetails?, property: (FhirConceptDetails) -> String?,
-): () -> String? = {
+): String? {
     val leftValue = leftConcept?.let(property)
     val rightValue = rightConcept?.let(property)
-    when {
+    return when {
         leftValue == null && rightValue == null -> null
         leftValue != null && rightValue == null -> leftValue.toString()
         leftValue == null && rightValue != null -> rightValue.toString()

@@ -34,7 +34,7 @@ fun <T> LazyTable(
     lazyListState: LazyListState,
     zebraStripingColor: Color? = backgroundColor.copy(0.5f),
     tableData: List<T>,
-    keyFun: (T) -> Any,
+    keyFun: (T) -> String?,
 ) = Column(modifier = modifier.fillMaxWidth()) {
     // draw the header cells
     Row(Modifier.fillMaxWidth()) {
@@ -103,7 +103,7 @@ fun RowScope.HeaderCell(
 fun RowScope.TableCell(
     modifier: Modifier = Modifier,
     weight: Float,
-    tooltipText: (() -> String?)? = null,
+    tooltipText: String?,//(() -> String?)? = null,
     backgroundColor: Color,
     foregroundColor: Color,
     content: @Composable () -> Unit,
@@ -112,9 +112,9 @@ fun RowScope.TableCell(
     horizontalArrangement = Arrangement.Center,
     verticalAlignment = Alignment.CenterVertically) {
     CompositionLocalProvider(LocalContentColor provides foregroundColor) {
-        when {
-            tooltipText == null || tooltipText() == null -> content()
-            else -> MouseOverPopup(text = tooltipText()!!,
+        when (tooltipText) {
+            null -> content()
+            else -> MouseOverPopup(text = tooltipText,
                 backgroundColor = colorScheme.primaryContainer,
                 foregroundColor = colorScheme.onPrimaryContainer,
                 content = content)
@@ -125,7 +125,7 @@ fun RowScope.TableCell(
 data class ColumnSpec<T>(
     val title: String,
     val weight: Float,
-    val tooltipText: ((T) -> () -> String?)? = null,
+    val tooltipText: ((T) -> String?)? = null,
     val mergeIf: ((T) -> Boolean)? = null,
     val content: @Composable (T) -> Unit,
 ) {

@@ -1,5 +1,13 @@
 {
   "id": "oncotree-2017-06-21",
+  "useContext": [{
+    "code": {
+      "display": "foo"
+    },
+    "valueQuantity": {
+      "value": "3.0"
+    }
+  }],
   "concept": [
     {
       "code": "MMB",

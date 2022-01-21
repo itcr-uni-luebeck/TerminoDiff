@@ -154,7 +154,7 @@ fun DiffDesignationTable(
     lazyListState = designationListState,
     tableData = diff.designationComparison,
     backgroundColor = colorScheme.primaryContainer,
-    zebraStripingColor = colorScheme.tertiaryContainer) { it.key }
+    zebraStripingColor = colorScheme.tertiaryContainer) { it.key.toString() }
 
 @Composable
 fun SingleConceptPropertyTable(

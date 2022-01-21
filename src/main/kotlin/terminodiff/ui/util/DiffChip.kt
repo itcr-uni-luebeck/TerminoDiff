@@ -1,6 +1,9 @@
 package terminodiff.ui.util
 
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -16,8 +19,11 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.ConceptDiffResult
+import terminodiff.engine.concepts.KeyedListDiffResultKind
+import terminodiff.i18n.LocalizedStrings
+import terminodiff.terminodiff.engine.metadata.MetadataComparison
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
-import terminodiff.terminodiff.engine.metadata.MetadataDiff
+import terminodiff.ui.AppIconResource
 import terminodiff.ui.theme.DiffColors
 
 @Composable
@@ -86,8 +92,40 @@ fun colorPairForConceptDiffResult(
 }
 
 fun colorPairForDiffResult(
-    comparisonResult: MetadataDiff.MetadataComparison, diffColors: DiffColors
+    comparisonResult: MetadataComparison, diffColors: DiffColors
 ): Pair<Color, Color> = when (comparisonResult.result) {
     MetadataComparisonResult.DIFFERENT -> if (comparisonResult.diffItem.expectDifferences) diffColors.yellowPair else diffColors.redPair
     else -> diffColors.greenPair
+}
+
+@Composable
+fun chipForDiffResult(
+    localizedStrings: LocalizedStrings,
+    diffColors: DiffColors,
+    result: KeyedListDiffResultKind,
+) {
+    val colorPair: Pair<Color, Color>
+    val chipText: String
+    var chipIcon: ImageVector? = null
+    when (result) {
+        KeyedListDiffResultKind.IDENTICAL -> {
+            colorPair = diffColors.greenPair
+            chipText = localizedStrings.identical
+        }
+        KeyedListDiffResultKind.KEY_ONLY_IN_LEFT -> {
+            colorPair = diffColors.redPair
+            chipText = localizedStrings.onlyInLeft
+            chipIcon = AppIconResource.loadXmlImageVector(AppIconResource.icLoadLeftFile)
+        }
+        KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT -> {
+            colorPair = diffColors.redPair
+            chipText = localizedStrings.onlyInRight
+            chipIcon = AppIconResource.loadXmlImageVector(AppIconResource.icLoadRightFile)
+        }
+        else -> {
+            colorPair = diffColors.yellowPair
+            chipText = localizedStrings.differentValue
+        }
+    }
+    DiffChip(text = chipText, colorPair = colorPair, icon = chipIcon)
 }
