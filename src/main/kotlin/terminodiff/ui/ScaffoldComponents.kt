@@ -148,10 +148,7 @@ fun MouseOverPopup(
 },
     delayMillis = 750,
     tooltipPlacement = TooltipPlacement.CursorPoint(offset = DpOffset(10.dp, 10.dp), alignment = Alignment.BottomEnd),
-    content = content)/*
-
-fun loadXmlImageVector(stream: InputStream, density: Density): ImageVector =
-    stream.buffered().use { loadXmlImageVector(InputSource(it), density) }*/
+    content = content)
 
 
 @OptIn(ExperimentalComposeUiApi::class)

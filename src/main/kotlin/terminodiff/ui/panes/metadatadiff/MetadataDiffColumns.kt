@@ -43,7 +43,8 @@ private fun propertyColumnSpec(localizedStrings: LocalizedStrings): ColumnSpec<M
             textAlign = TextAlign.Center)
     }
     return ColumnSpec(title = localizedStrings.property, weight = 0.1f, content = { comparison ->
-        // add the (english) default name to the property column as a tooltip, since FHIR spec is english.
+        // add the (english) default name to the property column as a tooltip, since FHIR spec is english,
+        // and translations may not always be as clear.
         val localizedName = comparison.diffItem.label.invoke(localizedStrings)
         val defaultLocalizedName = comparison.diffItem.label.invoke(defaultStrings)
         when {

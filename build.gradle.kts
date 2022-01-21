@@ -80,14 +80,14 @@ compose.desktop {
             vendor = "IT Center for Clinical Reserach, University of Lübeck"
             copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
 
-            /*linux {
+            linux {
                 iconFile.set(resourceDir.file("terminodiff.png"))
                 targetFormats(
                     TargetFormat.Deb,
                     TargetFormat.Rpm,
                     TargetFormat.AppImage,
                 )
-            }*/
+            }
             /*macOS {
                 bundleID = "de.uzl.itcr.terminodiff"
                 signing {
@@ -98,7 +98,7 @@ compose.desktop {
                     TargetFormat.Dmg
                 )
             }*/
-            windows {
+            /*windows {
                 iconFile.set(resourceDir.file("windows/terminodiff.ico"))
                 perUserInstall = true
                 dirChooser = true
@@ -107,7 +107,7 @@ compose.desktop {
                 targetFormats(
                     TargetFormat.Exe
                 )
-            }
+            }*/
         }
     }
 }
