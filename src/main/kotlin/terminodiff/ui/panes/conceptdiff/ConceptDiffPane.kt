@@ -58,7 +58,7 @@ fun ConceptDiffPanel(
     }
 
     Card(
-        modifier = Modifier.padding(8.dp).fillMaxSize(),//.fillMaxHeight(verticalWeight),
+        modifier = Modifier.padding(8.dp).fillMaxSize(),
         elevation = 8.dp,
         backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
         contentColor = MaterialTheme.colorScheme.onTertiaryContainer,

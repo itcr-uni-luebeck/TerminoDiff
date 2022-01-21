@@ -34,7 +34,7 @@ fun <T> LazyTable(
     lazyListState: LazyListState,
     zebraStripingColor: Color? = backgroundColor.copy(0.5f),
     tableData: List<T>,
-    keyFun: (T) -> Any,
+    keyFun: (T) -> String?,
 ) = Column(modifier = modifier.fillMaxWidth()) {
     // draw the header cells
     Row(Modifier.fillMaxWidth()) {

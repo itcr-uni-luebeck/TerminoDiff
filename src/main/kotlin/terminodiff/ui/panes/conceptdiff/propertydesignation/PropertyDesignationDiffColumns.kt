@@ -1,9 +1,5 @@
 package terminodiff.terminodiff.ui.panes.conceptdiff.propertydesignation
 
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import org.hl7.fhir.r4.model.CodeSystem
 import terminodiff.engine.concepts.DesignationKey
 import terminodiff.engine.concepts.KeyedListDiffResult
@@ -12,11 +8,10 @@ import terminodiff.engine.graph.FhirConceptDesignation
 import terminodiff.engine.graph.FhirConceptProperty
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.metadata.formatCoding
-import terminodiff.ui.AppIconResource
 import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.util.ColumnSpec
-import terminodiff.ui.util.DiffChip
-import terminodiff.ui.util.SelectableText
+import terminodiff.ui.util.chipForDiffResult
+import terminodiff.ui.util.textForValue
 
 typealias DesignationDiffResult = KeyedListDiffResult<DesignationKey, String>
 
@@ -116,44 +111,3 @@ private fun rightPropertyValueColumnSpec(localizedStrings: LocalizedStrings) =
     ColumnSpec<PropertyDiffResult>(title = localizedStrings.rightValue, weight = 0.4f) {
         if (it.result != KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT) textForValue(it.rightValue?.joinToString())
     }
-
-@Composable
-private fun chipForDiffResult(
-    localizedStrings: LocalizedStrings,
-    diffColors: DiffColors,
-    result: KeyedListDiffResult.KeyedListDiffResultKind,
-) {
-    val colorPair: Pair<Color, Color>
-    val chipText: String
-    var chipIcon: ImageVector? = null
-    when (result) {
-        KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL -> {
-            colorPair = diffColors.greenPair
-            chipText = localizedStrings.identical
-        }
-        KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_LEFT -> {
-            colorPair = diffColors.redPair
-            chipText = localizedStrings.onlyInLeft
-            chipIcon = AppIconResource.loadXmlImageVector(AppIconResource.icLoadLeftFile)
-        }
-        KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT -> {
-            colorPair = diffColors.redPair
-            chipText = localizedStrings.onlyInRight
-            chipIcon = AppIconResource.loadXmlImageVector(AppIconResource.icLoadRightFile)
-        }
-        else -> {
-            colorPair = diffColors.yellowPair
-            chipText = localizedStrings.differentValue
-        }
-    }
-    DiffChip(text = chipText, colorPair = colorPair, icon = chipIcon)
-}
-
-@Composable
-private fun textForValue(
-    value: Any?,
-    limit: Int = 3,
-) = SelectableText(text = when (value) {
-    is List<*> -> value.joinToString(limit = limit)
-    else -> value?.toString()
-}, color = LocalContentColor.current)

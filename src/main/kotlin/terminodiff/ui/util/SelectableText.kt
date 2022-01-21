@@ -40,3 +40,13 @@ fun SelectableText(
         )
     }
 }
+
+
+@Composable
+fun textForValue(
+    value: Any?,
+    limit: Int = 3,
+) = SelectableText(text = when (value) {
+    is List<*> -> value.joinToString(limit = limit)
+    else -> value?.toString()
+}, color = androidx.compose.material3.LocalContentColor.current)
