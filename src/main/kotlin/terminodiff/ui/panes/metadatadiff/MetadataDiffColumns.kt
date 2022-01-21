@@ -34,7 +34,7 @@ fun metadataColumnSpecs(
     rightValueColumnSpec(localizedStrings, diffDataContainer.rightCodeSystem!!))
 
 private fun propertyColumnSpec(localizedStrings: LocalizedStrings): ColumnSpec<MetadataComparison> {
-    val defaultStrings = getStrings(SupportedLocale.getDefaultLocale())
+    val defaultStrings = getStrings(SupportedLocale.defaultLocale)
     val selectableContent: @Composable (MetadataComparison) -> Unit = { comparison ->
         SelectableText(comparison.diffItem.label.invoke(localizedStrings),
             fontWeight = FontWeight.Bold,
