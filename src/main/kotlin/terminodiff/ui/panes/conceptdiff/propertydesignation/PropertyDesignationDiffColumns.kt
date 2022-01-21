@@ -3,6 +3,7 @@ package terminodiff.terminodiff.ui.panes.conceptdiff.propertydesignation
 import org.hl7.fhir.r4.model.CodeSystem
 import terminodiff.engine.concepts.DesignationKey
 import terminodiff.engine.concepts.KeyedListDiffResult
+import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.engine.concepts.PropertyDiffResult
 import terminodiff.engine.graph.FhirConceptDesignation
 import terminodiff.engine.graph.FhirConceptProperty
@@ -68,7 +69,7 @@ private fun designationComparisonColumnSpec(localizedStrings: LocalizedStrings, 
 private fun leftDesignationValueColumnSpec(localizedStrings: LocalizedStrings) = ColumnSpec<DesignationDiffResult>(
     localizedStrings.leftValue,
     weight = 0.2f,
-    mergeIf = { it.result == KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }) {
+    mergeIf = { it.result == KeyedListDiffResultKind.IDENTICAL }) {
     textForValue(it.leftValue)
 }
 
@@ -101,13 +102,13 @@ private fun propertyComparisonColumnSpec(localizedStrings: LocalizedStrings, dif
 private fun leftPropertyValueColumnSpec(localizedStrings: LocalizedStrings) =
     ColumnSpec<PropertyDiffResult>(title = localizedStrings.leftValue,
         weight = 0.4f,
-        mergeIf = { it.result == KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL }) {
-        if (it.result != KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_LEFT) {
+        mergeIf = { it.result == KeyedListDiffResultKind.IDENTICAL }) {
+        if (it.result != KeyedListDiffResultKind.KEY_ONLY_IN_LEFT) {
             textForValue(it.leftValue, limit = 10)
         }
     }
 
 private fun rightPropertyValueColumnSpec(localizedStrings: LocalizedStrings) =
     ColumnSpec<PropertyDiffResult>(title = localizedStrings.rightValue, weight = 0.4f) {
-        if (it.result != KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT) textForValue(it.rightValue?.joinToString())
+        if (it.result != KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT) textForValue(it.rightValue?.joinToString())
     }

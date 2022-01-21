@@ -1,8 +1,13 @@
 package terminodiff.ui.panes.conceptdiff
 
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.lazy.LazyListState
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Card
+import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -13,7 +18,7 @@ import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.engine.concepts.ConceptDiff
 import terminodiff.engine.concepts.ConceptDiffItem
-import terminodiff.engine.concepts.KeyedListDiffResult
+import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.engine.resources.DiffDataContainer
@@ -21,7 +26,10 @@ import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.ui.panes.conceptdiff.propertydesignation.PropertyDesignationDialog
 import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.theme.getDiffColors
-import terminodiff.ui.util.*
+import terminodiff.ui.util.ColumnSpec
+import terminodiff.ui.util.LazyTable
+import terminodiff.ui.util.ToggleableChipGroup
+import terminodiff.ui.util.ToggleableChipSpec
 import java.util.*
 
 private val logger: Logger = LoggerFactory.getLogger("conceptdiffpanel")
@@ -97,8 +105,8 @@ fun filterDiffItems(diffDataContainer: DiffDataContainer, activeFilter: String):
     val differentCodesInDiff = conceptDiff.filterValues { diff ->
         when {
             diff.conceptComparison.any { c -> c.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT } -> true
-            diff.propertyComparison.any { p -> p.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL } -> true
-            diff.designationComparison.any { d -> d.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL } -> true
+            diff.propertyComparison.any { p -> p.result != KeyedListDiffResultKind.IDENTICAL } -> true
+            diff.designationComparison.any { d -> d.result != KeyedListDiffResultKind.IDENTICAL } -> true
             else -> false
         }
     }.keys

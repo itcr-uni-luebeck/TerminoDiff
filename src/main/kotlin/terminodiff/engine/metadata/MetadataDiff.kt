@@ -57,7 +57,6 @@ class MetadataDiff(left: CodeSystem, right: CodeSystem, localizedStrings: Locali
             StringComparisonItem({ content }, false, localizedStrings) { it.content?.display },
             NumericComparisonItem({ count }, false, localizedStrings) { it.count },
             StringComparisonItem({ supplements }, false, localizedStrings) { it.supplements })
-
 }
 
 open class MetadataComparison(

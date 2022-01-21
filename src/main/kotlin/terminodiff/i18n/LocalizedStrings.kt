@@ -1,6 +1,8 @@
 package terminodiff.i18n
 
 import terminodiff.engine.concepts.ConceptDiffItem
+import terminodiff.engine.concepts.KeyedListDiffResult
+import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.engine.graph.DiffGraphElementKind
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
 import java.io.File
@@ -15,6 +17,7 @@ abstract class LocalizedStrings(
     val canonicalUrl: String,
     val caseSensitive: String = "Case-Sensitive?",
     val changeLanguage: String,
+    val clickForDetails: String,
     val code: String = "Code",
     val comparison: String,
     val compositional: String,
@@ -39,6 +42,7 @@ abstract class LocalizedStrings(
     val identical: String,
     val identifiers: String,
     val jurisdiction: String,
+    val keyedListResult_: (List<KeyedListDiffResult<*, *>>) -> String,
     val loadLeftFile: String,
     val loadRightFile: String,
     val leftValue: String,
@@ -110,6 +114,7 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     bothValuesAreNull = "Beide Werte sind null",
     canonicalUrl = "Kanonische URL",
     changeLanguage = "Sprache wechseln",
+    clickForDetails = "Für Details klicken",
     comparison = "Vergleich",
     compositional = "Kompositionell?",
     conceptDiff = "Konzept-Diff",
@@ -139,6 +144,16 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     identical = "Identisch",
     identifiers = "IDs",
     jurisdiction = "Jurisdiktion",
+    keyedListResult_ = { results ->
+        results.map { it.result }.groupingBy { it }.eachCount().let { eachCount ->
+            listOfNotNull(
+                if (KeyedListDiffResultKind.IDENTICAL in eachCount.keys) "${eachCount[KeyedListDiffResultKind.IDENTICAL]} identisch" else null,
+                if (KeyedListDiffResultKind.VALUE_DIFFERENT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.VALUE_DIFFERENT]} unterschiedlich" else null,
+                if (KeyedListDiffResultKind.KEY_ONLY_IN_LEFT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.KEY_ONLY_IN_LEFT]} nur links" else null,
+                if (KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT]} nur rechts" else null,
+            )
+        }.joinToString()
+    },
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
     leftValue = "Linker Wert",
@@ -200,6 +215,7 @@ class EnglishStrings : LocalizedStrings(
     bothValuesAreNull = "Both values are null",
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
+    clickForDetails = "Click for details",
     comparison = "Comparison",
     compositional = "Compositional?",
     conceptDiff = "Concept Diff",
@@ -229,6 +245,16 @@ class EnglishStrings : LocalizedStrings(
     identical = "Identical",
     identifiers = "Identifiers",
     jurisdiction = "Jurisdiction",
+    keyedListResult_ = { results ->
+        results.map { it.result }.groupingBy { it }.eachCount().let { eachCount ->
+            listOfNotNull(
+                if (KeyedListDiffResultKind.IDENTICAL in eachCount.keys) "${eachCount[KeyedListDiffResultKind.IDENTICAL]} identical" else null,
+                if (KeyedListDiffResultKind.VALUE_DIFFERENT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.VALUE_DIFFERENT]} different" else null,
+                if (KeyedListDiffResultKind.KEY_ONLY_IN_LEFT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.KEY_ONLY_IN_LEFT]} only left" else null,
+                if (KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT in eachCount.keys) "${eachCount[KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT]} only right" else null,
+            )
+        }.joinToString()
+    },
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
     leftValue = "Left value",

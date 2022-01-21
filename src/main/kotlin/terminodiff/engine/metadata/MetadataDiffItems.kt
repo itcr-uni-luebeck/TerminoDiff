@@ -3,6 +3,7 @@ package terminodiff.terminodiff.engine.metadata
 import org.hl7.fhir.r4.model.*
 import terminodiff.engine.concepts.KeyedListDiff
 import terminodiff.engine.concepts.KeyedListDiffResult
+import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.util.ColumnSpec
@@ -92,15 +93,13 @@ abstract class MetadataKeyedListDiffItem<ItemType, KeyType>(
     private fun getCommonColumns(
         localizedStrings: LocalizedStrings,
         diffColors: DiffColors,
-    ): List<ColumnSpec<KeyedListDiffResult<KeyType, String>>> = listOf(
-        ColumnSpec(localizedStrings.comparison, 0.1f) {
-            chipForDiffResult(localizedStrings, diffColors, it.result)
-        },
-        ColumnSpec(localizedStrings.leftValue, 0.2f) {
-            textForValue(it.leftValue?.joinToString())
-        }, ColumnSpec(localizedStrings.rightValue, 0.2f) {
-            textForValue(it.rightValue?.joinToString())
-        })
+    ): List<ColumnSpec<KeyedListDiffResult<KeyType, String>>> = listOf(ColumnSpec(localizedStrings.comparison, 0.1f) {
+        chipForDiffResult(localizedStrings, diffColors, it.result)
+    }, ColumnSpec(localizedStrings.leftValue, 0.2f) {
+        textForValue(it.leftValue?.joinToString())
+    }, ColumnSpec(localizedStrings.rightValue, 0.2f) {
+        textForValue(it.rightValue?.joinToString())
+    })
 
     private fun detailedCompare(
         left: CodeSystem,
@@ -128,7 +127,7 @@ abstract class MetadataKeyedListDiffItem<ItemType, KeyType>(
     override fun compare(left: CodeSystem, right: CodeSystem): ResultPair {
         val detailedResult = detailedCompare(left, right)
         return when {
-            detailedResult.any { it.result != KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL } -> MetadataComparisonResult.DIFFERENT to { differentValue }
+            detailedResult.any { it.result != KeyedListDiffResultKind.IDENTICAL } -> MetadataComparisonResult.DIFFERENT to null
             else -> MetadataComparisonResult.IDENTICAL to null
         }
     }
@@ -196,11 +195,9 @@ class ContactComparisonItem(
 
     override fun getKeyColumns(
         localizedStrings: LocalizedStrings,
-    ): List<ColumnSpec<KeyedListDiffResult<String, String>>> = listOf(
-        ColumnSpec(localizedStrings.name, 0.15f) {
-            textForValue(it.key)
-        }
-    )
+    ): List<ColumnSpec<KeyedListDiffResult<String, String>>> = listOf(ColumnSpec(localizedStrings.name, 0.15f) {
+        textForValue(it.key)
+    })
 
     override fun mapComparisonResult(
         result: MetadataComparisonResult,
@@ -212,10 +209,16 @@ class ContactComparisonItem(
         detailedResult = detailedCompare)
 }
 
-private fun formatEntity(init: String? = null, builder: StringBuilder.() -> Unit) = when (init) {
+private fun formatEntity(
+    init: String? = null,
+    postProcessing: (String.() -> String)? = null,
+    builder: StringBuilder.() -> Unit,
+) = when (init) {
     null -> StringBuilder()
     else -> StringBuilder(init)
-}.apply(builder).trim().toString()
+}.apply(builder).toString().let { s ->
+    postProcessing?.invoke(s) ?: s
+}.trim()
 
 fun formatIdentifier(identifier: Identifier) = formatEntity {
     if (identifier.hasUse()) append("[${identifier.use.display}] ")
@@ -223,12 +226,11 @@ fun formatIdentifier(identifier: Identifier) = formatEntity {
     if (identifier.hasValue()) append(identifier.value) else append("null")
 }
 
-fun formatCoding(coding: Coding) = formatEntity {
+fun formatCoding(coding: Coding) = formatEntity(postProcessing = { trimStart(':') }) {
     if (coding.hasSystem()) append("(${coding.system}) ")
     if (coding.hasVersion()) append("(@${coding.version}) ")
     if (coding.hasCode()) append(coding.code)
     if (coding.hasDisplay()) append(": ${coding.display}")
-    trimStart(':')
 }
 
 private fun formatQuantity(quantity: Quantity) = formatEntity {
@@ -269,11 +271,9 @@ class CodeableConceptComparisonItem(
 
     override fun getKeyColumns(
         localizedStrings: LocalizedStrings,
-    ): List<ColumnSpec<KeyedListDiffResult<String, String>>> = listOf(
-        ColumnSpec(localizedStrings.text, 0.3f) {
-            textForValue(it.key)
-        }
-    )
+    ): List<ColumnSpec<KeyedListDiffResult<String, String>>> = listOf(ColumnSpec(localizedStrings.text, 0.3f) {
+        textForValue(it.key)
+    })
 
     override fun mapComparisonResult(
         result: MetadataComparisonResult,
@@ -292,7 +292,9 @@ class UsageContextComparisonItem(
     expectDifferences = false,
     localizedStrings,
     { it.useContext }) {
-    override fun getKey(instance: UsageContext): String = formatCoding(instance.code)
+    override fun getKey(instance: UsageContext): String {
+        return formatCoding(instance.code)
+    }
 
     override fun getStringValue(instance: UsageContext): String? = formatValue(instance)
 
@@ -310,11 +312,9 @@ class UsageContextComparisonItem(
 
     override fun getKeyColumns(
         localizedStrings: LocalizedStrings,
-    ): List<ColumnSpec<KeyedListDiffResult<String, String>>> = listOf(
-        ColumnSpec(localizedStrings.code, 0.3f) {
-            textForValue(it.key)
-        }
-    )
+    ): List<ColumnSpec<KeyedListDiffResult<String, String>>> = listOf(ColumnSpec(localizedStrings.code, 0.3f) {
+        textForValue(it.key)
+    })
 
     override fun mapComparisonResult(
         result: MetadataComparisonResult,

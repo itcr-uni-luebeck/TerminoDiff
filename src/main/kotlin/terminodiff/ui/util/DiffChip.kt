@@ -19,7 +19,7 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.ConceptDiffResult
-import terminodiff.engine.concepts.KeyedListDiffResult
+import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.metadata.MetadataComparison
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
@@ -102,22 +102,22 @@ fun colorPairForDiffResult(
 fun chipForDiffResult(
     localizedStrings: LocalizedStrings,
     diffColors: DiffColors,
-    result: KeyedListDiffResult.KeyedListDiffResultKind,
+    result: KeyedListDiffResultKind,
 ) {
     val colorPair: Pair<Color, Color>
     val chipText: String
     var chipIcon: ImageVector? = null
     when (result) {
-        KeyedListDiffResult.KeyedListDiffResultKind.IDENTICAL -> {
+        KeyedListDiffResultKind.IDENTICAL -> {
             colorPair = diffColors.greenPair
             chipText = localizedStrings.identical
         }
-        KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_LEFT -> {
+        KeyedListDiffResultKind.KEY_ONLY_IN_LEFT -> {
             colorPair = diffColors.redPair
             chipText = localizedStrings.onlyInLeft
             chipIcon = AppIconResource.loadXmlImageVector(AppIconResource.icLoadLeftFile)
         }
-        KeyedListDiffResult.KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT -> {
+        KeyedListDiffResultKind.KEY_ONLY_IN_RIGHT -> {
             colorPair = diffColors.redPair
             chipText = localizedStrings.onlyInRight
             chipIcon = AppIconResource.loadXmlImageVector(AppIconResource.icLoadRightFile)
