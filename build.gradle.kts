@@ -81,10 +81,13 @@ compose.desktop {
             copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
 
             linux {
-                iconFile.set(resourceDir.file("terminodiff.png"))
+                iconFile.set(resourceDir.file("common/terminodiff.png"))
+                rpmLicenseType = "GPL-3.0"
+                debMaintainer = "j.wiedekopf@uni-luebeck.de"
+                appCategory = "Development"
                 targetFormats(
                     TargetFormat.Deb,
-                    TargetFormat.Rpm,
+                    //TargetFormat.Rpm,
                     TargetFormat.AppImage,
                 )
             }
