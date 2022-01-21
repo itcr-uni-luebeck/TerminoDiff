@@ -20,7 +20,6 @@ import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.loadXmlImageVector
-import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.xml.sax.InputSource
@@ -39,15 +38,16 @@ class AppIconResource {
         const val icReload: ImageRelativePath = "icons/ic-reload.xml"
         const val icUniLuebeck: ImageRelativePath = "uzl-logo.xml"
 
-        fun loadFile(relativePath: ImageRelativePath) =
+        fun loadFile(relativePath: ImageRelativePath): InputStream? =
             AppIconResource::class.java.classLoader.getResourceAsStream(relativePath)
 
-        fun loadXmlImageVector(stream: InputStream, density: Density): ImageVector =
-            stream.buffered().use { loadXmlImageVector(InputSource(it), density) }
+        @Composable
+        fun loadXmlImageVector(stream: InputStream): ImageVector =
+            stream.buffered().use { loadXmlImageVector(InputSource(it), LocalDensity.current) }
 
         @Composable
         fun loadXmlImageVector(relativePath: ImageRelativePath): ImageVector =
-            loadFile(relativePath)!!.buffered().use { loadXmlImageVector(InputSource(it), LocalDensity.current) }
+            loadFile(relativePath)?.let { loadXmlImageVector(it) } ?: throw IllegalArgumentException("the file $relativePath could not be loaded")
     }
 }
 
@@ -125,7 +125,7 @@ fun AppImageIcon(
 ) {
     AppIconResource.loadFile(relativePath)?.let { iconStream ->
         Icon(modifier = modifier,
-            imageVector = AppIconResource.loadXmlImageVector(iconStream, LocalDensity.current),
+            imageVector = AppIconResource.loadXmlImageVector(iconStream),
             contentDescription = label,
             tint = tint)
     }

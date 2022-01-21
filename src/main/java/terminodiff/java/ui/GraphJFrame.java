@@ -27,22 +27,23 @@ public abstract class GraphJFrame<V, E> extends JFrame {
     protected final DefaultGraphMouse<V, E> graphMouse = new DefaultGraphMouse<>();
     protected final JPanel container = new JPanel(new BorderLayout());
     protected final LocalizedStrings localizedStrings;
-    protected boolean isDarkTheme;
+    protected final boolean isDarkTheme;
 
     @SuppressWarnings("unchecked")
-    protected LayoutAlgorithm<V> layoutAlgorithm = LayoutHelperDirectedGraphs.Layouts.EIGLSPERGERLP.getLayoutAlgorithm();
+    protected final LayoutAlgorithm<V> layoutAlgorithm = LayoutHelperDirectedGraphs.Layouts.EIGLSPERGERLP.getLayoutAlgorithm();
 
-    protected LayoutHelperDirectedGraphs.Layouts[] combos = LayoutHelperDirectedGraphs.getCombos();
+    protected final LayoutHelperDirectedGraphs.Layouts[] combos = LayoutHelperDirectedGraphs.getCombos();
     protected final JComboBox<LayoutHelperDirectedGraphs.Layouts> layoutComboBox = new JComboBox<>(combos);
-    protected VisualizationModel<V, E> visualizationModel;
-    protected VisualizationViewer<V, E> mainVisualizationViewer;
-    protected SatelliteVisualizationViewer<V, E> satelliteVisualizationViewer;
+    protected final VisualizationModel<V, E> visualizationModel;
+    protected final VisualizationViewer<V, E> mainVisualizationViewer;
+    protected final SatelliteVisualizationViewer<V, E> satelliteVisualizationViewer;
 
     protected abstract void configureMainViewer(VisualizationViewer<V, E> mainViewer);
 
     protected abstract void configureBothViewers(VisualizationViewer<V, E> viewer);
 
-    protected void configureSatelliteViewer(VisualizationViewer<V, E> satelliteViewer) {
+    @SuppressWarnings("EmptyMethod")
+    protected void configureSatelliteViewer(@SuppressWarnings("unused") VisualizationViewer<V, E> satelliteViewer) {
     }
 
     public GraphJFrame(Graph<V, E> graph, Boolean isDarkTheme, LocalizedStrings localizedStrings, String frameTitle) {
@@ -102,6 +103,7 @@ public abstract class GraphJFrame<V, E> extends JFrame {
         layoutComboBox.setSelectedItem(LayoutHelperDirectedGraphs.Layouts.EIGLSPERGERLP);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     private void configureResizeHandler(VisualizationViewer<V, E> mainViewer, SatelliteVisualizationViewer<V, E> satelliteViewer, Dimension satViewerSize) {
         mainViewer.getComponent().addComponentListener(new ComponentAdapter() {
             @Override

@@ -84,6 +84,7 @@ fun rememberCarouselScrollState(initial: Int = 0): CarouselScrollState {
  * @see Carousel
  *
  */
+@Suppress("EmptyMethod")
 class CarouselScrollState(initial: Int) : ScrollableState {
 
     /**
@@ -120,7 +121,7 @@ class CarouselScrollState(initial: Int) : ScrollableState {
     private var _length = mutableStateOf(Int.MAX_VALUE, structuralEqualityPolicy())
 
     /**
-     * We receive scroll events in floats but represent the scroll position in ints so we have to
+     * We receive scroll events in floats but represent the scroll position in ints, so we have to
      * manually accumulate the fractional part of the scroll to not completely ignore it.
      */
     private var accumulator: Float = 0f
@@ -161,14 +162,14 @@ class CarouselScrollState(initial: Int) : ScrollableState {
 }
 
 /**
- * Modify element to allow to scroll vertically when height of the content is bigger than max
+ * Modify element to allow scrolling vertically when height of the content is bigger than max
  * constraints allow.
  *
  * In order to use this modifier, you need to create and own [CarouselScrollState]
  * @see [rememberCarouselScrollState]
  *
  * @param state state of the scroll
- * @param enabled whether or not scrolling via touch input is enabled
+ * @param enabled whether scrolling via touch input is enabled
  * @param flingBehavior logic describing fling behavior when drag has finished with velocity. If
  * `null`, default from [ScrollableDefaults.flingBehavior] will be used.
  * @param reverseScrolling reverse the direction of scrolling, when `true`, 0 [CarouselScrollState.value]
@@ -188,7 +189,7 @@ fun Modifier.verticalScroll(
 )
 
 /**
- * Modify element to allow to scroll horizontally when width of the content is bigger than max
+ * Modify element to allow scrolling horizontally when width of the content is bigger than max
  * constraints allow.
  *
  * In order to use this modifier, you need to create and own [CarouselScrollState]
@@ -366,7 +367,7 @@ internal fun Constraints.assertNotNestingScrollableContainers(isVertical: Boolea
  * We faced similar issue in Compose already with Androids Popups and Dialogs where we decided to
  * just predefine some constant with a maximum elevation size we are not going to clip. We are
  * going to reuse this technique here. This will improve how it works in most common cases. If the
- * user will need to have a larger unclipped area for some reason they can always add the needed
+ * user needs to have a larger unclipped area for some reason they can always add the needed
  * padding inside the scrollable area.
  */
 internal fun Modifier.clipScrollableContainer(isVertical: Boolean) =

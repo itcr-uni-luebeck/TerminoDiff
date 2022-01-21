@@ -22,7 +22,7 @@ object AppPreferences {
         }
     }
 
-    var language: String by preference(userPref, "language_", SupportedLocale.getDefaultLocale().name)
+    var language: String by preference(userPref, "language_", SupportedLocale.defaultLocale.name)
     var darkModeEnabled: Boolean by preference(userPref, "dark_mode_enabled", false)
     var fileBrowserDirectory: String by preference(userPref, "file_browser_directory", System.getProperty("user.home"))
 }
@@ -31,9 +31,9 @@ inline fun <reified T : Any> preference(preferences: Preferences, key: String, d
     PreferenceDelegate(preferences, key, defaultValue, T::class)
 
 class PreferenceDelegate<T : Any>(
-    val preferences: Preferences,
-    val key: String,
-    val defaultValue: T,
+    private val preferences: Preferences,
+    private val key: String,
+    private val defaultValue: T,
     val type: KClass<T>
 ) : ReadWriteProperty<Any, T> {
 

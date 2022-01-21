@@ -8,18 +8,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import kotlinx.coroutines.launch
 import li.flor.nativejfilechooser.NativeJFileChooser
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.SplitPaneState
 import org.jetbrains.compose.splitpane.VerticalSplitPane
-import org.slf4j.Logger
-import org.slf4j.LoggerFactory
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
@@ -32,12 +28,8 @@ import terminodiff.ui.panes.graph.ShowGraphsPanel
 import terminodiff.ui.panes.metadatadiff.MetadataDiffPanel
 import terminodiff.ui.theme.TerminoDiffTheme
 import java.io.File
-import java.net.InetAddress
-import java.util.*
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
-
-private val logger: Logger = LoggerFactory.getLogger("TerminodiffAppContent")
 
 @OptIn(ExperimentalSplitPaneApi::class)
 @Composable
@@ -60,23 +52,6 @@ fun TerminodiffAppContent(
             diffDataContainer.rightFilename = it
         }
     }
-
-    val coroutineScope = rememberCoroutineScope()
-    when (val hostname = InetAddress.getLocalHost().hostName.lowercase(Locale.getDefault())) {
-        "joshua-athena-windows" ->
-            coroutineScope.launch {
-                /*diffDataContainer.leftFilename =
-                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2017_06_21.json")
-                diffDataContainer.rightFilename =
-                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json")*/
-                diffDataContainer.leftFilename =
-                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\icd10gm2010_dimdi.fhir.json")
-                diffDataContainer.rightFilename =
-                    File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\icd10gm2010_bfarm.fhir.json")
-            }
-        else -> logger.info("hostname: $hostname")
-    }
-
 
     TerminodiffContentWindow(
         localizedStrings = localizedStrings,
@@ -265,17 +240,15 @@ private fun ContainerInitializedContent(
                 }
             }
         }
-
-
     }
 }
 
 fun getFileChooser(title: String): JFileChooser {
     return when (SystemUtils.IS_OS_MAC) {
         // NativeJFileChooser hangs on Azul Zulu 11 + JavaFX on macOS 12.1 aarch64.
-        // with Azul Zulu w/o JFX, currently the file browser does not work at all on a M1 MBA.
-        // hence, the non-native file chooser is used instead, which is not *nearly* as nice,
-        // but it seems to be much more stabl
+        // With Azul Zulu w/o JFX, currently the file browser does not work at all on a M1 MBA.
+        // Hence, the non-native file chooser from Swing is used instead, which is not *nearly* as nice
+        // as the native dialog on Windows, but it seems to be much more stable.
         true -> JFileChooser(AppPreferences.fileBrowserDirectory)
         else -> NativeJFileChooser(AppPreferences.fileBrowserDirectory)
     }.apply {
