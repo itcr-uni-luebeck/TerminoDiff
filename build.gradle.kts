@@ -57,7 +57,6 @@ java {
 
 javafx {
     // add javafx to the classpath
-    // TODO: 03/01/22 figure out a way to modularize this app, to suppress javafx message
     version = "17.0.1"
     modules("javafx.controls", "javafx.swing")
 }
@@ -71,6 +70,8 @@ compose.desktop {
     application {
         mainClass = "terminodiff.MainKt"
         nativeDistributions {
+            modules("java.base", "java.compiler", "java.instrument", "java.management", "java.naming", "java.prefs", "java.scripting", "java.security.jgss", "java.sql", "java.xml.crypto", "javafx.swing", "jdk.attach", "jdk.jdi", "jdk.unsupported")
+            jvmArgs += listOf("-Dskiko.renderApi=SOFTWARE")
             val resourceDir = project.layout.projectDirectory.dir("resources")
             appResourcesRootDir.set(resourceDir)
             licenseFile.set(project.file("LICENSE"))
@@ -86,8 +87,8 @@ compose.desktop {
                 debMaintainer = "j.wiedekopf@uni-luebeck.de"
                 appCategory = "Development"
                 targetFormats(
-                    TargetFormat.Deb,
-                    //TargetFormat.Rpm,
+                    // TargetFormat.Deb,
+                    TargetFormat.Rpm,
                     TargetFormat.AppImage,
                 )
             }

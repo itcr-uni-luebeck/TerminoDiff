@@ -1,0 +1,29 @@
+{
+  "$schema": "https://zenodo.org/schemas/deposits/records/legacyrecord.json",
+  "creators": [
+    {
+      "orcid": "0000-0002-9902-6459",
+      "affiliation": "IT Center for Clinical Research & Institute of Medical Informatics, University of Lübeck, Germany",
+      "name": "Wiedekopf, Joshua"
+    }
+  ],
+  "license": "GPL-3.0",
+  "title": "TerminoDiff 1.0.0",
+  "description": "Semantic Diff of HL7 FHIR CodeSystem resources",
+  "keywords": [
+    "HL7",
+    "FHIR",
+    "Terminology",
+    "Differences",
+    "CodeSystem",
+    "Terminology Server",
+    "Terminology as Topic"
+  ],
+  "contributors": [
+    {
+      "affiliation": "IT Center for Clinical Research, University of Lübeck, Germany",
+      "type": "ResearchGroup"
+    }
+  ],
+  "communities": [{ "identifier": "itcrl" }]
+}
