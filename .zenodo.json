@@ -1,4 +1,5 @@
 {
+  "$schema": "https://zenodo.org/schemas/deposits/records/legacyrecord.json",
   "creators": [
     {
       "orcid": "0000-0002-9902-6459",
@@ -20,7 +21,6 @@
   ],
   "license": "GPL-3.0",
   "title": "TerminoDiff",
-  "version": "1.0.0",
   "description": "Semantic Diff of HL7 FHIR CodeSystem resources",
   "keywords": [
     "HL7",
@@ -41,12 +41,6 @@
   "communities": [
     {
       "identifier": "itcrl"
-    }
-  ],
-  "related_identifiers": [
-    {
-      "scheme": "doi",
-      "identifier": "10.5281/zenodo.5898267"
     }
   ]
 }
