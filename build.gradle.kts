@@ -70,8 +70,6 @@ compose.desktop {
     application {
         mainClass = "terminodiff.MainKt"
         nativeDistributions {
-            modules("java.base", "java.compiler", "java.instrument", "java.management", "java.naming", "java.prefs", "java.scripting", "java.security.jgss", "java.sql", "java.xml.crypto", "javafx.swing", "jdk.attach", "jdk.jdi", "jdk.unsupported")
-            jvmArgs += listOf("-Dskiko.renderApi=SOFTWARE")
             val resourceDir = project.layout.projectDirectory.dir("resources")
             appResourcesRootDir.set(resourceDir)
             licenseFile.set(project.file("LICENSE"))
@@ -81,7 +79,7 @@ compose.desktop {
             vendor = "IT Center for Clinical Reserach, University of Lübeck"
             copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
 
-            linux {
+            /*linux {
                 iconFile.set(resourceDir.file("common/terminodiff.png"))
                 rpmLicenseType = "GPL-3.0"
                 debMaintainer = "j.wiedekopf@uni-luebeck.de"
@@ -91,8 +89,9 @@ compose.desktop {
                     TargetFormat.Rpm,
                     TargetFormat.AppImage,
                 )
-            }
+            }*/
             /*macOS {
+                jvmArgs += listOf("-Dskiko.renderApi=SOFTWARE")
                 bundleID = "de.uzl.itcr.terminodiff"
                 signing {
                     sign.set(false)
@@ -102,7 +101,7 @@ compose.desktop {
                     TargetFormat.Dmg
                 )
             }*/
-            /*windows {
+            windows {
                 iconFile.set(resourceDir.file("windows/terminodiff.ico"))
                 perUserInstall = true
                 dirChooser = true
@@ -111,7 +110,7 @@ compose.desktop {
                 targetFormats(
                     TargetFormat.Exe
                 )
-            }*/
+            }
         }
     }
 }
