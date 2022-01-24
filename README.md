@@ -150,7 +150,7 @@ This work is the subject of a submission to the Medical Informatics Europe 2022 
 In the meantime, please cite via the [Zenodo DOI](https://doi.org/10.5281/zenodo.5898267) as:
 
 ```
-Wiedekopf, Joshua. (2022). TerminoDiff. Zenodo. https://doi.org/10.5281/zenodo.5898267
+Wiedekopf, Joshua, et al. (2022). TerminoDiff. Zenodo. https://doi.org/10.5281/zenodo.5898267
 ```
 
 ## Can I help?
