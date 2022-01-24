@@ -7,7 +7,8 @@
     }
   ],
   "license": "GPL-3.0",
-  "title": "TerminoDiff 1.0.0",
+  "title": "TerminoDiff",
+  "version": "1.0.0",
   "description": "Semantic Diff of HL7 FHIR CodeSystem resources",
   "keywords": [
     "HL7",
@@ -25,5 +26,16 @@
       "type": "ResearchGroup"
     }
   ],
-  "communities": [{ "identifier": "itcrl" }]
+  "communities": [
+    {
+      "identifier": "itcrl"
+    }
+  ],
+  "related_identifiers": [
+    {
+      "scheme": "doi",
+      "identifier": "10.5281/zenodo.5898267",
+      "relation": "isVersionOf"
+    }
+  ]
 }

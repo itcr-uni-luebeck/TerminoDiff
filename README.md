@@ -1,5 +1,7 @@
 # TerminoDiff - Diff for 🔥 Terminology
 
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5898268.svg)](https://doi.org/10.5281/zenodo.5898268)
+
 TerminoDiff is a graphical application to quickly compare [HL7 FHIR CodeSystem resources](https://www.hl7.org/fhir/codesystem.html).
 
 ## Why this app?
@@ -144,6 +146,12 @@ We are looking at implementing the following features:
 ## How do I cite this?
 
 This work is the subject of a submission to the Medical Informatics Europe 2022 conference.
+
+In the meantime, please cite via the [Zenodo DOI](https://doi.org/10.5281/zenodo.5898267) as:
+
+```
+Wiedekopf, Joshua. (2022). TerminoDiff. Zenodo. https://doi.org/10.5281/zenodo.5898267
+```
 
 ## Can I help?
 
