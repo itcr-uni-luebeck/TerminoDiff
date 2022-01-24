@@ -1,5 +1,4 @@
 {
-  "$schema": "https://zenodo.org/schemas/deposits/records/legacyrecord.json",
   "creators": [
     {
       "orcid": "0000-0002-9902-6459",
@@ -21,7 +20,8 @@
   ],
   "contributors": [
     {
-      "affiliation": "IT Center for Clinical Research, University of Lübeck, Germany",
+      "name": "IT Center for Clinical Research"
+      "affiliation": "University of Lübeck, Germany",
       "type": "ResearchGroup"
     }
   ],
