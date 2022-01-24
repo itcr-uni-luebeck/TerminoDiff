@@ -1,6 +1,6 @@
 # TerminoDiff - Diff for 🔥 Terminology
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5898268.svg)](https://doi.org/10.5281/zenodo.5898268)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.5898497.svg)](https://doi.org/10.5281/zenodo.5898497)
 
 TerminoDiff is a graphical application to quickly compare [HL7 FHIR CodeSystem resources](https://www.hl7.org/fhir/codesystem.html).
 
