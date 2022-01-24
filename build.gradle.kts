@@ -57,7 +57,6 @@ java {
 
 javafx {
     // add javafx to the classpath
-    // TODO: 03/01/22 figure out a way to modularize this app, to suppress javafx message
     version = "17.0.1"
     modules("javafx.controls", "javafx.swing")
 }
@@ -80,25 +79,28 @@ compose.desktop {
             vendor = "IT Center for Clinical Reserach, University of Lübeck"
             copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
 
-            linux {
-                iconFile.set(resourceDir.file("terminodiff.png"))
+            /*linux {
+                iconFile.set(resourceDir.file("common/terminodiff.png"))
+                rpmLicenseType = "GPL-3.0"
+                debMaintainer = "j.wiedekopf@uni-luebeck.de"
+                appCategory = "Development"
                 targetFormats(
-                    TargetFormat.Deb,
+                    // TargetFormat.Deb,
                     TargetFormat.Rpm,
                     TargetFormat.AppImage,
                 )
-            }
-            macOS {
+            }*/
+            /*macOS {
+                jvmArgs += listOf("-Dskiko.renderApi=SOFTWARE")
                 bundleID = "de.uzl.itcr.terminodiff"
                 signing {
-                    sign.set(true)
-                    identity.set("Joshua Wiedekopf")
+                    sign.set(false)
                 }
                 iconFile.set(resourceDir.file("macos/terminodiff.icns"))
                 targetFormats(
                     TargetFormat.Dmg
                 )
-            }
+            }*/
             windows {
                 iconFile.set(resourceDir.file("windows/terminodiff.ico"))
                 perUserInstall = true
@@ -106,11 +108,9 @@ compose.desktop {
                 upgradeUuid = "ECFA19D9-D1F2-4AF5-9E5E-59A8F21C3A79"
                 menuGroup = "TerminoDiff"
                 targetFormats(
-                    TargetFormat.Exe,
-                    TargetFormat.Msi
+                    TargetFormat.Exe
                 )
             }
-
         }
     }
 }

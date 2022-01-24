@@ -100,7 +100,7 @@ enum class SupportedLocale {
     EN, DE;
 
     companion object {
-        fun getDefaultLocale() = EN
+        val defaultLocale = EN
     }
 }
 
@@ -306,7 +306,7 @@ class EnglishStrings : LocalizedStrings(
     rightFileOpenFilename_ = { file -> "Right file open: ${file.absolutePath}" },
 )
 
-fun getStrings(locale: SupportedLocale = SupportedLocale.getDefaultLocale()): LocalizedStrings = when (locale) {
+fun getStrings(locale: SupportedLocale = SupportedLocale.defaultLocale): LocalizedStrings = when (locale) {
     SupportedLocale.DE -> GermanStrings()
     SupportedLocale.EN -> EnglishStrings()
 }

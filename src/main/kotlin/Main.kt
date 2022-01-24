@@ -9,7 +9,6 @@ import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import ca.uhn.fhir.context.FhirContext
 import com.formdev.flatlaf.FlatDarkLaf
-import com.formdev.flatlaf.FlatLightLaf
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.rememberSplitPaneState
@@ -32,10 +31,10 @@ private val logger: Logger = LoggerFactory.getLogger(TerminoDiffApp::class.java)
  */
 class TerminoDiffApp
 
-val resourcesDir = System.getProperty("compose.application.resources.dir")?.let {
-    // this only works in the native distribution, or when running via `runDistributable` in Gradle/IntelliJ
-    // otherwise, resourcesDir will be null
-    File(it)
+val resourcesDir = System.getProperty("compose.application.resources.dir")?.let { path ->
+    // this only works in the native distribution, (this includes when using `runDistributable` in Gradle/IntelliJ)
+    // otherwise, resourcesDir will be `null`
+    File(path)
 }
 
 fun main() = application {
@@ -65,7 +64,7 @@ fun AppWindow(
 
     when (SystemUtils.IS_OS_WINDOWS) {
         //when (useDarkTheme && SystemUtils.IS_OS_WINDOWS) {
-        //setting this does not make sense if not on windows
+        //setting this does not make sense if not on Windows
         true -> FlatDarkLaf.setup()
         //else -> FlatLightLaf.setup()
     }

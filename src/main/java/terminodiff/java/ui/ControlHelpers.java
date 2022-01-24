@@ -19,12 +19,14 @@ import org.jungrapht.visualization.control.ScalingControl;
  *
  * @author Tom Nelson
  */
+@SuppressWarnings({"rawtypes", "unchecked"})
 public class ControlHelpers {
 
     public static JComponent getZoomControls(String title, VisualizationServer vv) {
         return getCenteredContainer(title, getZoomControls(vv));
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public static JComponent getZoomControls(VisualizationServer vv) {
 
         final ScalingControl scaler = new CrossoverScalingControl();
@@ -45,6 +47,7 @@ public class ControlHelpers {
         return getCenteredContainer(title, getZoomControls(vv, buttonContainerLayoutManager));
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public static JComponent getZoomControls(
             VisualizationServer vv, LayoutManager buttonContainerLayoutManager) {
 
@@ -63,10 +66,6 @@ public class ControlHelpers {
 
     /**
      * Demo helper to make a titled toggle button to choose free-form multiselection
-     *
-     * @param title
-     * @param vv
-     * @return
      */
     public static JComponent getMultiselectPanel(String title, VisualizationViewer vv) {
         JToggleButton toggle = new JToggleButton("FreeForm Select");
@@ -89,8 +88,7 @@ public class ControlHelpers {
             vv.setGraphMouse(graphMouse);
         }
         if (graphMouse instanceof DefaultModalGraphMouse) {
-            JPanel modePanel = new JPanel(new GridLayout(2, 1));
-            return modePanel;
+            return new JPanel(new GridLayout(2, 1));
         } else {
             return new JPanel();
         }
@@ -101,8 +99,7 @@ public class ControlHelpers {
     }
 
     public static JComponent getModeControls(DefaultModalGraphMouse graphMouse) {
-        JPanel modePanel = new JPanel(new GridLayout(2, 1));
-        return modePanel;
+        return new JPanel(new GridLayout(2, 1));
     }
 
     public static JComponent getModeRadio(String title, DefaultModalGraphMouse graphMouse) {

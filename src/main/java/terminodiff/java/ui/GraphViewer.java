@@ -52,6 +52,7 @@ public class GraphViewer {
         }
     }
 
+    @SuppressWarnings("DuplicatedCode")
     public static VisualizationViewer<DiffNode, DiffEdge> configureDiffGraphViewer(
             Graph<DiffNode, DiffEdge> graph,
             boolean isDarkTheme,
@@ -81,13 +82,6 @@ public class GraphViewer {
         layoutAlgorithm.setVertexBoundsFunction(mainVisualizationViewer.getRenderContext().getVertexBoundsFunction());
         layoutAlgorithm.runAfter();
 
-        /*VisualizationViewer<DiffNode, DiffEdge> viewer = VisualizationViewer.builder(graph)
-                .layoutSize(new Dimension(1000, 1000))
-                .viewSize(new Dimension(1000, 1000))
-                .build();*/
-
-        /*final DefaultLensGraphMouse<DiffNode, DiffEdge> graphMouse = new DefaultLensGraphMouse<>();
-        viewer.setGraphMouse(graphMouse);*/
         mainVisualizationViewer.setVertexToolTipFunction(n -> n.getTooltip(localizedStrings));
         mainVisualizationViewer.setEdgeToolTipFunction(DiffEdge::getTooltip);
         mainVisualizationViewer.getRenderContext().setEdgeShapeFunction((g, e) -> EdgeShape.CUBIC_CURVE);
@@ -108,8 +102,7 @@ public class GraphViewer {
             if (isDarkTheme) return Color.WHITE;
             else return Color.BLACK;
         });
-        //viewer.getRenderContext().setVertexShapeFunction(SugiyamaLayoutViewer::diffGraphVertexShape);
-        //configureViewerLayoutAlgorithm(viewer);
+
         configureTheme(mainVisualizationViewer, isDarkTheme, false);
         mainVisualizationViewer.scaleToLayout();
         satelliteVisualizationViewer.scaleToLayout();
