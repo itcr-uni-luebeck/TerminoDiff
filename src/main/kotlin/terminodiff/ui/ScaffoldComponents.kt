@@ -47,7 +47,8 @@ class AppIconResource {
 
         @Composable
         fun loadXmlImageVector(relativePath: ImageRelativePath): ImageVector =
-            loadFile(relativePath)?.let { loadXmlImageVector(it) } ?: throw IllegalArgumentException("the file $relativePath could not be loaded")
+            loadFile(relativePath)?.let { loadXmlImageVector(it) }
+                ?: throw IllegalArgumentException("the file $relativePath could not be loaded")
     }
 }
 
@@ -59,6 +60,7 @@ fun TerminoDiffTopAppBar(
     onLoadRightFile: () -> Unit,
     onChangeDarkTheme: () -> Unit,
     onReload: () -> Unit,
+    displayLoadFiles: Boolean = false,
 ) {
 
     TopAppBar(title = {
@@ -87,15 +89,17 @@ fun TerminoDiffTopAppBar(
                     imageRelativePath = AppIconResource.icChangeLanguage,
                     label = localizedStrings.changeLanguage)
             }
-            MouseOverPopup(localizedStrings.loadLeftFile) {
-                IconActionButton(onClick = onLoadLeftFile,
-                    imageRelativePath = AppIconResource.icLoadLeftFile,
-                    label = localizedStrings.loadLeftFile)
-            }
-            MouseOverPopup(localizedStrings.loadRightFile) {
-                IconActionButton(onClick = onLoadRightFile,
-                    imageRelativePath = AppIconResource.icLoadRightFile,
-                    label = localizedStrings.loadRightFile)
+            if (displayLoadFiles) {
+                MouseOverPopup(localizedStrings.loadLeftFile) {
+                    IconActionButton(onClick = onLoadLeftFile,
+                        imageRelativePath = AppIconResource.icLoadLeftFile,
+                        label = localizedStrings.loadLeftFile)
+                }
+                MouseOverPopup(localizedStrings.loadRightFile) {
+                    IconActionButton(onClick = onLoadRightFile,
+                        imageRelativePath = AppIconResource.icLoadRightFile,
+                        label = localizedStrings.loadRightFile)
+                }
             }
             MouseOverPopup(localizedStrings.reload) {
                 IconActionButton(onClick = onReload,

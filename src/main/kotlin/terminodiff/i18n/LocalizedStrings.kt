@@ -4,8 +4,8 @@ import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.engine.graph.DiffGraphElementKind
+import terminodiff.engine.resources.DiffDataContainer.*
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
-import java.io.File
 
 /**
  * we pass around an instance of LocalizedStrings, since we want every composable
@@ -14,6 +14,7 @@ import java.io.File
 abstract class LocalizedStrings(
     val boolean_: (Boolean?) -> String,
     val bothValuesAreNull: String,
+    val calculateDiff: String,
     val canonicalUrl: String,
     val caseSensitive: String = "Case-Sensitive?",
     val changeLanguage: String,
@@ -37,6 +38,9 @@ abstract class LocalizedStrings(
     val display: String = "Display",
     val displayAndInWhich_: (String?, DiffGraphElementKind) -> String,
     val experimental: String,
+    val fhirTerminologyServer: String,
+    val fileFromPath_: (String) -> String,
+    val fileSystem: String,
     val hierarchyMeaning: String,
     val id: String = "ID",
     val identical: String,
@@ -45,13 +49,15 @@ abstract class LocalizedStrings(
     val keyedListResult_: (List<KeyedListDiffResult<*, *>>) -> String,
     val loadLeftFile: String,
     val loadRightFile: String,
+    val loadFromFile: String,
+    val loadedResources: String,
     val leftValue: String,
     val language: String,
     val rightValue: String,
     val metadataDiff: String,
     val metadataDiffResults_: (MetadataComparisonResult) -> String,
     val name: String = "Name",
-    val noDataLoadedTitle: String,
+    val noDataLoaded: String,
     val numberItems_: (Int) -> String = {
         when (it) {
             1 -> "1 item"
@@ -73,6 +79,7 @@ abstract class LocalizedStrings(
     val propertyDesignationForCode_: (String) -> String,
     val propertyType: String,
     val reload: String,
+    val side_: (Side) -> String,
     val showAll: String,
     val showDifferent: String,
     val showIdentical: String,
@@ -92,8 +99,6 @@ abstract class LocalizedStrings(
     val valueSet: String = "ValueSet",
     val version: String = "Version",
     val versionNeeded: String,
-    val leftFileOpenFilename_: (File) -> String,
-    val rightFileOpenFilename_: (File) -> String,
 )
 
 enum class SupportedLocale {
@@ -112,6 +117,7 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     }
 },
     bothValuesAreNull = "Beide Werte sind null",
+    calculateDiff = "Diff berechnen",
     canonicalUrl = "Kanonische URL",
     changeLanguage = "Sprache wechseln",
     clickForDetails = "Für Details klicken",
@@ -140,6 +146,9 @@ class GermanStrings : LocalizedStrings(boolean_ = {
         "'$display' ($where)"
     },
     experimental = "Experimentell?",
+    fhirTerminologyServer = "FHIR-Terminologieserver",
+    fileFromPath_ = { "Datei von: $it" },
+    fileSystem = "Dateisystem",
     hierarchyMeaning = "Hierachie-Bedeutung",
     identical = "Identisch",
     identifiers = "IDs",
@@ -156,6 +165,8 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     },
     loadLeftFile = "Linke Datei laden",
     loadRightFile = "Rechte Datei laden",
+    loadFromFile = "Vom Dateisystem laden",
+    loadedResources = "Geladene Ressourcen",
     leftValue = "Linker Wert",
     language = "Sprache",
     rightValue = "Rechter Wert",
@@ -166,7 +177,7 @@ class GermanStrings : LocalizedStrings(boolean_ = {
             MetadataComparisonResult.DIFFERENT -> "Unterschiedlich"
         }
     },
-    noDataLoadedTitle = "Keine Daten geladen",
+    noDataLoaded = "Keine Daten geladen",
     oneValueIsNull = "Ein Wert ist null",
     onlyInLeft = "Nur links",
     onlyConceptDifferences = "Konzeptunterschiede",
@@ -188,6 +199,12 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     propertyDesignationForCode_ = { code -> "Eigenschaften und Designationen für Konzept '$code'" },
     propertyType = "Typ",
     reload = "Neu laden",
+    side_ = {
+        when (it) {
+            Side.RIGHT -> "Rechts"
+            Side.LEFT -> "Links"
+        }
+    },
     showAll = "Alle",
     showDifferent = "Unterschiedliche",
     showIdentical = "Identische",
@@ -200,19 +217,17 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     use = "Zweck",
     useContext = "Nutzungskontext",
     value = "Wert",
-    versionNeeded = "Version erforderlich?",
-    leftFileOpenFilename_ = { file -> "Linke Datei geöffnet: ${file.absolutePath}" },
-    rightFileOpenFilename_ = { file -> "Rechte Datei geöffnet: ${file.absolutePath}" })
+    versionNeeded = "Version erforderlich?")
 
-class EnglishStrings : LocalizedStrings(
-    boolean_ = {
-        when (it) {
-            null -> "null"
-            true -> "TRUE"
-            false -> "FALSE"
-        }
-    },
+class EnglishStrings : LocalizedStrings(boolean_ = {
+    when (it) {
+        null -> "null"
+        true -> "TRUE"
+        false -> "FALSE"
+    }
+},
     bothValuesAreNull = "Both values are null",
+    calculateDiff = "Calculate diff",
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
     clickForDetails = "Click for details",
@@ -241,6 +256,9 @@ class EnglishStrings : LocalizedStrings(
         "'$display' ($where)"
     },
     experimental = "Experimental?",
+    fhirTerminologyServer = "FHIR Terminology Server",
+    fileFromPath_ = { "File from: $it" },
+    fileSystem = "Filesystem",
     hierarchyMeaning = "Hierarchy Meaning",
     identical = "Identical",
     identifiers = "Identifiers",
@@ -257,6 +275,8 @@ class EnglishStrings : LocalizedStrings(
     },
     loadLeftFile = "Load left file",
     loadRightFile = "Load right file",
+    loadFromFile = "Load from file",
+    loadedResources = "Loaded resources",
     leftValue = "Left value",
     language = "Language",
     rightValue = "Right value",
@@ -267,7 +287,7 @@ class EnglishStrings : LocalizedStrings(
             MetadataComparisonResult.DIFFERENT -> "Different"
         }
     },
-    noDataLoadedTitle = "No data loaded",
+    noDataLoaded = "No data loaded",
     oneValueIsNull = "One value is null",
     onlyInLeft = "Only left",
     onlyConceptDifferences = "Concept differences",
@@ -289,6 +309,12 @@ class EnglishStrings : LocalizedStrings(
     propertyDesignationForCode_ = { code -> "Properties and designations for concept '$code'" },
     propertyType = "Type",
     reload = "Reload",
+    side_ = {
+        when (it) {
+            Side.RIGHT -> "Right"
+            Side.LEFT -> "Left"
+        }
+    },
     showAll = "All",
     showDifferent = "Different",
     showIdentical = "Identical",
@@ -301,10 +327,7 @@ class EnglishStrings : LocalizedStrings(
     use = "Use",
     useContext = "Use context",
     value = "Value",
-    versionNeeded = "Version needed?",
-    leftFileOpenFilename_ = { file -> "Left file open: ${file.absolutePath}" },
-    rightFileOpenFilename_ = { file -> "Right file open: ${file.absolutePath}" },
-)
+    versionNeeded = "Version needed?")
 
 fun getStrings(locale: SupportedLocale = SupportedLocale.defaultLocale): LocalizedStrings = when (locale) {
     SupportedLocale.DE -> GermanStrings()
