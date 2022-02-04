@@ -8,9 +8,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import kotlinx.coroutines.launch
 import li.flor.nativejfilechooser.NativeJFileChooser
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
@@ -28,6 +30,8 @@ import terminodiff.ui.panes.graph.ShowGraphsPanel
 import terminodiff.ui.panes.metadatadiff.MetadataDiffPanel
 import terminodiff.ui.theme.TerminoDiffTheme
 import java.io.File
+import java.net.InetAddress
+import java.util.*
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
 
@@ -51,6 +55,15 @@ fun TerminodiffAppContent(
         showLoadFileDialog(localizedStrings.loadRightFile)?.let {
             diffDataContainer.rightFilename = it
         }
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+    when (InetAddress.getLocalHost().hostName.lowercase(Locale.getDefault())) {
+        "joshua-athena-windows" ->
+            coroutineScope.launch {
+                diffDataContainer.leftFilename = File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2017_06_21.json")
+                diffDataContainer.rightFilename = File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json")
+            }
     }
 
     TerminodiffContentWindow(

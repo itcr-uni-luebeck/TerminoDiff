@@ -28,18 +28,30 @@ fun SelectableText(
     overflow: TextOverflow = TextOverflow.Clip,
 ) {
     SelectionContainer {
-        Text(
-            text = text ?: "null",
-            modifier = modifier,
-            fontStyle = fontStyle,
-            color = color,
-            fontWeight = fontWeight,
-            style = style,
-            textAlign = textAlign,
-            overflow = overflow,
-        )
+        NullableText(text, fontStyle, fontWeight, modifier, color, style, textAlign, overflow)
     }
 }
+
+@Composable
+fun NullableText(
+    text: String?,
+    fontStyle: FontStyle? = if (text == null) FontStyle.Italic else FontStyle.Normal,
+    fontWeight: FontWeight? = null,
+    modifier: Modifier = Modifier,
+    color: Color = LocalContentColor.current,
+    style: TextStyle = LocalTextStyle.current,
+    textAlign: TextAlign? = null,
+    overflow: TextOverflow = TextOverflow.Clip,
+) = Text(
+    text = text ?: "null",
+    modifier = modifier,
+    fontStyle = fontStyle,
+    color = color,
+    fontWeight = fontWeight,
+    style = style,
+    textAlign = textAlign,
+    overflow = overflow,
+)
 
 
 @Composable
