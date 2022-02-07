@@ -39,21 +39,15 @@ fun TerminodiffAppContent(
     splitPaneState: SplitPaneState,
 ) {
     var goButtonClicked by remember { mutableStateOf(false) }
-    val onLoadLeftFile: () -> Unit = {
-        // TODO: 04/02/22 migrate to showing a dialog with the load pane first, in case a resource from TS is used
-        showLoadFileDialog(localizedStrings.loadLeftFile)?.let {
-            diffDataContainer.leftResource = InputResource(Kind.FILE, localFile = it)
-        }
+    val onLoadLeftFile: (InputResource) -> Unit = {
+        diffDataContainer.leftResource = it
     }
-    val onLoadRightFile: () -> Unit = {
-        // TODO: 04/02/22 see above 
-        showLoadFileDialog(localizedStrings.loadRightFile)?.let {
-            diffDataContainer.rightResource = InputResource(Kind.FILE, localFile = it)
-        }
+    val onLoadRightFile: (InputResource) -> Unit = {
+        diffDataContainer.rightResource = it
     }
 
     val coroutineScope = rememberCoroutineScope()
-    @Suppress("ControlFlowWithEmptyBody") when (InetAddress.getLocalHost().hostName.lowercase(Locale.getDefault())) {
+    /*@Suppress("ControlFlowWithEmptyBody") when (InetAddress.getLocalHost().hostName.lowercase(Locale.getDefault())) {
         // TODO: 04/02/22 remove prior to release!
         "joshua-athena-windows" -> coroutineScope.launch {
             diffDataContainer.leftResource = InputResource(Kind.FILE,
@@ -61,14 +55,14 @@ fun TerminodiffAppContent(
             //diffDataContainer.rightFilename = File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json")
         }
     }
-
+*/
     TerminodiffContentWindow(localizedStrings = localizedStrings,
         scrollState = scrollState,
         useDarkTheme = useDarkTheme,
         onLocaleChange = onLocaleChange,
         onChangeDarkTheme = onChangeDarkTheme,
-        onLoadLeftFile = onLoadLeftFile,
-        onLoadRightFile = onLoadRightFile,
+        onLoadLeft = onLoadLeftFile,
+        onLoadRight = onLoadRightFile,
         onReload = { diffDataContainer.reload() },
         diffDataContainer = diffDataContainer,
         splitPaneState = splitPaneState,
@@ -83,8 +77,8 @@ fun TerminodiffContentWindow(
     useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
     onChangeDarkTheme: () -> Unit,
-    onLoadLeftFile: () -> Unit,
-    onLoadRightFile: () -> Unit,
+    onLoadLeft: (InputResource) -> Unit,
+    onLoadRight: (InputResource) -> Unit,
     onReload: () -> Unit,
     diffDataContainer: DiffDataContainer,
     splitPaneState: SplitPaneState,
@@ -96,8 +90,6 @@ fun TerminodiffContentWindow(
             TerminoDiffTopAppBar(
                 localizedStrings = localizedStrings,
                 onLocaleChange = onLocaleChange,
-                onLoadLeftFile = onLoadLeftFile,
-                onLoadRightFile = onLoadRightFile,
                 onChangeDarkTheme = onChangeDarkTheme,
                 onReload = onReload,
             )
@@ -114,8 +106,8 @@ fun TerminodiffContentWindow(
                     localizedStrings = localizedStrings,
                     leftResource = diffDataContainer.leftResource,
                     rightResource = diffDataContainer.rightResource,
-                    onLoadLeftFile = onLoadLeftFile,
-                    onLoadRightFile = onLoadRightFile,
+                    onLoadLeft = onLoadLeft,
+                    onLoadRight = onLoadRight,
                     onGoButtonClick = onGoButtonClick)
             }
         }

@@ -24,6 +24,7 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.xml.sax.InputSource
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.terminodiff.engine.resources.InputResource
 import java.awt.Cursor
 import java.io.InputStream
 
@@ -56,11 +57,8 @@ class AppIconResource {
 fun TerminoDiffTopAppBar(
     localizedStrings: LocalizedStrings,
     onLocaleChange: () -> Unit,
-    onLoadLeftFile: () -> Unit,
-    onLoadRightFile: () -> Unit,
     onChangeDarkTheme: () -> Unit,
     onReload: () -> Unit,
-    displayLoadFiles: Boolean = false,
 ) {
 
     TopAppBar(title = {
@@ -88,18 +86,6 @@ fun TerminoDiffTopAppBar(
                 IconActionButton(onClick = onLocaleChange,
                     imageRelativePath = AppIconResource.icChangeLanguage,
                     label = localizedStrings.changeLanguage)
-            }
-            if (displayLoadFiles) {
-                MouseOverPopup(localizedStrings.loadLeftFile) {
-                    IconActionButton(onClick = onLoadLeftFile,
-                        imageRelativePath = AppIconResource.icLoadLeftFile,
-                        label = localizedStrings.loadLeftFile)
-                }
-                MouseOverPopup(localizedStrings.loadRightFile) {
-                    IconActionButton(onClick = onLoadRightFile,
-                        imageRelativePath = AppIconResource.icLoadRightFile,
-                        label = localizedStrings.loadRightFile)
-                }
             }
             MouseOverPopup(localizedStrings.reload) {
                 IconActionButton(onClick = onReload,
