@@ -24,6 +24,7 @@ val jGraphTVersion = "1.5.1"
 val material3DesktopVersion = "1.0.0"
 val jungraphtVersion = "1.3"
 val composeDesktopVersion = "1.0.1"
+val ktorVersion = "2.0.0-beta-1"
 
 dependencies {
     testImplementation(kotlin("test"))
@@ -47,6 +48,8 @@ dependencies {
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359") // provides org.xml.sax
     implementation("org.apache.commons:commons-lang3:3.12.0")
     implementation("com.formdev:flatlaf:2.0.1")
+    implementation("io.ktor:ktor-client-core:$ktorVersion")
+    implementation("io.ktor:ktor-client-cio:$ktorVersion")
 }
 
 tasks.test {
