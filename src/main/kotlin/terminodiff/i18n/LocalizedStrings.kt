@@ -45,6 +45,7 @@ abstract class LocalizedStrings(
     val id: String = "ID",
     val identical: String,
     val identifiers: String,
+    val invalid: String,
     val jurisdiction: String,
     val keyedListResult_: (List<KeyedListDiffResult<*, *>>) -> String,
     val loadLeftFile: String,
@@ -69,6 +70,7 @@ abstract class LocalizedStrings(
     val onlyConceptDifferences: String,
     val onlyInRight: String,
     val overallComparison: String,
+    val pending: String,
     val publisher: String,
     val purpose: String,
     val property: String,
@@ -95,6 +97,7 @@ abstract class LocalizedStrings(
     val uniLuebeck: String,
     val use: String,
     val useContext: String,
+    val valid: String,
     val value: String,
     val valueSet: String = "ValueSet",
     val version: String = "Version",
@@ -152,6 +155,7 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     hierarchyMeaning = "Hierachie-Bedeutung",
     identical = "Identisch",
     identifiers = "IDs",
+    invalid = "Ungültig",
     jurisdiction = "Jurisdiktion",
     keyedListResult_ = { results ->
         results.map { it.result }.groupingBy { it }.eachCount().let { eachCount ->
@@ -183,6 +187,7 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     onlyConceptDifferences = "Konzeptunterschiede",
     onlyInRight = "Nur rechts",
     overallComparison = "Gesamt",
+    pending = "Ausstehend...",
     publisher = "Herausgeber",
     purpose = "Zweck",
     property = "Eigenschaft",
@@ -216,6 +221,7 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     uniLuebeck = "Universität zu Lübeck",
     use = "Zweck",
     useContext = "Nutzungskontext",
+    valid = "Gültig",
     value = "Wert",
     versionNeeded = "Version erforderlich?")
 
@@ -262,6 +268,7 @@ class EnglishStrings : LocalizedStrings(boolean_ = {
     hierarchyMeaning = "Hierarchy Meaning",
     identical = "Identical",
     identifiers = "Identifiers",
+    invalid = "Ungültig",
     jurisdiction = "Jurisdiction",
     keyedListResult_ = { results ->
         results.map { it.result }.groupingBy { it }.eachCount().let { eachCount ->
@@ -293,6 +300,7 @@ class EnglishStrings : LocalizedStrings(boolean_ = {
     onlyConceptDifferences = "Concept differences",
     onlyInRight = "Only right",
     overallComparison = "Overall",
+    pending = "Pending...",
     publisher = "Publisher",
     purpose = "Purpose",
     property = "Property",
@@ -326,6 +334,7 @@ class EnglishStrings : LocalizedStrings(boolean_ = {
     uniLuebeck = "University of Luebeck",
     use = "Use",
     useContext = "Use context",
+    valid = "Valid",
     value = "Value",
     versionNeeded = "Version needed?")
 

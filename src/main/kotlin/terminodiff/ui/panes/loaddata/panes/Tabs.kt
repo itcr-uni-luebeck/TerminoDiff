@@ -3,10 +3,8 @@ package terminodiff.terminodiff.ui.panes.loaddata.panes
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fireplace
-import androidx.compose.material.icons.filled.Plagiarism
 import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -21,6 +19,7 @@ import libraries.accompanist.pager.PagerState
 import libraries.pager_indicators.pagerTabIndicatorOffset
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.resources.InputResource
+import terminodiff.ui.MouseOverPopup
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
@@ -83,12 +82,23 @@ internal fun LabeledTextField(
     },
     trailingIcon = {
         trailingIconVector?.let { imageVector ->
-            if (trailingIconDescription == null || onTrailingIconClick == null) throw IllegalArgumentException("a content description and handler has to be specified if a trailing icon is provided")
-            IconButton(onClick = onTrailingIconClick) {
-                Icon(imageVector = imageVector,
-                    contentDescription = trailingIconDescription,
-                    tint = colorScheme.onSecondaryContainer)
+            if (trailingIconDescription == null) throw IllegalArgumentException("a content description has to be specified if a trailing icon is provided")
+            MouseOverPopup(
+                text = trailingIconDescription
+            ) {
+                when (onTrailingIconClick) {
+
+                    null -> Icon(imageVector = imageVector,
+                        contentDescription = trailingIconDescription,
+                        tint = colorScheme.onSecondaryContainer)
+                    else -> IconButton(onClick = onTrailingIconClick) {
+                        Icon(imageVector = imageVector,
+                            contentDescription = trailingIconDescription,
+                            tint = colorScheme.onSecondaryContainer)
+                    }
+                }
             }
+
         }
     },
     colors = TextFieldDefaults.textFieldColors(backgroundColor = colorScheme.secondaryContainer,

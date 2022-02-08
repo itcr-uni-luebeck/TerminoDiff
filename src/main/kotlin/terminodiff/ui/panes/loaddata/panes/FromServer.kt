@@ -4,9 +4,13 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Cancel
+import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.Pending
 import androidx.compose.runtime.*
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.DataFormatException
@@ -15,8 +19,6 @@ import io.ktor.client.engine.cio.*
 import io.ktor.client.request.*
 import io.ktor.client.statement.*
 import io.ktor.http.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
 import org.hl7.fhir.r4.model.Bundle
 import org.hl7.fhir.r4.model.CodeSystem
 import org.slf4j.Logger
@@ -34,75 +36,63 @@ fun FromServerScreenWrapper(
     fhirContext: FhirContext,
 ) {
     var baseServerUrl: String by remember { mutableStateOf(AppPreferences.terminologyServerUrl) }
-    val cleanServerUrl: Url by derivedStateOf { URLBuilder(baseServerUrl.trimEnd('/')).build() }
-    val coroutineScope = rememberCoroutineScope()
+
     val ktorClient = remember {
         HttpClient(CIO) {
             expectSuccess = false
             followRedirects = true
         }
     }
-    val availableResources : List<DownloadableCodeSystem>? by derivedStateOf { listResources() }
-    val remoteResourceList: MutableList<DownloadableCodeSystem> = remember { mutableStateListOf() }
+
+    /**
+     * https://developer.android.com/jetpack/compose/side-effects#producestate
+     */
+    /*val (resourceListPending: Boolean, resourceList: List<DownloadableCodeSystem>?) by
+    produceState<Pair<Boolean,List<DownloadableCodeSystem>?>(null,
+        baseServerUrl) {
+        val list = listCodeSystems(baseServerUrl, ktorClient, fhirContext)
+        value = list
+    }*/
+    val resourceListPair by produceState<Pair<Boolean, List<DownloadableCodeSystem>?>>(true to null, baseServerUrl) {
+        value = true to null
+        val list = listCodeSystems(baseServerUrl, ktorClient, fhirContext)
+        value = false to list
+    }
+    val (isResourceListPending, resourceList) = resourceListPair
     FromServerScreen(localizedStrings = localizedStrings,
         baseServerUrl = baseServerUrl,
         onChangeBaseServerUrl = { newUrl ->
             baseServerUrl = newUrl
             AppPreferences.terminologyServerUrl = newUrl
-            listResources(
-                newUrl = newUrl, coroutineScope = coroutineScope, ktorClient = ktorClient,
-                fhirContext = fhirContext)
-            { foundResources ->
-                remoteResourceList.clear()
-                remoteResourceList.addAll(foundResources)
-            }
         },
+        isResourceListPending = isResourceListPending,
+        resourceList = resourceList,
         onLoadLeftFile = onLoadLeft,
         onLoadRightFile = onLoadRight)
 }
 
-/*private fun listResources(
-    newUrl: String,
-    coroutineScope: CoroutineScope,
+private suspend fun listCodeSystems(
+    urlString: String,
     ktorClient: HttpClient,
     fhirContext: FhirContext,
-    onList: (List<DownloadableCodeSystem>) -> Unit,
-) {
-    val codeSystemUrl = URLBuilder(newUrl.trimEnd('/')).apply {
+): List<DownloadableCodeSystem>? = try {
+    val codeSystemUrl = URLBuilder(urlString.trimEnd('/')).apply {
         appendPathSegments("CodeSystem")
         parameters.append("_elements", "url,id,version,name,title,link,content")
     }.build()
     logger.debug("Requesting resource bundle from $codeSystemUrl")
-    coroutineScope.launch {
-        val list = retrieveBundleOfDownloadableResources(ktorClient, codeSystemUrl, fhirContext)
-        onList.invoke(list.sortedBy { it.canonicalUrl }.sortedBy { it.version })
-    }
-}*/
-
-private fun listResources(
-    newUrl: String,
-    coroutineScope: CoroutineScope,
-    ktorClient: HttpClient,
-    fhirContext: FhirContext,
-    onList: (List<DownloadableCodeSystem>) -> Unit,
-)  : List<DownloadableCodeSystem>? {
-    val codeSystemUrl = URLBuilder(newUrl.trimEnd('/')).apply {
-        appendPathSegments("CodeSystem")
-        parameters.append("_elements", "url,id,version,name,title,link,content")
-    }.build()
-    logger.debug("Requesting resource bundle from $codeSystemUrl")
-    val job = coroutineScope.launch {
-        val list = retrieveBundleOfDownloadableResources(ktorClient, codeSystemUrl, fhirContext)
-        onList.invoke(list.sortedBy { it.canonicalUrl }.sortedBy { it.version })
-        return@launch list // TODO: 07/02/22 this does not work
-    }
+    val list = retrieveBundleOfDownloadableResources(ktorClient, codeSystemUrl, fhirContext)
+    list?.sortedBy { it.canonicalUrl }?.sortedBy { it.version }
+} catch (e: Exception) {
+    logger.info("Error reqesting from FHIR Base $urlString: ${e.message}")
+    null
 }
 
 private suspend fun retrieveBundleOfDownloadableResources(
     ktorClient: HttpClient,
     initialUrl: Url,
     fhirContext: FhirContext,
-): List<DownloadableCodeSystem> {
+): List<DownloadableCodeSystem>? {
     var nextUrl: Url? = initialUrl
     val resources = mutableListOf<DownloadableCodeSystem>()
     while (nextUrl != null) {
@@ -115,10 +105,9 @@ private suspend fun retrieveBundleOfDownloadableResources(
             }
         }
         if (!bundleRx.status.isSuccess()) {
-            logger.info("GET rx to $thisUrl not successful: ${bundleRx.status}")
-            return emptyList()
+            logger.debug("GET rx to $thisUrl not successful: ${bundleRx.status}")
+            return null
         } else {
-            logger.info(bundleRx.status.toString())
             try {
                 val bundle = fhirContext.newJsonParser().parseResource(Bundle::class.java, bundleRx.bodyAsText())
                 val entries: List<DownloadableCodeSystem> = bundle.entry.mapNotNull { entry ->
@@ -131,6 +120,7 @@ private suspend fun retrieveBundleOfDownloadableResources(
                                 canonicalUrl = cs.url,
                                 id = cs.id,
                                 version = cs.version,
+                                metaVersion = cs.meta.versionId,
                                 name = cs.name,
                                 title = cs.title,
                                 content = cs.content
@@ -142,12 +132,12 @@ private suspend fun retrieveBundleOfDownloadableResources(
                 resources.addAll(entries)
                 nextUrl = bundle.getLink("next")?.url?.let { Url(it) }
             } catch (e: DataFormatException) {
-                return emptyList()
+                return null
             }
         }
     }
-    logger.info("Retrieved bundle from $initialUrl; ${resources.count()} resources")
-    return resources
+    logger.info("Retrieved bundle with ${resources.count()} from $initialUrl")
+    return resources.sortedBy { it.canonicalUrl }.sortedBy { it.version }
 }
 
 @Composable
@@ -155,21 +145,29 @@ fun FromServerScreen(
     localizedStrings: LocalizedStrings,
     baseServerUrl: String,
     onChangeBaseServerUrl: (String) -> Unit,
+    isResourceListPending: Boolean,
+    resourceList: List<DownloadableCodeSystem>?,
     onLoadLeftFile: LoadListener,
     onLoadRightFile: LoadListener,
 ) = Column(modifier = Modifier.fillMaxSize()) {
-    /*TextField(
-        value = baseServerUrl,
-        onValueChange = onChangeBaseServerUrl,
-        label = {
-            Text(localizedStrings.fhirTerminologyServer, color = colorScheme.onSecondaryContainer.copy(0.75f))
+    resourceList?.let {
+        logger.debug("resource list (${it.size}): ${it.joinToString(limit = 3)}")
+    } ?: logger.debug("null resource list")
+    val trailingIconPair : Pair<ImageVector, String> by derivedStateOf {
+        when {
+            isResourceListPending -> Icons.Default.Pending to localizedStrings.pending
+            resourceList == null -> Icons.Default.Cancel to localizedStrings.invalid
+            else -> Icons.Default.CheckCircle to localizedStrings.valid
         }
-    )*/
+    }
+    val (trailingIcon, trailingIconDescription) = trailingIconPair
     LabeledTextField(
         value = baseServerUrl,
         onValueChange = onChangeBaseServerUrl,
         modifier = Modifier.fillMaxWidth().padding(12.dp),
         labelText = localizedStrings.fhirTerminologyServer,
+        trailingIconVector = trailingIcon,
+        trailingIconDescription = trailingIconDescription
     )
 }
 
@@ -178,6 +176,7 @@ data class DownloadableCodeSystem(
     val canonicalUrl: String,
     val id: String,
     val version: String?,
+    val metaVersion: String?,
     val name: String?,
     val title: String?,
     val content: CodeSystem.CodeSystemContentMode,
