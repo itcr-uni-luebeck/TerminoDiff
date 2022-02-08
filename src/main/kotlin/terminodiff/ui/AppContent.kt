@@ -4,28 +4,18 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import ca.uhn.fhir.context.FhirContext
-import kotlinx.coroutines.launch
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.SplitPaneState
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.resources.InputResource
-import terminodiff.terminodiff.engine.resources.InputResource.*
 import terminodiff.terminodiff.ui.panes.diff.DiffPaneContent
 import terminodiff.terminodiff.ui.panes.loaddata.LoadDataPaneContent
 import terminodiff.ui.TerminoDiffTopAppBar
 import terminodiff.ui.theme.TerminoDiffTheme
-import java.io.File
-import java.net.InetAddress
-import java.util.*
 
 @OptIn(ExperimentalSplitPaneApi::class)
 @Composable
@@ -39,22 +29,12 @@ fun TerminodiffAppContent(
     onChangeDarkTheme: () -> Unit,
     splitPaneState: SplitPaneState,
 ) {
-    var goButtonClicked by remember { mutableStateOf(false) }
+    var showDiff by remember { mutableStateOf(false) }
     val onLoadLeftFile: (InputResource) -> Unit = {
         diffDataContainer.leftResource = it
     }
     val onLoadRightFile: (InputResource) -> Unit = {
         diffDataContainer.rightResource = it
-    }
-
-    val coroutineScope = rememberCoroutineScope()
-    @Suppress("ControlFlowWithEmptyBody") when (InetAddress.getLocalHost().hostName.lowercase(Locale.getDefault())) {
-        // TODO: 04/02/22 remove prior to release!
-        "joshua-athena-windows" -> coroutineScope.launch {
-            diffDataContainer.leftResource = InputResource(Kind.FILE,
-                File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2017_06_21.json"))
-            //diffDataContainer.rightFilename = File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json")
-        }
     }
 
     TerminodiffContentWindow(localizedStrings = localizedStrings,
@@ -68,7 +48,7 @@ fun TerminodiffAppContent(
         onReload = { diffDataContainer.reload() },
         diffDataContainer = diffDataContainer,
         splitPaneState = splitPaneState,
-        goButtonClicked = goButtonClicked) { goButtonClicked = true }
+        showDiff = showDiff) { newValue -> showDiff = newValue }
 }
 
 @OptIn(ExperimentalSplitPaneApi::class)
@@ -85,8 +65,8 @@ fun TerminodiffContentWindow(
     onReload: () -> Unit,
     diffDataContainer: DiffDataContainer,
     splitPaneState: SplitPaneState,
-    goButtonClicked: Boolean,
-    onGoButtonClick: () -> Unit,
+    showDiff: Boolean,
+    setShowDiff: (Boolean) -> Unit,
 ) {
     TerminoDiffTheme(useDarkTheme = useDarkTheme) {
         Scaffold(topBar = {
@@ -95,9 +75,12 @@ fun TerminodiffContentWindow(
                 onLocaleChange = onLocaleChange,
                 onChangeDarkTheme = onChangeDarkTheme,
                 onReload = onReload,
+                onShowLoadScreen = {
+                    setShowDiff.invoke(false)
+                }
             )
         }, backgroundColor = MaterialTheme.colorScheme.background) { scaffoldPadding ->
-            when (diffDataContainer.leftCodeSystem != null && diffDataContainer.rightCodeSystem != null && goButtonClicked) {
+            when (diffDataContainer.leftCodeSystem != null && diffDataContainer.rightCodeSystem != null && showDiff) {
                 true -> DiffPaneContent(modifier = Modifier.padding(scaffoldPadding),
                     scrollState = scrollState,
                     strings = localizedStrings,
@@ -113,7 +96,7 @@ fun TerminodiffContentWindow(
                     onLoadLeft = onLoadLeft,
                     onLoadRight = onLoadRight,
                     fhirContext = fhirContext,
-                    onGoButtonClick = onGoButtonClick,
+                    onGoButtonClick = { setShowDiff.invoke(true) },
                 )
             }
         }

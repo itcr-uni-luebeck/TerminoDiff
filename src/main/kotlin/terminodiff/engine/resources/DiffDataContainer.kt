@@ -22,6 +22,7 @@ class DiffDataContainer(private val fhirContext: FhirContext, strings: Localized
 
     var localizedStrings by mutableStateOf(strings)
     var loadState: UUID by mutableStateOf(UUID.randomUUID())
+
     //var leftFilename: File? by mutableStateOf(null)
     //var rightFilename: File? by mutableStateOf(null)
     var leftResource: InputResource? by mutableStateOf(null)
@@ -48,8 +49,27 @@ class DiffDataContainer(private val fhirContext: FhirContext, strings: Localized
     }
 
     private fun loadCodeSystemResource(resource: InputResource?, side: Side): CodeSystem? {
-        if (resource == null) return null
-        when (resource.kind) {
+        if (resource?.localFile == null) return null
+        val file = resource.localFile!!
+        logger.info("Loading $side ${resource.kind} resource from ${file.absolutePath}")
+        return try {
+            when (file.extension.lowercase()) {
+                "xml" -> fhirContext.newXmlParser().parseResource(CodeSystem::class.java, file.reader())
+                "json" -> fhirContext.newJsonParser().parseResource(CodeSystem::class.java, file.reader())
+                else -> {
+                    logger.error("The file at ${file.absolutePath} has an unsupported file type")
+                    null
+                }
+            }.also {
+                if (it != null) {
+                    logger.info("Loaded $side CodeSystem with URL ${it.url} and version '${it.version}', state = $loadState")
+                }
+            }
+        } catch (e: DataFormatException) {
+            logger.error("The file at ${file.absolutePath} could not be parsed as FHIR", e)
+            null
+        }
+        /*when (resource.kind) {
             InputResource.Kind.FILE -> {
                 val file = resource.localFile!!
                 logger.info("Loading $side ${resource.kind} resource from ${file.absolutePath}")
@@ -71,8 +91,11 @@ class DiffDataContainer(private val fhirContext: FhirContext, strings: Localized
                     null
                 }
             }
-            else -> TODO()
-        }
+            else -> {
+                logger.info("loading $resource")
+                TODO()
+            }
+        }*/
     }
 
     private fun buildCsGraph(codeSystem: CodeSystem?): CodeSystemGraphBuilder? = when (codeSystem) {

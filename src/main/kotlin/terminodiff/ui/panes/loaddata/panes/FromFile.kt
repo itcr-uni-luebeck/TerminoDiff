@@ -1,10 +1,10 @@
 package terminodiff.terminodiff.ui.panes.loaddata.panes
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Plagiarism
-import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -85,8 +85,8 @@ private fun FromFileScreen(
             elevation = ButtonDefaults.elevation(defaultElevation = 8.dp)) {
             AppImageIcon(relativePath = AppIconResource.icLoadLeftFile,
                 label = localizedStrings.loadLeftFile,
-                tint = buttonColors.contentColor(true).value)
-            Text(localizedStrings.loadLeftFile)
+                tint = buttonColors.contentColor(enabled = isValidPath).value)
+            Text(localizedStrings.loadLeftFile, color = buttonColors.contentColor(enabled = isValidPath).value)
         }
         Button(modifier = Modifier.padding(4.dp),
             colors = buttonColors,
@@ -95,8 +95,8 @@ private fun FromFileScreen(
             elevation = ButtonDefaults.elevation(defaultElevation = 8.dp)) {
             AppImageIcon(relativePath = AppIconResource.icLoadRightFile,
                 label = localizedStrings.loadRightFile,
-                tint = buttonColors.contentColor(true).value)
-            Text(localizedStrings.loadRightFile)
+                tint = buttonColors.contentColor(enabled = isValidPath).value)
+            Text(localizedStrings.loadRightFile, color = buttonColors.contentColor(enabled = isValidPath).value)
         }
     }
 }

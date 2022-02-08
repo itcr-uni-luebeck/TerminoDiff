@@ -69,9 +69,9 @@ fun ColumnScope.LoadedResourcesCard(
                     modifier = Modifier.weight(0.3f),
                     onClick = onGoButtonClick,
                     elevation = ButtonDefaults.elevation(8.dp),
-                    colors = ButtonDefaults.buttonColors(colorScheme.primaryContainer,
-                        colorScheme.onPrimaryContainer)) {
-                    Text(localizedStrings.calculateDiff, color = colorScheme.onPrimaryContainer)
+                    colors = ButtonDefaults.buttonColors(colorScheme.primary,
+                        colorScheme.onPrimary)) {
+                    Text(localizedStrings.calculateDiff, color = colorScheme.onPrimary)
                 }
             }
             else -> {
@@ -102,13 +102,11 @@ fun ResourceDescription(
         style = typography.titleMedium,
         textDecoration = TextDecoration.Underline,
         color = colorScheme.onSecondaryContainer)
-    //val text = formatText(resource, localizedStrings)
     Row(modifier = Modifier.align(Alignment.CenterHorizontally).height(IntrinsicSize.Min)) {
         Text(
             text = text,
             textAlign = TextAlign.Center,
             color = colorScheme.onSecondaryContainer,
-            //modifier = Modifier.weight(1f).fillMaxWidth(),
             maxLines = 3,
             softWrap = true,
         )
@@ -122,7 +120,10 @@ private fun formatText(resource: InputResource?, localizedStrings: LocalizedStri
             val path = resource.localFile!!.canonicalFile.invariantSeparatorsPath
             localizedStrings.fileFromPath_.invoke(path)
         }
-        resource.kind == Kind.FHIR_SERVER -> "FHIR SERVER NOT IMPLEMENTED"
+        resource.kind == Kind.FHIR_SERVER -> {
+            val url = resource.resourceUrl!!
+            localizedStrings.fileFromUrl_.invoke(url)
+        }
         else -> ""
     }
     return AnnotatedString(stringDescription)
@@ -142,9 +143,6 @@ fun ColumnScope.LoadResourcesCards(
     val tabs = listOf(LoadFilesTabItem.FromFile, LoadFilesTabItem.FromTerminologyServer)
     val pagerState = rememberPagerState()
     Column(modifier = Modifier.padding(4.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Text(text = localizedStrings.loadedResources,
-            style = typography.titleLarge,
-            color = colorScheme.onTertiaryContainer)
         Tabs(tabs = tabs, pagerState = pagerState, localizedStrings = localizedStrings)
         TabsContent(tabs = tabs,
             pagerState = pagerState,

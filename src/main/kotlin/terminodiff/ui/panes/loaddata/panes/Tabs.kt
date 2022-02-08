@@ -20,6 +20,7 @@ import libraries.pager_indicators.pagerTabIndicatorOffset
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.resources.InputResource
 import terminodiff.ui.MouseOverPopup
+import terminodiff.ui.panes.loaddata.panes.fromserver.FromServerScreenWrapper
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable

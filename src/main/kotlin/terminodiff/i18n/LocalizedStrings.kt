@@ -40,6 +40,7 @@ abstract class LocalizedStrings(
     val experimental: String,
     val fhirTerminologyServer: String,
     val fileFromPath_: (String) -> String,
+    val fileFromUrl_: (String) -> String,
     val fileSystem: String,
     val hierarchyMeaning: String,
     val id: String = "ID",
@@ -57,6 +58,7 @@ abstract class LocalizedStrings(
     val rightValue: String,
     val metadataDiff: String,
     val metadataDiffResults_: (MetadataComparisonResult) -> String,
+    val metaVersion: String,
     val name: String = "Name",
     val noDataLoaded: String,
     val numberItems_: (Int) -> String = {
@@ -70,6 +72,7 @@ abstract class LocalizedStrings(
     val onlyConceptDifferences: String,
     val onlyInRight: String,
     val overallComparison: String,
+    val openResources: String,
     val pending: String,
     val publisher: String,
     val purpose: String,
@@ -81,6 +84,7 @@ abstract class LocalizedStrings(
     val propertyDesignationForCode_: (String) -> String,
     val propertyType: String,
     val reload: String,
+    val select: String,
     val side_: (Side) -> String,
     val showAll: String,
     val showDifferent: String,
@@ -102,6 +106,8 @@ abstract class LocalizedStrings(
     val valueSet: String = "ValueSet",
     val version: String = "Version",
     val versionNeeded: String,
+    val vRead: String = "VRead",
+    val vReadExplanationEnabled_: (Boolean) -> String,
 )
 
 enum class SupportedLocale {
@@ -151,6 +157,7 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     experimental = "Experimentell?",
     fhirTerminologyServer = "FHIR-Terminologieserver",
     fileFromPath_ = { "Datei von: $it" },
+    fileFromUrl_ = { "FHIR-Server von: $it" },
     fileSystem = "Dateisystem",
     hierarchyMeaning = "Hierachie-Bedeutung",
     identical = "Identisch",
@@ -181,11 +188,13 @@ class GermanStrings : LocalizedStrings(boolean_ = {
             MetadataComparisonResult.DIFFERENT -> "Unterschiedlich"
         }
     },
+    metaVersion = "Meta-Version",
     noDataLoaded = "Keine Daten geladen",
     oneValueIsNull = "Ein Wert ist null",
     onlyInLeft = "Nur links",
     onlyConceptDifferences = "Konzeptunterschiede",
     onlyInRight = "Nur rechts",
+    openResources = "Ressourcen öffnen",
     overallComparison = "Gesamt",
     pending = "Ausstehend...",
     publisher = "Herausgeber",
@@ -204,6 +213,7 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     propertyDesignationForCode_ = { code -> "Eigenschaften und Designationen für Konzept '$code'" },
     propertyType = "Typ",
     reload = "Neu laden",
+    select = "Auswahl",
     side_ = {
         when (it) {
             Side.RIGHT -> "Rechts"
@@ -223,7 +233,13 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     useContext = "Nutzungskontext",
     valid = "Gültig",
     value = "Wert",
-    versionNeeded = "Version erforderlich?")
+    versionNeeded = "Version erforderlich?",
+    vReadExplanationEnabled_ = {
+        when (it) {
+            true -> "Vergleiche Versionen der Ressource mit der \$history-Operation."
+            else -> "Es gibt nur eine Ressourcen-Version der gewählten Ressource."
+        }
+    })
 
 class EnglishStrings : LocalizedStrings(boolean_ = {
     when (it) {
@@ -264,6 +280,7 @@ class EnglishStrings : LocalizedStrings(boolean_ = {
     experimental = "Experimental?",
     fhirTerminologyServer = "FHIR Terminology Server",
     fileFromPath_ = { "File from: $it" },
+    fileFromUrl_ = { "FHIR Server from: $it" },
     fileSystem = "Filesystem",
     hierarchyMeaning = "Hierarchy Meaning",
     identical = "Identical",
@@ -294,11 +311,13 @@ class EnglishStrings : LocalizedStrings(boolean_ = {
             MetadataComparisonResult.DIFFERENT -> "Different"
         }
     },
+    metaVersion = "Meta Version",
     noDataLoaded = "No data loaded",
     oneValueIsNull = "One value is null",
     onlyInLeft = "Only left",
     onlyConceptDifferences = "Concept differences",
     onlyInRight = "Only right",
+    openResources = "Open Resources",
     overallComparison = "Overall",
     pending = "Pending...",
     publisher = "Publisher",
@@ -317,6 +336,7 @@ class EnglishStrings : LocalizedStrings(boolean_ = {
     propertyDesignationForCode_ = { code -> "Properties and designations for concept '$code'" },
     propertyType = "Type",
     reload = "Reload",
+    select = "Select",
     side_ = {
         when (it) {
             Side.RIGHT -> "Right"
@@ -336,7 +356,13 @@ class EnglishStrings : LocalizedStrings(boolean_ = {
     useContext = "Use context",
     valid = "Valid",
     value = "Value",
-    versionNeeded = "Version needed?")
+    versionNeeded = "Version needed?",
+    vReadExplanationEnabled_ = {
+        when (it) {
+            true -> "Compare versions of the resource using the \$history operation."
+            else -> "There is only one resource version of the selected resource."
+        }
+    })
 
 fun getStrings(locale: SupportedLocale = SupportedLocale.defaultLocale): LocalizedStrings = when (locale) {
     SupportedLocale.DE -> GermanStrings()

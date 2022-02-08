@@ -8,7 +8,10 @@ import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TopAppBar
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -24,7 +27,6 @@ import androidx.compose.ui.unit.DpOffset
 import androidx.compose.ui.unit.dp
 import org.xml.sax.InputSource
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.terminodiff.engine.resources.InputResource
 import java.awt.Cursor
 import java.io.InputStream
 
@@ -59,23 +61,24 @@ fun TerminoDiffTopAppBar(
     onLocaleChange: () -> Unit,
     onChangeDarkTheme: () -> Unit,
     onReload: () -> Unit,
+    onShowLoadScreen: () -> Unit,
 ) {
 
     TopAppBar(title = {
         Row(verticalAlignment = Alignment.CenterVertically) {
             Text(modifier = Modifier.padding(end = 16.dp),
                 text = localizedStrings.terminoDiff,
-                color = MaterialTheme.colorScheme.onPrimaryContainer)
+                color = colorScheme.onPrimaryContainer)
             AppImageIcon(
                 relativePath = AppIconResource.icUniLuebeck,
                 label = localizedStrings.uniLuebeck,
-                tint = MaterialTheme.colorScheme.onPrimaryContainer,
+                tint = colorScheme.onPrimaryContainer,
                 modifier = Modifier.fillMaxHeight(0.8f)
             )
         }
     },
-        backgroundColor = MaterialTheme.colorScheme.primaryContainer,
-        contentColor = MaterialTheme.colorScheme.onPrimaryContainer,
+        backgroundColor = colorScheme.primaryContainer,
+        contentColor = colorScheme.onPrimaryContainer,
         actions = {
             MouseOverPopup(localizedStrings.toggleDarkTheme) {
                 IconActionButton(onClick = onChangeDarkTheme,
@@ -86,6 +89,13 @@ fun TerminoDiffTopAppBar(
                 IconActionButton(onClick = onLocaleChange,
                     imageRelativePath = AppIconResource.icChangeLanguage,
                     label = localizedStrings.changeLanguage)
+            }
+            MouseOverPopup(localizedStrings.openResources) {
+                IconActionButton(
+                    onClick = onShowLoadScreen,
+                    imageVector = Icons.Default.FolderOpen,
+                    label = localizedStrings.reload
+                )
             }
             MouseOverPopup(localizedStrings.reload) {
                 IconActionButton(onClick = onReload,
@@ -107,10 +117,25 @@ private fun IconActionButton(
 }
 
 @Composable
+private fun IconActionButton(
+    onClick: () -> Unit,
+    imageVector: ImageVector,
+    label: String,
+) {
+    IconButton(onClick = onClick) {
+        Icon(
+            imageVector = imageVector,
+            contentDescription = label,
+            tint = colorScheme.onPrimaryContainer,
+        )
+    }
+}
+
+@Composable
 fun AppImageIcon(
     relativePath: ImageRelativePath,
     label: String,
-    tint: Color = MaterialTheme.colorScheme.onPrimaryContainer,
+    tint: Color = colorScheme.onPrimaryContainer,
     modifier: Modifier = Modifier,
 ) {
     AppIconResource.loadFile(relativePath)?.let { iconStream ->
@@ -128,8 +153,8 @@ fun AppImageIcon(
 @Composable
 fun MouseOverPopup(
     text: String,
-    backgroundColor: Color = MaterialTheme.colorScheme.tertiaryContainer,
-    foregroundColor: Color = MaterialTheme.colorScheme.onTertiaryContainer,
+    backgroundColor: Color = colorScheme.tertiaryContainer,
+    foregroundColor: Color = colorScheme.onTertiaryContainer,
     content: @Composable () -> Unit,
 ) = TooltipArea(tooltip = {
     Surface(modifier = Modifier.shadow(4.dp), color = backgroundColor, shape = RoundedCornerShape(4.dp)) {
