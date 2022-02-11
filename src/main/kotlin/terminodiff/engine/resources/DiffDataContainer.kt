@@ -13,7 +13,7 @@ import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.graph.CodeSystemDiffBuilder
 import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.i18n.LocalizedStrings
-import java.io.File
+import terminodiff.terminodiff.engine.resources.InputResource
 import java.util.*
 
 private val logger: Logger = LoggerFactory.getILoggerFactory().getLogger("DiffDataContainer")
@@ -22,12 +22,15 @@ class DiffDataContainer(private val fhirContext: FhirContext, strings: Localized
 
     var localizedStrings by mutableStateOf(strings)
     var loadState: UUID by mutableStateOf(UUID.randomUUID())
-    var leftFilename: File? by mutableStateOf(null)
-    var rightFilename: File? by mutableStateOf(null)
+
+    //var leftFilename: File? by mutableStateOf(null)
+    //var rightFilename: File? by mutableStateOf(null)
+    var leftResource: InputResource? by mutableStateOf(null)
+    var rightResource: InputResource? by mutableStateOf(null)
 
     //all other properties are dependent and flow down from the filename changes
-    val leftCodeSystem: CodeSystem? by derivedStateOf { loadCodeSystemResource(leftFilename, Side.LEFT) }
-    val rightCodeSystem: CodeSystem? by derivedStateOf { loadCodeSystemResource(rightFilename, Side.RIGHT) }
+    val leftCodeSystem: CodeSystem? by derivedStateOf { loadCodeSystemResource(leftResource, Side.LEFT) }
+    val rightCodeSystem: CodeSystem? by derivedStateOf { loadCodeSystemResource(rightResource, Side.RIGHT) }
     val leftGraphBuilder: CodeSystemGraphBuilder? by derivedStateOf { buildCsGraph(leftCodeSystem) }
     val rightGraphBuilder: CodeSystemGraphBuilder? by derivedStateOf { buildCsGraph(rightCodeSystem) }
 
@@ -45,9 +48,10 @@ class DiffDataContainer(private val fhirContext: FhirContext, strings: Localized
         LEFT, RIGHT
     }
 
-    private fun loadCodeSystemResource(file: File?, side: Side): CodeSystem? {
-        if (file == null) return null
-        logger.info("Loading $side resource from ${file.absolutePath}")
+    private fun loadCodeSystemResource(resource: InputResource?, side: Side): CodeSystem? {
+        if (resource?.localFile == null) return null
+        val file = resource.localFile!!
+        logger.info("Loading $side ${resource.kind} resource from ${file.absolutePath}")
         return try {
             when (file.extension.lowercase()) {
                 "xml" -> fhirContext.newXmlParser().parseResource(CodeSystem::class.java, file.reader())

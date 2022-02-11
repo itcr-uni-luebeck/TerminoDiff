@@ -27,7 +27,7 @@ fun ShowGraphsPanel(
     useDarkTheme: Boolean,
 ) {
     Card(
-        Modifier.padding(8.dp).fillMaxWidth(),
+        Modifier.padding(top = 8.dp, bottom = 0.dp, start = 8.dp, end = 8.dp).fillMaxWidth(),
         elevation = 8.dp,
         backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
         contentColor = MaterialTheme.colorScheme.onSecondaryContainer
@@ -37,7 +37,7 @@ fun ShowGraphsPanel(
             contentColor = MaterialTheme.colorScheme.onPrimary
         )
         Row(
-            modifier = Modifier.padding(8.dp),
+            modifier = Modifier.padding(2.dp),
             horizontalArrangement = Arrangement.SpaceAround,
             verticalAlignment = Alignment.CenterVertically
         ) {
