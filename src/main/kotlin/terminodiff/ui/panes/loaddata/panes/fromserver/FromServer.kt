@@ -5,6 +5,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
@@ -42,6 +43,7 @@ import terminodiff.ui.ImageRelativePath
 import terminodiff.ui.MouseOverPopup
 import terminodiff.ui.util.ColumnSpec
 import terminodiff.ui.util.LazyTable
+import java.util.*
 
 private val logger: Logger = LoggerFactory.getLogger("FromServerScreen")
 
@@ -83,9 +85,17 @@ fun FromServerScreenWrapper(
         coroutineScope = coroutineScope,
         isResourceListPending = isResourceListPending,
         resourceList = resourceList,
+        fhirContext = fhirContext,
         onLoadLeftFile = onLoadLeft,
         onLoadRightFile = onLoadRight,
     )
+}
+
+fun urlBuilderWithProtocol(urlString: String) = urlString.trimEnd('/').let { trimUrl ->
+    URLBuilder(when {
+        trimUrl.startsWith("http") -> trimUrl
+        else -> "https://$trimUrl" // add HTTP prefix so that URLs of the fashion http://localhost/termserver.example.local/fhir are not constructed...
+    })
 }
 
 private suspend fun listCodeSystems(
@@ -93,7 +103,7 @@ private suspend fun listCodeSystems(
     ktorClient: HttpClient,
     fhirContext: FhirContext,
 ): List<DownloadableCodeSystem>? = try {
-    val codeSystemUrl = URLBuilder(urlString.trimEnd('/')).apply {
+    val codeSystemUrl = urlBuilderWithProtocol(urlString).apply {
         appendPathSegments("CodeSystem")
         parameters.append("_elements", "url,id,version,name,title,link,content")
     }.build()
@@ -105,7 +115,7 @@ private suspend fun listCodeSystems(
     null
 }
 
-private suspend fun retrieveBundleOfDownloadableResources(
+suspend fun retrieveBundleOfDownloadableResources(
     ktorClient: HttpClient,
     initialUrl: Url,
     fhirContext: FhirContext,
@@ -132,11 +142,16 @@ private suspend fun retrieveBundleOfDownloadableResources(
                     when (resource?.resourceType?.name) {
                         "CodeSystem" -> {
                             val cs = resource as CodeSystem
+                            val id = when (entry.id) {
+                                null -> cs.idElement.idPart
+                                else -> entry.id
+                            }
                             DownloadableCodeSystem(physicalUrl = entry.fullUrl,
                                 canonicalUrl = cs.url,
-                                id = cs.idElement.idPart,
+                                id = id, //cs.idElement.idPart,
                                 version = cs.version,
                                 metaVersion = cs.meta.versionId,
+                                lastChange = cs.meta.lastUpdated,
                                 name = cs.name,
                                 title = cs.title,
                                 content = cs.content)
@@ -151,7 +166,7 @@ private suspend fun retrieveBundleOfDownloadableResources(
             }
         }
     }
-    logger.info("Retrieved bundle with ${resources.count()} from $initialUrl")
+    logger.info("Retrieved bundle with ${resources.count()} resources from $initialUrl")
     return resources.sortedBy { it.canonicalUrl }.sortedBy { it.version }
 }
 
@@ -161,13 +176,13 @@ fun FromServerScreen(
     baseServerUrl: String,
     onChangeBaseServerUrl: (String) -> Unit,
     coroutineScope: CoroutineScope,
+    fhirContext: FhirContext,
     ktorClient: HttpClient,
     isResourceListPending: Boolean,
     resourceList: List<DownloadableCodeSystem>?,
     onLoadLeftFile: LoadListener,
     onLoadRightFile: LoadListener,
 ) = Column(modifier = Modifier.fillMaxSize()) {
-
     val trailingIconPair: Pair<ImageVector, String> by derivedStateOf {
         when {
             isResourceListPending -> Icons.Default.Pending to localizedStrings.pending
@@ -181,10 +196,13 @@ fun FromServerScreen(
     vReadResource?.let {
         VReadDialog(resource = it,
             ktorClient = ktorClient,
-            coroutineContext = coroutineScope,
-            fhirBaseUrl = baseServerUrl,
+            fhirContext = fhirContext,
+            coroutineScope = coroutineScope,
             localizedStrings = localizedStrings,
-            onCloseRequest = { vReadResource = null })
+            onCloseReject = { vReadResource = null },
+            onSelectLeft = onLoadLeftFile,
+            onSelectRight = onLoadRightFile
+        )
     }
     LabeledTextField(value = baseServerUrl,
         onValueChange = onChangeBaseServerUrl,
@@ -192,18 +210,25 @@ fun FromServerScreen(
         labelText = localizedStrings.fhirTerminologyServer,
         trailingIconVector = trailingIcon,
         trailingIconDescription = trailingIconDescription)
-    resourceList?.let { systemList ->
-        logger.debug("resource list (${systemList.size}): ${systemList.joinToString(limit = 3)}")
-        ListOfResources(resourceList = resourceList,
-            lazyListState = lazyListState,
-            localizedStrings = localizedStrings,
-            baseServerUrl = baseServerUrl,
-            coroutineScope = coroutineScope,
-            ktorClient = ktorClient,
-            onLoadLeftFile = onLoadLeftFile,
-            onLoadRightFile = onLoadRightFile,
-            onShowVReadDialog = { vReadResource = it })
-    } ?: logger.debug("null resource list")
+
+    when {
+        isResourceListPending -> Row(Modifier.fillMaxWidth().weight(0.5f), horizontalArrangement = Arrangement.Center) {
+            CircularProgressIndicator(Modifier.fillMaxHeight(0.75f)
+                .padding(16.dp), colorScheme.onPrimaryContainer)
+        }
+        resourceList != null -> {
+            logger.debug("resource list (${resourceList.size}): ${resourceList.joinToString(limit = 3)}")
+            ListOfResources(resourceList = resourceList,
+                lazyListState = lazyListState,
+                localizedStrings = localizedStrings,
+                baseServerUrl = baseServerUrl,
+                coroutineScope = coroutineScope,
+                ktorClient = ktorClient,
+                onLoadLeftFile = onLoadLeftFile,
+                onLoadRightFile = onLoadRightFile,
+                onShowVReadDialog = { vReadResource = it })
+        }
+    }
 }
 
 @Composable
@@ -242,20 +267,20 @@ fun ListOfResources(
     }
 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceAround) {
-        leftRightButton(text = localizedStrings.loadLeftFile,
+        leftRightButton(text = localizedStrings.loadLeft,
             iconPath = AppIconResource.icLoadLeftFile,
             onLoadFile = onLoadLeftFile)
 
-        val vReadEnabled = selectedItem?.let { it.metaVersion != "1" } ?: false
+        val vReadDisabled = (selectedItem?.metaVersion?.equals("1")) ?: true
         LoadButton(text = localizedStrings.vRead,
             selectedItem = selectedItem,
             baseServerUrl = baseServerUrl,
             iconImageVector = Icons.Default.Compare,
-            enabled = vReadEnabled,
-            tooltip = localizedStrings.vReadExplanationEnabled_.invoke(vReadEnabled),
+            enabled = !vReadDisabled,
+            tooltip = localizedStrings.vReadExplanationEnabled_.invoke(!vReadDisabled),
             onClick = onShowVReadDialog)
 
-        leftRightButton(text = localizedStrings.loadRightFile,
+        leftRightButton(text = localizedStrings.loadRight,
             iconPath = AppIconResource.icLoadRightFile,
             onLoadFile = onLoadRightFile)
     }
@@ -287,9 +312,11 @@ private fun LoadButton(
             colors = buttonColors,
             onClick = {
                 selectedItem?.let { item ->
-                    onClick.invoke(InputResource(kind = InputResource.Kind.FHIR_SERVER,
+                    val resource = InputResource(kind = InputResource.Kind.FHIR_SERVER,
                         resourceUrl = item.physicalUrl,
-                        sourceFhirServerUrl = baseServerUrl))
+                        sourceFhirServerUrl = baseServerUrl,
+                        downloadableCodeSystem = item)
+                    onClick.invoke(resource)
                 }
             },
             enabled = enabled) {
@@ -310,4 +337,5 @@ data class DownloadableCodeSystem(
     val name: String?,
     val title: String?,
     val content: CodeSystem.CodeSystemContentMode,
+    val lastChange: Date?,
 )

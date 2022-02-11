@@ -11,13 +11,13 @@ fun fromServerPaneColumnSpecs(
     localizedStrings: LocalizedStrings,
     selectedItem: DownloadableCodeSystem?,
     onCheckedChange: (DownloadableCodeSystem) -> Unit,
-) = listOf(checkboxColumnSpec(localizedStrings, selectedItem, onCheckedChange),
+) = listOf(radioButtonColumnSpec(localizedStrings, selectedItem, onCheckedChange),
     canonicalColumnSpec(localizedStrings),
     versionColumnSpec(localizedStrings),
     titleColumnSpec(localizedStrings),
     metaVersionColumnSpec(localizedStrings))
 
-private fun checkboxColumnSpec(
+private fun radioButtonColumnSpec(
     localizedStrings: LocalizedStrings,
     selectedItem: DownloadableCodeSystem?,
     onCheckedChange: (DownloadableCodeSystem) -> Unit,

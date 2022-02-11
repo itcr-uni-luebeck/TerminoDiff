@@ -69,33 +69,6 @@ class DiffDataContainer(private val fhirContext: FhirContext, strings: Localized
             logger.error("The file at ${file.absolutePath} could not be parsed as FHIR", e)
             null
         }
-        /*when (resource.kind) {
-            InputResource.Kind.FILE -> {
-                val file = resource.localFile!!
-                logger.info("Loading $side ${resource.kind} resource from ${file.absolutePath}")
-                return try {
-                    when (file.extension.lowercase()) {
-                        "xml" -> fhirContext.newXmlParser().parseResource(CodeSystem::class.java, file.reader())
-                        "json" -> fhirContext.newJsonParser().parseResource(CodeSystem::class.java, file.reader())
-                        else -> {
-                            logger.error("The file at ${file.absolutePath} has an unsupported file type")
-                            null
-                        }
-                    }.also {
-                        if (it != null) {
-                            logger.info("Loaded $side CodeSystem with URL ${it.url} and version '${it.version}', state = $loadState")
-                        }
-                    }
-                } catch (e: DataFormatException) {
-                    logger.error("The file at ${file.absolutePath} could not be parsed as FHIR", e)
-                    null
-                }
-            }
-            else -> {
-                logger.info("loading $resource")
-                TODO()
-            }
-        }*/
     }
 
     private fun buildCsGraph(codeSystem: CodeSystem?): CodeSystemGraphBuilder? = when (codeSystem) {

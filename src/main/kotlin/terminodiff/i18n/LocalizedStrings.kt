@@ -6,12 +6,14 @@ import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.engine.graph.DiffGraphElementKind
 import terminodiff.engine.resources.DiffDataContainer.*
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
+import terminodiff.terminodiff.engine.resources.InputResource
 
 /**
  * we pass around an instance of LocalizedStrings, since we want every composable
  * to recompose when the language changes.
  */
 abstract class LocalizedStrings(
+    val anUnknownErrorOccurred: String,
     val boolean_: (Boolean?) -> String,
     val bothValuesAreNull: String,
     val calculateDiff: String,
@@ -19,9 +21,11 @@ abstract class LocalizedStrings(
     val caseSensitive: String = "Case-Sensitive?",
     val changeLanguage: String,
     val clickForDetails: String,
-    val code: String = "Code",
+    val closeAccept: String,
+    val closeReject: String,
     val comparison: String,
     val compositional: String,
+    val code: String = "Code",
     val conceptDiff: String,
     val conceptDiffResults_: (ConceptDiffItem.ConceptDiffResultEnum) -> String,
     val contact: String,
@@ -49,8 +53,8 @@ abstract class LocalizedStrings(
     val invalid: String,
     val jurisdiction: String,
     val keyedListResult_: (List<KeyedListDiffResult<*, *>>) -> String,
-    val loadLeftFile: String,
-    val loadRightFile: String,
+    val loadLeft: String,
+    val loadRight: String,
     val loadFromFile: String,
     val loadedResources: String,
     val leftValue: String,
@@ -107,7 +111,9 @@ abstract class LocalizedStrings(
     val version: String = "Version",
     val versionNeeded: String,
     val vRead: String = "VRead",
+    val vReadFor_: (InputResource) -> String,
     val vReadExplanationEnabled_: (Boolean) -> String,
+    val vreadFromUrlAndMetaVersion_: (String, String) -> String,
 )
 
 enum class SupportedLocale {
@@ -118,16 +124,20 @@ enum class SupportedLocale {
     }
 }
 
-class GermanStrings : LocalizedStrings(boolean_ = {
-    when (it) {
-        null -> "null"
-        true -> "WAHR"
-        false -> "FALSCH"
-    }
-},
+class GermanStrings : LocalizedStrings(
+    anUnknownErrorOccurred = "Ein unbekannter Fehler ist aufgetrefen",
+    boolean_ = {
+        when (it) {
+            null -> "null"
+            true -> "WAHR"
+            false -> "FALSCH"
+        }
+    },
     bothValuesAreNull = "Beide Werte sind null",
     calculateDiff = "Diff berechnen",
     canonicalUrl = "Kanonische URL",
+    closeAccept = "Akzeptieren",
+    closeReject = "Verwerfen",
     changeLanguage = "Sprache wechseln",
     clickForDetails = "Für Details klicken",
     comparison = "Vergleich",
@@ -174,8 +184,8 @@ class GermanStrings : LocalizedStrings(boolean_ = {
             )
         }.joinToString()
     },
-    loadLeftFile = "Linke Datei laden",
-    loadRightFile = "Rechte Datei laden",
+    loadLeft = "Links laden",
+    loadRight = "Rechts laden",
     loadFromFile = "Vom Dateisystem laden",
     loadedResources = "Geladene Ressourcen",
     leftValue = "Linker Wert",
@@ -234,25 +244,36 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     valid = "Gültig",
     value = "Wert",
     versionNeeded = "Version erforderlich?",
+    vReadFor_ = {
+        "VRead für ${it.downloadableCodeSystem!!.canonicalUrl}"
+    },
     vReadExplanationEnabled_ = {
         when (it) {
             true -> "Vergleiche Versionen der Ressource mit der \$history-Operation."
             else -> "Es gibt nur eine Ressourcen-Version der gewählten Ressource."
         }
-    })
-
-class EnglishStrings : LocalizedStrings(boolean_ = {
-    when (it) {
-        null -> "null"
-        true -> "TRUE"
-        false -> "FALSE"
+    },
+    vreadFromUrlAndMetaVersion_ = { url, meta ->
+        "VRead von $url (Meta-Version: $meta)"
     }
-},
+)
+
+class EnglishStrings : LocalizedStrings(
+    anUnknownErrorOccurred = "An unknown error occured.",
+    boolean_ = {
+        when (it) {
+            null -> "null"
+            true -> "TRUE"
+            false -> "FALSE"
+        }
+    },
     bothValuesAreNull = "Both values are null",
     calculateDiff = "Calculate diff",
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
     clickForDetails = "Click for details",
+    closeAccept = "Accept",
+    closeReject = "Reject",
     comparison = "Comparison",
     compositional = "Compositional?",
     conceptDiff = "Concept Diff",
@@ -297,8 +318,8 @@ class EnglishStrings : LocalizedStrings(boolean_ = {
             )
         }.joinToString()
     },
-    loadLeftFile = "Load left file",
-    loadRightFile = "Load right file",
+    loadLeft = "Load left",
+    loadRight = "Load right",
     loadFromFile = "Load from file",
     loadedResources = "Loaded resources",
     leftValue = "Left value",
@@ -357,11 +378,17 @@ class EnglishStrings : LocalizedStrings(boolean_ = {
     valid = "Valid",
     value = "Value",
     versionNeeded = "Version needed?",
+    vReadFor_ = {
+        "VRead for ${it.downloadableCodeSystem!!.canonicalUrl}"
+    },
     vReadExplanationEnabled_ = {
         when (it) {
             true -> "Compare versions of the resource using the \$history operation."
             else -> "There is only one resource version of the selected resource."
         }
+    },
+    vreadFromUrlAndMetaVersion_ = { url, meta ->
+        "VRead from $url (Meta version: $meta)"
     })
 
 fun getStrings(locale: SupportedLocale = SupportedLocale.defaultLocale): LocalizedStrings = when (locale) {

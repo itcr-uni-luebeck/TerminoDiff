@@ -124,6 +124,11 @@ private fun formatText(resource: InputResource?, localizedStrings: LocalizedStri
             val url = resource.resourceUrl!!
             localizedStrings.fileFromUrl_.invoke(url)
         }
+        resource.kind == Kind.VREAD -> {
+            val url = resource.resourceUrl!!
+            val metaVersion = resource.downloadableCodeSystem!!.metaVersion
+            localizedStrings.vreadFromUrlAndMetaVersion_.invoke(url, metaVersion!!)
+        }
         else -> ""
     }
     return AnnotatedString(stringDescription)

@@ -7,6 +7,7 @@ import io.ktor.http.*
 import org.apache.http.HttpException
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import terminodiff.ui.panes.loaddata.panes.fromserver.DownloadableCodeSystem
 import java.io.File
 import kotlin.io.path.bufferedWriter
 
@@ -17,15 +18,17 @@ data class InputResource(
     var localFile: File? = null,
     val resourceUrl: String? = null,
     val sourceFhirServerUrl: String? = null,
+    val downloadableCodeSystem: DownloadableCodeSystem? = null
 ) {
     enum class Kind {
         FILE,
-        FHIR_SERVER
+        FHIR_SERVER,
+        VREAD
     }
 
     suspend fun downloadRemoteFile(ktorClient: HttpClient): InputResource = when {
         kind == Kind.FILE -> this
-        kind == Kind.FHIR_SERVER && resourceUrl != null -> {
+        (kind == Kind.FHIR_SERVER || kind == Kind.VREAD) && resourceUrl != null -> {
             val tempFilePath = kotlin.io.path.createTempFile(prefix = "terminodiff", suffix = ".json")
             val rx = ktorClient.get(resourceUrl) {
                 header("Accept", "application/json")

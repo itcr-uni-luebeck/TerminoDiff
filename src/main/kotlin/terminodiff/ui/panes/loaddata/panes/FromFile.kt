@@ -84,9 +84,9 @@ private fun FromFileScreen(
             onClick = { onLoadLeftFile(InputResource(InputResource.Kind.FILE, selectedFile)) },
             elevation = ButtonDefaults.elevation(defaultElevation = 8.dp)) {
             AppImageIcon(relativePath = AppIconResource.icLoadLeftFile,
-                label = localizedStrings.loadLeftFile,
+                label = localizedStrings.loadLeft,
                 tint = buttonColors.contentColor(enabled = isValidPath).value)
-            Text(localizedStrings.loadLeftFile, color = buttonColors.contentColor(enabled = isValidPath).value)
+            Text(localizedStrings.loadLeft, color = buttonColors.contentColor(enabled = isValidPath).value)
         }
         Button(modifier = Modifier.padding(4.dp),
             colors = buttonColors,
@@ -94,9 +94,9 @@ private fun FromFileScreen(
             onClick = { onLoadRightFile(InputResource(InputResource.Kind.FILE, selectedFile)) },
             elevation = ButtonDefaults.elevation(defaultElevation = 8.dp)) {
             AppImageIcon(relativePath = AppIconResource.icLoadRightFile,
-                label = localizedStrings.loadRightFile,
+                label = localizedStrings.loadRight,
                 tint = buttonColors.contentColor(enabled = isValidPath).value)
-            Text(localizedStrings.loadRightFile, color = buttonColors.contentColor(enabled = isValidPath).value)
+            Text(localizedStrings.loadRight, color = buttonColors.contentColor(enabled = isValidPath).value)
         }
     }
 }

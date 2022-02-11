@@ -37,7 +37,7 @@ fun <T> LazyTable(
     keyFun: (T) -> String?,
 ) = Column(modifier = modifier.fillMaxWidth()) {
     // draw the header cells
-    Row(Modifier.fillMaxWidth()) {
+    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
         columnSpecs.forEach { HeaderCell(it, cellBorderColor, foregroundColor) }
     }
     Divider(color = cellBorderColor, thickness = 1.dp)
@@ -88,7 +88,7 @@ fun RowScope.HeaderCell(
     cellBorderColor: Color,
     contentColor: Color,
 ) {
-    Box(Modifier.border(1.dp, cellBorderColor).weight(spec.weight).padding(2.dp)) {
+    Box(Modifier.border(1.dp, cellBorderColor).weight(spec.weight).fillMaxHeight().padding(2.dp)) {
         Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
             Text(text = spec.title,
                 style = MaterialTheme.typography.bodyLarge,
