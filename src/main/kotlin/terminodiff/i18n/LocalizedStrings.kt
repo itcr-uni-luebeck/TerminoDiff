@@ -20,6 +20,7 @@ abstract class LocalizedStrings(
     val canonicalUrl: String,
     val caseSensitive: String = "Case-Sensitive?",
     val changeLanguage: String,
+    val clearSearch: String,
     val clickForDetails: String,
     val closeAccept: String,
     val closeReject: String,
@@ -88,6 +89,7 @@ abstract class LocalizedStrings(
     val propertyDesignationForCode_: (String) -> String,
     val propertyType: String,
     val reload: String,
+    val search: String,
     val select: String,
     val side_: (Side) -> String,
     val showAll: String,
@@ -136,6 +138,7 @@ class GermanStrings : LocalizedStrings(
     bothValuesAreNull = "Beide Werte sind null",
     calculateDiff = "Diff berechnen",
     canonicalUrl = "Kanonische URL",
+    clearSearch = "Suche zurücksetzen",
     closeAccept = "Akzeptieren",
     closeReject = "Verwerfen",
     changeLanguage = "Sprache wechseln",
@@ -223,6 +226,7 @@ class GermanStrings : LocalizedStrings(
     propertyDesignationForCode_ = { code -> "Eigenschaften und Designationen für Konzept '$code'" },
     propertyType = "Typ",
     reload = "Neu laden",
+    search = "Suchen",
     select = "Auswahl",
     side_ = {
         when (it) {
@@ -271,6 +275,7 @@ class EnglishStrings : LocalizedStrings(
     calculateDiff = "Calculate diff",
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
+    clearSearch = "Clear search",
     clickForDetails = "Click for details",
     closeAccept = "Accept",
     closeReject = "Reject",
@@ -357,6 +362,7 @@ class EnglishStrings : LocalizedStrings(
     propertyDesignationForCode_ = { code -> "Properties and designations for concept '$code'" },
     propertyType = "Type",
     reload = "Reload",
+    search = "Search",
     select = "Select",
     side_ = {
         when (it) {

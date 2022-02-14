@@ -14,7 +14,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import terminodiff.engine.concepts.ConceptDiffItem
@@ -38,9 +37,9 @@ fun conceptDiffColumnSpecs(
     overallComparisonColumnSpec(localizedStrings, diffColors))
 
 private fun codeColumnSpec(localizedStrings: LocalizedStrings) =
-    ColumnSpec<ConceptTableData>(title = localizedStrings.code, weight = 0.1f, content = {
-        SelectableText(it.code, style = typography.bodyLarge, textAlign = TextAlign.Center)
-    })
+    ColumnSpec.StringSearchableColumnSpec<ConceptTableData>(title = localizedStrings.code,
+        weight = 0.1f,
+        instanceGetter = { code })
 
 private fun displayColumnSpec(
     localizedStrings: LocalizedStrings, diffColors: DiffColors, showDisplayDetailsDialog: (ConceptTableData) -> Unit,
@@ -166,12 +165,13 @@ private fun columnSpecForProperty(
     @Suppress("SameParameterValue") weight: Float,
     stringValueResolver: (FhirConceptDetails) -> String?,
     onDetailClick: ((ConceptTableData) -> Unit)? = null,
-): ColumnSpec<ConceptTableData> {
+): ColumnSpec.StringSearchableColumnSpec<ConceptTableData> {
     val tooltipTextFun: (ConceptTableData) -> String? =
         { data -> tooltipForConceptProperty(data.leftDetails, data.rightDetails, stringValueResolver) }
-    return ColumnSpec(
+    return ColumnSpec.StringSearchableColumnSpec(
         title = title,
         weight = weight,
+        instanceGetter = tooltipTextFun,
         tooltipText = tooltipTextFun,
     ) { data ->
         val singleConcept = when {

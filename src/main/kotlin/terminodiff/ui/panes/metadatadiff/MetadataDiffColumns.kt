@@ -33,16 +33,22 @@ fun metadataColumnSpecs(
     leftValueColumnSpec(localizedStrings, diffDataContainer.leftCodeSystem!!),
     rightValueColumnSpec(localizedStrings, diffDataContainer.rightCodeSystem!!))
 
-private fun propertyColumnSpec(localizedStrings: LocalizedStrings): ColumnSpec<MetadataComparison> {
+private fun propertyColumnSpec(localizedStrings: LocalizedStrings): ColumnSpec.StringSearchableColumnSpec<MetadataComparison> {
     val defaultStrings = getStrings(SupportedLocale.defaultLocale)
+    val text: (MetadataComparison) -> String = { it.diffItem.label.invoke(localizedStrings) }
     val selectableContent: @Composable (MetadataComparison) -> Unit = { comparison ->
-        SelectableText(comparison.diffItem.label.invoke(localizedStrings),
+        SelectableText(text.invoke(comparison),
             fontWeight = FontWeight.Bold,
             color = MaterialTheme.colorScheme.onTertiaryContainer,
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center)
     }
-    return ColumnSpec(title = localizedStrings.property, weight = 0.1f, content = { comparison ->
+    return ColumnSpec.StringSearchableColumnSpec(
+        title = localizedStrings.property,
+        weight = 0.1f,
+        instanceGetter = { text.invoke(this) },
+        tooltipText = text,
+    ) { comparison: MetadataComparison ->
         // add the (english) default name to the property column as a tooltip, since FHIR spec is english,
         // and translations may not always be as clear.
         val localizedName = comparison.diffItem.label.invoke(localizedStrings)
@@ -52,7 +58,7 @@ private fun propertyColumnSpec(localizedStrings: LocalizedStrings): ColumnSpec<M
                 content = { selectableContent.invoke(comparison) })
             else -> selectableContent.invoke(comparison)
         }
-    })
+    }
 }
 
 private fun resultColumnSpec(
@@ -136,9 +142,11 @@ private fun countText(
 private fun leftValueColumnSpec(
     localizedStrings: LocalizedStrings,
     leftCodeSystem: CodeSystem,
-) = ColumnSpec<MetadataComparison>(title = localizedStrings.leftValue, weight = 0.25f, mergeIf = { comparison ->
-    comparison.result == MetadataComparisonResult.IDENTICAL
-}) { comparison ->
+) = ColumnSpec.StringSearchableColumnSpec<MetadataComparison>(title = localizedStrings.leftValue, weight = 0.25f,
+    instanceGetter = { this.diffItem.getRenderDisplay(leftCodeSystem) },
+    mergeIf = { comparison ->
+        comparison.result == MetadataComparisonResult.IDENTICAL
+    }) { comparison ->
     TextForLeftRightValue(comparison,
         leftCodeSystem,
         localizedStrings,
@@ -148,7 +156,12 @@ private fun leftValueColumnSpec(
 private fun rightValueColumnSpec(
     localizedStrings: LocalizedStrings,
     rightCodeSystem: CodeSystem,
-) = ColumnSpec<MetadataComparison>(title = localizedStrings.rightValue, weight = 0.25f) { comparison ->
+) = ColumnSpec.StringSearchableColumnSpec<MetadataComparison>(
+    title = localizedStrings.rightValue,
+    weight = 0.25f,
+    mergeIf = null,
+    instanceGetter = { this.diffItem.getRenderDisplay(rightCodeSystem) }
+) { comparison ->
     TextForLeftRightValue(comparison,
         rightCodeSystem,
         localizedStrings,

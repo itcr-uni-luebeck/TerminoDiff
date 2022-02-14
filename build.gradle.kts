@@ -50,6 +50,7 @@ dependencies {
     implementation("com.formdev:flatlaf:2.0.1")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
+    implementation("me.xdrop:fuzzywuzzy:1.4.0")
 }
 
 tasks.test {
