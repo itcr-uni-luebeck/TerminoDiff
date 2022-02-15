@@ -1,0 +1,42 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  setup:
+    runs-on: ubuntu-latest
+    steps:
+    - run: echo "PACKAGEVERSION=$(grep 'composeBuildVersion' gradle.properties | sed s/composeBuildVersion=//)" | tee -a $GITHUB_ENV
+    - run: echo "VERSION=$(grep 'projectVersion' gradle.properties | sed s/projectVersion=//)" | tee -a $GITHUB_ENV
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: JDK Ubuntu
+      uses: actions/setup-java@v2
+      with:
+        java-package: jdk+fx
+        java-version: '17'
+        distribution: 'azul'
+    - name: Gradle Ubuntu
+      uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
+      with:
+        arguments: -PcomposeBuildOs=ubuntu packageDeb
+    - run: echo DEBNAME="terminodiff-$PACKAGEVERSION.deb" | tee -a $GITHUB_ENV
+    - run: echo DEBPATH="build/compose/binaries/main/deb/$DEBNAME" | tee =a $GITHUB_ENV
+    - name: Upload DEB
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: ${{ env.DEBNAME }}
+        path: ${{ env.DEBPATH }}
