@@ -188,9 +188,18 @@ fun DiffDataTable(
 ) {
     if (diffDataContainer.codeSystemDiff == null) throw IllegalStateException("the diff data container is not initialized")
 
-    val columnSpecs = conceptDiffColumnSpecs(localizedStrings, diffColors, showPropertyDialog, showDisplayDetailsDialog, showDefinitionDetailsDialog)
+    val columnSpecs = conceptDiffColumnSpecs(localizedStrings,
+        diffColors,
+        showPropertyDialog,
+        showDisplayDetailsDialog,
+        showDefinitionDetailsDialog)
 
-    TableScreen(tableData = tableData, lazyListState = lazyListState, columnSpecs = columnSpecs)
+    TableScreen(
+        tableData = tableData,
+        lazyListState = lazyListState,
+        columnSpecs = columnSpecs,
+        localizedStrings = localizedStrings,
+    )
 }
 
 data class ConceptTableData(
@@ -206,7 +215,10 @@ data class ConceptTableData(
 
 @Composable
 fun TableScreen(
-    tableData: TableData, lazyListState: LazyListState, columnSpecs: List<ColumnSpec<ConceptTableData>>,
+    tableData: TableData,
+    lazyListState: LazyListState,
+    columnSpecs: List<ColumnSpec<ConceptTableData>>,
+    localizedStrings: LocalizedStrings,
 ) {
     val containedData: List<ConceptTableData> = tableData.shownCodes.map { code ->
         ConceptTableData(code = code,
@@ -214,10 +226,13 @@ fun TableScreen(
             rightDetails = tableData.rightGraphBuilder.nodeTree[code],
             diff = tableData.conceptDiff[code])
     }
-    LazyTable(columnSpecs = columnSpecs,
-        lazyListState = lazyListState,
-        tableData = containedData,
-        keyFun = { it.code },
+    LazyTable(
+        columnSpecs = columnSpecs,
         backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-        zebraStripingColor = MaterialTheme.colorScheme.primaryContainer)
+        lazyListState = lazyListState,
+        zebraStripingColor = MaterialTheme.colorScheme.primaryContainer,
+        tableData = containedData,
+        localizedStrings = localizedStrings,
+        keyFun = { it.code },
+    )
 }

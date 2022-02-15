@@ -201,8 +201,7 @@ fun FromServerScreen(
             localizedStrings = localizedStrings,
             onCloseReject = { vReadResource = null },
             onSelectLeft = onLoadLeftFile,
-            onSelectRight = onLoadRightFile
-        )
+            onSelectRight = onLoadRightFile)
     }
     LabeledTextField(value = baseServerUrl,
         onValueChange = onChangeBaseServerUrl,
@@ -213,8 +212,7 @@ fun FromServerScreen(
 
     when {
         isResourceListPending -> Row(Modifier.fillMaxWidth().weight(0.5f), horizontalArrangement = Arrangement.Center) {
-            CircularProgressIndicator(Modifier.fillMaxHeight(0.75f)
-                .padding(16.dp), colorScheme.onPrimaryContainer)
+            CircularProgressIndicator(Modifier.fillMaxHeight(0.75f).padding(16.dp), colorScheme.onPrimaryContainer)
         }
         resourceList != null -> {
             logger.debug("resource list (${resourceList.size}): ${resourceList.joinToString(limit = 3)}")
@@ -284,14 +282,17 @@ fun ListOfResources(
             iconPath = AppIconResource.icLoadRightFile,
             onLoadFile = onLoadRightFile)
     }
-    LazyTable(modifier = Modifier.padding(4.dp),
+    LazyTable(
+        modifier = Modifier.padding(4.dp),
         columnSpecs = columnSpecs,
-        lazyListState = lazyListState,
-        tableData = resourceList,
-        keyFun = DownloadableCodeSystem::id,
-        zebraStripingColor = colorScheme.primaryContainer,
         backgroundColor = colorScheme.tertiaryContainer,
-        foregroundColor = colorScheme.onTertiaryContainer)
+        foregroundColor = colorScheme.onTertiaryContainer,
+        lazyListState = lazyListState,
+        zebraStripingColor = colorScheme.primaryContainer,
+        tableData = resourceList,
+        localizedStrings = localizedStrings,
+        keyFun = DownloadableCodeSystem::id,
+    )
 }
 
 @Composable

@@ -67,17 +67,19 @@ fun TabsContent(
 }
 
 @Composable
-internal fun LabeledTextField(
+fun LabeledTextField(
     value: String,
     onValueChange: (String) -> Unit,
     modifier: Modifier = Modifier,
     labelText: String,
+    singleLine: Boolean = true,
     trailingIconVector: ImageVector? = null,
     trailingIconDescription: String? = null,
     onTrailingIconClick: (() -> Unit)? = null,
 ) = TextField(value = value,
     onValueChange = onValueChange,
     modifier = modifier,
+    singleLine = singleLine,
     label = {
         Text(text = labelText, color = colorScheme.onSecondaryContainer.copy(0.75f))
     },
@@ -88,7 +90,6 @@ internal fun LabeledTextField(
                 text = trailingIconDescription
             ) {
                 when (onTrailingIconClick) {
-
                     null -> Icon(imageVector = imageVector,
                         contentDescription = trailingIconDescription,
                         tint = colorScheme.onSecondaryContainer)

@@ -81,15 +81,18 @@ fun MetadataDiffTable(
     onShowDetailsClick: (MetadataComparison) -> Unit,
 ) =
     diffDataContainer.codeSystemDiff?.metadataDifferences?.comparisons?.let { comparisons ->
-        LazyTable(columnSpecs = metadataColumnSpecs(localizedStrings,
-            diffColors,
-            diffDataContainer,
-            onShowDetailsClick),
-            lazyListState = lazyListState,
-            tableData = comparisons,
+        LazyTable(
+            columnSpecs = metadataColumnSpecs(localizedStrings,
+                diffColors,
+                diffDataContainer,
+                onShowDetailsClick),
             backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+            lazyListState = lazyListState,
             zebraStripingColor = MaterialTheme.colorScheme.primaryContainer,
-            keyFun = { it.diffItem.label.invoke(localizedStrings) })
+            tableData = comparisons,
+            localizedStrings = localizedStrings,
+            keyFun = { it.diffItem.label.invoke(localizedStrings) },
+        )
     }
 
 

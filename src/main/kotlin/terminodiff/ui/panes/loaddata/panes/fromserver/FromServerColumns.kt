@@ -14,6 +14,7 @@ fun fromServerPaneColumnSpecs(
 ) = listOf(radioButtonColumnSpec(localizedStrings, selectedItem, onCheckedChange),
     canonicalColumnSpec(localizedStrings),
     versionColumnSpec(localizedStrings),
+    nameColumnSpec(localizedStrings),
     titleColumnSpec(localizedStrings),
     metaVersionColumnSpec(localizedStrings))
 
@@ -32,14 +33,21 @@ private fun radioButtonColumnSpec(
 }
 
 private fun canonicalColumnSpec(localizedStrings: LocalizedStrings) =
-    ColumnSpec<DownloadableCodeSystem>(title = localizedStrings.canonicalUrl, weight = 0.1f, content = {
-        SelectableText(text = it.canonicalUrl)
-    }, tooltipText = { it.canonicalUrl })
+    ColumnSpec.StringSearchableColumnSpec<DownloadableCodeSystem>(title = localizedStrings.canonicalUrl,
+        weight = 0.1f,
+        instanceGetter = { canonicalUrl })
+
+private fun nameColumnSpec(localizedStrings: LocalizedStrings) =
+    ColumnSpec.StringSearchableColumnSpec<DownloadableCodeSystem>(title = localizedStrings.name,
+        weight = 0.1f,
+        instanceGetter = { name }
+    )
 
 private fun titleColumnSpec(localizedStrings: LocalizedStrings) =
-    ColumnSpec<DownloadableCodeSystem>(title = localizedStrings.title, weight = 0.1f, content = {
-        SelectableText(text = it.title)
-    }, tooltipText = { it.title })
+    ColumnSpec.StringSearchableColumnSpec<DownloadableCodeSystem>(title = localizedStrings.title,
+        weight = 0.1f,
+        instanceGetter = { title }
+    )
 
 private fun versionColumnSpec(localizedStrings: LocalizedStrings) =
     ColumnSpec<DownloadableCodeSystem>(title = localizedStrings.version, weight = 0.1f, content = {
@@ -47,6 +55,6 @@ private fun versionColumnSpec(localizedStrings: LocalizedStrings) =
     }, tooltipText = { it.version })
 
 private fun metaVersionColumnSpec(localizedStrings: LocalizedStrings) =
-    ColumnSpec<DownloadableCodeSystem>(title = localizedStrings.metaVersion, weight = 0.1f, content = {
+    ColumnSpec<DownloadableCodeSystem>(title = localizedStrings.metaVersion, weight = 0.05f, content = {
         SelectableText(text = it.metaVersion)
     })

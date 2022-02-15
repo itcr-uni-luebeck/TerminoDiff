@@ -151,13 +151,16 @@ fun VReadTable(
     onSelectLeft: (DownloadableCodeSystem) -> Unit,
     onSelectRight: (DownloadableCodeSystem) -> Unit,
 ) {
-    LazyTable(modifier = modifier.padding(8.dp),
+    LazyTable(
+        modifier = modifier.padding(8.dp),
         columnSpecs = columnSpecs(localizedStrings, leftSelection, rightSelection, onSelectLeft, onSelectRight),
         backgroundColor = colorScheme.primaryContainer,
+        lazyListState = lazyListState,
         zebraStripingColor = colorScheme.tertiaryContainer,
-        keyFun = DownloadableCodeSystem::metaVersion,
         tableData = vReadVersions,
-        lazyListState = lazyListState)
+        localizedStrings = localizedStrings,
+        keyFun = DownloadableCodeSystem::metaVersion,
+    )
 }
 
 private fun buildHistoryUrl(resource: InputResource): Url = when {
