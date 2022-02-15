@@ -63,7 +63,7 @@ private fun DrawTable(
 ) {
 
     /**
-     * internal function to have less parameters in the when block below
+     * internal function to have fewer parameters in the when block below
      */
     @Composable
     fun <KeyType : KeyedListDiffResult<*, *>> internalDrawTable(
@@ -73,11 +73,12 @@ private fun DrawTable(
     ) = LazyTable(
         modifier = Modifier.padding(8.dp),
         columnSpecs = columnSpecs,
-        tableData = comparisonResult,
         backgroundColor = colorScheme.primaryContainer,
-        zebraStripingColor = colorScheme.tertiaryContainer,
         lazyListState = listState,
-        keyFun = keyFun
+        zebraStripingColor = colorScheme.tertiaryContainer,
+        tableData = comparisonResult,
+        localizedStrings = localizedStrings,
+        keyFun = keyFun,
     )
     when (comparison) {
         is IdentifierListComparison -> internalDrawTable(

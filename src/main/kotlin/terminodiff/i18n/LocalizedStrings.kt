@@ -4,23 +4,29 @@ import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.engine.graph.DiffGraphElementKind
+import terminodiff.engine.resources.DiffDataContainer.*
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
-import java.io.File
+import terminodiff.terminodiff.engine.resources.InputResource
 
 /**
  * we pass around an instance of LocalizedStrings, since we want every composable
  * to recompose when the language changes.
  */
 abstract class LocalizedStrings(
+    val anUnknownErrorOccurred: String,
     val boolean_: (Boolean?) -> String,
     val bothValuesAreNull: String,
+    val calculateDiff: String,
     val canonicalUrl: String,
     val caseSensitive: String = "Case-Sensitive?",
     val changeLanguage: String,
+    val clearSearch: String,
     val clickForDetails: String,
-    val code: String = "Code",
+    val closeAccept: String,
+    val closeReject: String,
     val comparison: String,
     val compositional: String,
+    val code: String = "Code",
     val conceptDiff: String,
     val conceptDiffResults_: (ConceptDiffItem.ConceptDiffResultEnum) -> String,
     val contact: String,
@@ -37,21 +43,29 @@ abstract class LocalizedStrings(
     val display: String = "Display",
     val displayAndInWhich_: (String?, DiffGraphElementKind) -> String,
     val experimental: String,
+    val fhirTerminologyServer: String,
+    val fileFromPath_: (String) -> String,
+    val fileFromUrl_: (String) -> String,
+    val fileSystem: String,
     val hierarchyMeaning: String,
     val id: String = "ID",
     val identical: String,
     val identifiers: String,
+    val invalid: String,
     val jurisdiction: String,
     val keyedListResult_: (List<KeyedListDiffResult<*, *>>) -> String,
-    val loadLeftFile: String,
-    val loadRightFile: String,
+    val loadLeft: String,
+    val loadRight: String,
+    val loadFromFile: String,
+    val loadedResources: String,
     val leftValue: String,
     val language: String,
     val rightValue: String,
     val metadataDiff: String,
     val metadataDiffResults_: (MetadataComparisonResult) -> String,
+    val metaVersion: String,
     val name: String = "Name",
-    val noDataLoadedTitle: String,
+    val noDataLoaded: String,
     val numberItems_: (Int) -> String = {
         when (it) {
             1 -> "1 item"
@@ -63,6 +77,8 @@ abstract class LocalizedStrings(
     val onlyConceptDifferences: String,
     val onlyInRight: String,
     val overallComparison: String,
+    val openResources: String,
+    val pending: String,
     val publisher: String,
     val purpose: String,
     val property: String,
@@ -73,6 +89,9 @@ abstract class LocalizedStrings(
     val propertyDesignationForCode_: (String) -> String,
     val propertyType: String,
     val reload: String,
+    val search: String,
+    val select: String,
+    val side_: (Side) -> String,
     val showAll: String,
     val showDifferent: String,
     val showIdentical: String,
@@ -88,12 +107,15 @@ abstract class LocalizedStrings(
     val uniLuebeck: String,
     val use: String,
     val useContext: String,
+    val valid: String,
     val value: String,
     val valueSet: String = "ValueSet",
     val version: String = "Version",
     val versionNeeded: String,
-    val leftFileOpenFilename_: (File) -> String,
-    val rightFileOpenFilename_: (File) -> String,
+    val vRead: String = "VRead",
+    val vReadFor_: (InputResource) -> String,
+    val vReadExplanationEnabled_: (Boolean) -> String,
+    val vreadFromUrlAndMetaVersion_: (String, String) -> String,
 )
 
 enum class SupportedLocale {
@@ -104,15 +126,21 @@ enum class SupportedLocale {
     }
 }
 
-class GermanStrings : LocalizedStrings(boolean_ = {
-    when (it) {
-        null -> "null"
-        true -> "WAHR"
-        false -> "FALSCH"
-    }
-},
+class GermanStrings : LocalizedStrings(
+    anUnknownErrorOccurred = "Ein unbekannter Fehler ist aufgetrefen",
+    boolean_ = {
+        when (it) {
+            null -> "null"
+            true -> "WAHR"
+            false -> "FALSCH"
+        }
+    },
     bothValuesAreNull = "Beide Werte sind null",
+    calculateDiff = "Diff berechnen",
     canonicalUrl = "Kanonische URL",
+    clearSearch = "Suche zurücksetzen",
+    closeAccept = "Akzeptieren",
+    closeReject = "Verwerfen",
     changeLanguage = "Sprache wechseln",
     clickForDetails = "Für Details klicken",
     comparison = "Vergleich",
@@ -140,9 +168,14 @@ class GermanStrings : LocalizedStrings(boolean_ = {
         "'$display' ($where)"
     },
     experimental = "Experimentell?",
+    fhirTerminologyServer = "FHIR-Terminologieserver",
+    fileFromPath_ = { "Datei von: $it" },
+    fileFromUrl_ = { "FHIR-Server von: $it" },
+    fileSystem = "Dateisystem",
     hierarchyMeaning = "Hierachie-Bedeutung",
     identical = "Identisch",
     identifiers = "IDs",
+    invalid = "Ungültig",
     jurisdiction = "Jurisdiktion",
     keyedListResult_ = { results ->
         results.map { it.result }.groupingBy { it }.eachCount().let { eachCount ->
@@ -154,8 +187,10 @@ class GermanStrings : LocalizedStrings(boolean_ = {
             )
         }.joinToString()
     },
-    loadLeftFile = "Linke Datei laden",
-    loadRightFile = "Rechte Datei laden",
+    loadLeft = "Links laden",
+    loadRight = "Rechts laden",
+    loadFromFile = "Vom Dateisystem laden",
+    loadedResources = "Geladene Ressourcen",
     leftValue = "Linker Wert",
     language = "Sprache",
     rightValue = "Rechter Wert",
@@ -166,12 +201,15 @@ class GermanStrings : LocalizedStrings(boolean_ = {
             MetadataComparisonResult.DIFFERENT -> "Unterschiedlich"
         }
     },
-    noDataLoadedTitle = "Keine Daten geladen",
+    metaVersion = "Meta-Version",
+    noDataLoaded = "Keine Daten geladen",
     oneValueIsNull = "Ein Wert ist null",
     onlyInLeft = "Nur links",
     onlyConceptDifferences = "Konzeptunterschiede",
     onlyInRight = "Nur rechts",
+    openResources = "Ressourcen öffnen",
     overallComparison = "Gesamt",
+    pending = "Ausstehend...",
     publisher = "Herausgeber",
     purpose = "Zweck",
     property = "Eigenschaft",
@@ -188,6 +226,14 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     propertyDesignationForCode_ = { code -> "Eigenschaften und Designationen für Konzept '$code'" },
     propertyType = "Typ",
     reload = "Neu laden",
+    search = "Suchen",
+    select = "Auswahl",
+    side_ = {
+        when (it) {
+            Side.RIGHT -> "Rechts"
+            Side.LEFT -> "Links"
+        }
+    },
     showAll = "Alle",
     showDifferent = "Unterschiedliche",
     showIdentical = "Identische",
@@ -199,12 +245,25 @@ class GermanStrings : LocalizedStrings(boolean_ = {
     uniLuebeck = "Universität zu Lübeck",
     use = "Zweck",
     useContext = "Nutzungskontext",
+    valid = "Gültig",
     value = "Wert",
     versionNeeded = "Version erforderlich?",
-    leftFileOpenFilename_ = { file -> "Linke Datei geöffnet: ${file.absolutePath}" },
-    rightFileOpenFilename_ = { file -> "Rechte Datei geöffnet: ${file.absolutePath}" })
+    vReadFor_ = {
+        "VRead für ${it.downloadableCodeSystem!!.canonicalUrl}"
+    },
+    vReadExplanationEnabled_ = {
+        when (it) {
+            true -> "Vergleiche Versionen der Ressource mit der \$history-Operation."
+            else -> "Es gibt nur eine Ressourcen-Version der gewählten Ressource."
+        }
+    },
+    vreadFromUrlAndMetaVersion_ = { url, meta ->
+        "VRead von $url (Meta-Version: $meta)"
+    }
+)
 
 class EnglishStrings : LocalizedStrings(
+    anUnknownErrorOccurred = "An unknown error occured.",
     boolean_ = {
         when (it) {
             null -> "null"
@@ -213,9 +272,13 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     bothValuesAreNull = "Both values are null",
+    calculateDiff = "Calculate diff",
     canonicalUrl = "Canonical URL",
     changeLanguage = "Change Language",
+    clearSearch = "Clear search",
     clickForDetails = "Click for details",
+    closeAccept = "Accept",
+    closeReject = "Reject",
     comparison = "Comparison",
     compositional = "Compositional?",
     conceptDiff = "Concept Diff",
@@ -241,9 +304,14 @@ class EnglishStrings : LocalizedStrings(
         "'$display' ($where)"
     },
     experimental = "Experimental?",
+    fhirTerminologyServer = "FHIR Terminology Server",
+    fileFromPath_ = { "File from: $it" },
+    fileFromUrl_ = { "FHIR Server from: $it" },
+    fileSystem = "Filesystem",
     hierarchyMeaning = "Hierarchy Meaning",
     identical = "Identical",
     identifiers = "Identifiers",
+    invalid = "Ungültig",
     jurisdiction = "Jurisdiction",
     keyedListResult_ = { results ->
         results.map { it.result }.groupingBy { it }.eachCount().let { eachCount ->
@@ -255,8 +323,10 @@ class EnglishStrings : LocalizedStrings(
             )
         }.joinToString()
     },
-    loadLeftFile = "Load left file",
-    loadRightFile = "Load right file",
+    loadLeft = "Load left",
+    loadRight = "Load right",
+    loadFromFile = "Load from file",
+    loadedResources = "Loaded resources",
     leftValue = "Left value",
     language = "Language",
     rightValue = "Right value",
@@ -267,12 +337,15 @@ class EnglishStrings : LocalizedStrings(
             MetadataComparisonResult.DIFFERENT -> "Different"
         }
     },
-    noDataLoadedTitle = "No data loaded",
+    metaVersion = "Meta Version",
+    noDataLoaded = "No data loaded",
     oneValueIsNull = "One value is null",
     onlyInLeft = "Only left",
     onlyConceptDifferences = "Concept differences",
     onlyInRight = "Only right",
+    openResources = "Open Resources",
     overallComparison = "Overall",
+    pending = "Pending...",
     publisher = "Publisher",
     purpose = "Purpose",
     property = "Property",
@@ -289,6 +362,14 @@ class EnglishStrings : LocalizedStrings(
     propertyDesignationForCode_ = { code -> "Properties and designations for concept '$code'" },
     propertyType = "Type",
     reload = "Reload",
+    search = "Search",
+    select = "Select",
+    side_ = {
+        when (it) {
+            Side.RIGHT -> "Right"
+            Side.LEFT -> "Left"
+        }
+    },
     showAll = "All",
     showDifferent = "Different",
     showIdentical = "Identical",
@@ -300,11 +381,21 @@ class EnglishStrings : LocalizedStrings(
     uniLuebeck = "University of Luebeck",
     use = "Use",
     useContext = "Use context",
+    valid = "Valid",
     value = "Value",
     versionNeeded = "Version needed?",
-    leftFileOpenFilename_ = { file -> "Left file open: ${file.absolutePath}" },
-    rightFileOpenFilename_ = { file -> "Right file open: ${file.absolutePath}" },
-)
+    vReadFor_ = {
+        "VRead for ${it.downloadableCodeSystem!!.canonicalUrl}"
+    },
+    vReadExplanationEnabled_ = {
+        when (it) {
+            true -> "Compare versions of the resource using the \$history operation."
+            else -> "There is only one resource version of the selected resource."
+        }
+    },
+    vreadFromUrlAndMetaVersion_ = { url, meta ->
+        "VRead from $url (Meta version: $meta)"
+    })
 
 fun getStrings(locale: SupportedLocale = SupportedLocale.defaultLocale): LocalizedStrings = when (locale) {
     SupportedLocale.DE -> GermanStrings()

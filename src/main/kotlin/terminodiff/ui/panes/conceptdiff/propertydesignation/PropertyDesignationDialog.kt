@@ -68,35 +68,49 @@ fun PropertyDesignationDialog(
             Column(Modifier.background(colorScheme.primaryContainer).fillMaxSize()) {
                 VerticalSplitPane(splitPaneState = splitPaneState) {
                     first {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 4.dp)) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(top = 4.dp)) {
                             Text(localizedStrings.properties,
                                 style = typography.titleMedium,
                                 color = colorScheme.onPrimaryContainer)
                             when {
-                                conceptData.isInBoth() -> DiffPropertyTable(conceptData.diff!!,
-                                    propertyDiffColumnSpecs,
-                                    propertyListState)
-                                else -> SingleConceptPropertyTable(conceptData.leftDetails,
-                                    conceptData.rightDetails,
-                                    identicalPropertyColumnSpecs,
-                                    propertyListState)
+                                conceptData.isInBoth() -> DiffPropertyTable(
+                                    conceptDiff = conceptData.diff!!,
+                                    diffColumnSpecs = propertyDiffColumnSpecs,
+                                    lazyListState = propertyListState,
+                                    localizedStrings = localizedStrings
+                                )
+                                else -> SingleConceptPropertyTable(
+                                    leftDetails = conceptData.leftDetails,
+                                    rightDetails = conceptData.rightDetails,
+                                    identicalColumnSpecs = identicalPropertyColumnSpecs,
+                                    lazyListState = propertyListState,
+                                    localizedStrings = localizedStrings,
+                                )
                             }
                         }
 
                     }
                     second {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 4.dp)) {
+                        Column(horizontalAlignment = Alignment.CenterHorizontally,
+                            modifier = Modifier.padding(top = 4.dp)) {
                             Text(localizedStrings.designations,
                                 style = typography.titleMedium,
                                 color = colorScheme.onPrimaryContainer)
                             when {
-                                conceptData.isInBoth() -> DiffDesignationTable(conceptData.diff!!,
-                                    designationDiffColumnSpecs,
-                                    designationListState)
-                                else -> DesignationTable(conceptData.leftDetails,
-                                    conceptData.rightDetails,
-                                    identicalDesignationColumnSpecs,
-                                    designationListState)
+                                conceptData.isInBoth() -> DiffDesignationTable(
+                                    diff = conceptData.diff!!,
+                                    columnSpecs = designationDiffColumnSpecs,
+                                    designationListState = designationListState,
+                                    localizedStrings = localizedStrings,
+                                )
+                                else -> DesignationTable(
+                                    leftDetails = conceptData.leftDetails,
+                                    rightDetails = conceptData.rightDetails,
+                                    columnSpecs = identicalDesignationColumnSpecs,
+                                    designationListState = designationListState,
+                                    localizedStrings = localizedStrings
+                                )
                             }
                         }
                     }
@@ -128,6 +142,7 @@ fun DesignationTable(
     rightDetails: FhirConceptDetails?,
     columnSpecs: List<ColumnSpec<FhirConceptDesignation>>,
     designationListState: LazyListState,
+    localizedStrings: LocalizedStrings,
 ) = when (leftDetails) {
     null -> rightDetails
     else -> leftDetails
@@ -135,13 +150,15 @@ fun DesignationTable(
     LazyTable(
         modifier = Modifier.padding(8.dp),
         columnSpecs = columnSpecs,
-        tableData = tableData,
         backgroundColor = colorScheme.primaryContainer,
+        lazyListState = designationListState,
         zebraStripingColor = colorScheme.tertiaryContainer,
-        lazyListState = designationListState
-    ) {
-        it.language ?: "null"
-    }
+        tableData = tableData,
+        localizedStrings = localizedStrings,
+        keyFun = {
+            it.language ?: "null"
+        },
+    )
 }
 
 @Composable
@@ -149,12 +166,17 @@ fun DiffDesignationTable(
     diff: ConceptDiff,
     columnSpecs: List<ColumnSpec<KeyedListDiffResult<DesignationKey, String>>>,
     designationListState: LazyListState,
-) = LazyTable(modifier = Modifier.padding(8.dp),
+    localizedStrings: LocalizedStrings,
+) = LazyTable(
+    modifier = Modifier.padding(8.dp),
     columnSpecs = columnSpecs,
-    lazyListState = designationListState,
-    tableData = diff.designationComparison,
     backgroundColor = colorScheme.primaryContainer,
-    zebraStripingColor = colorScheme.tertiaryContainer) { it.key.toString() }
+    lazyListState = designationListState,
+    zebraStripingColor = colorScheme.tertiaryContainer,
+    tableData = diff.designationComparison,
+    localizedStrings = localizedStrings,
+    keyFun = { it.key.toString() },
+)
 
 @Composable
 fun SingleConceptPropertyTable(
@@ -162,16 +184,21 @@ fun SingleConceptPropertyTable(
     rightDetails: FhirConceptDetails?,
     identicalColumnSpecs: List<ColumnSpec<FhirConceptProperty>>,
     lazyListState: LazyListState,
+    localizedStrings: LocalizedStrings,
 ) = when (leftDetails) {
     null -> rightDetails
     else -> leftDetails
 }?.property?.let { tableData ->
-    LazyTable(modifier = Modifier.padding(8.dp),
+    LazyTable(
+        modifier = Modifier.padding(8.dp),
         columnSpecs = identicalColumnSpecs,
-        lazyListState = lazyListState,
-        tableData = tableData,
         backgroundColor = colorScheme.primaryContainer,
-        zebraStripingColor = colorScheme.tertiaryContainer) { it.propertyCode }
+        lazyListState = lazyListState,
+        zebraStripingColor = colorScheme.tertiaryContainer,
+        tableData = tableData,
+        localizedStrings = localizedStrings,
+        keyFun = { it.propertyCode },
+    )
 }
 
 @Composable
@@ -179,9 +206,14 @@ fun DiffPropertyTable(
     conceptDiff: ConceptDiff,
     diffColumnSpecs: List<ColumnSpec<PropertyDiffResult>>,
     lazyListState: LazyListState,
-) = LazyTable(modifier = Modifier.padding(8.dp),
+    localizedStrings: LocalizedStrings,
+) = LazyTable(
+    modifier = Modifier.padding(8.dp),
     columnSpecs = diffColumnSpecs,
-    lazyListState = lazyListState,
-    tableData = conceptDiff.propertyComparison,
     backgroundColor = colorScheme.primaryContainer,
-    zebraStripingColor = colorScheme.tertiaryContainer) { it.key }
+    lazyListState = lazyListState,
+    zebraStripingColor = colorScheme.tertiaryContainer,
+    tableData = conceptDiff.propertyComparison,
+    localizedStrings = localizedStrings,
+    keyFun = { it.key },
+)

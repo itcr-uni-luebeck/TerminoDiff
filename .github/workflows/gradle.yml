@@ -1,0 +1,74 @@
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Native Distributions
+
+on:
+  push:
+    branches: [ develop, main ]
+  pull_request:
+    branches: [ develop, main ]
+
+jobs:
+  build-ubuntu:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: JDK Ubuntu
+      uses: actions/setup-java@v2
+      with:
+        java-package: jdk+fx
+        java-version: '17'
+        distribution: 'zulu'
+    - name: Gradle Ubuntu
+      uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
+      with:
+        arguments: -PcomposeBuildOs=ubuntu packageDeb
+    - name: Upload DEB
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: ubuntu
+        path: build/compose/binaries/main/deb
+  build-windows:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: JDK Windows
+      uses: actions/setup-java@v2
+      with:
+        java-package: jdk+fx
+        java-version: '17'
+        distribution: 'zulu'
+    - name: Gradle Windows
+      uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
+      with:
+        arguments: -PcomposeBuildOs=windows packageExe
+    - name: Upload EXE
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: windows
+        path: build/compose/binaries/main/exe
+  build-mac:
+    runs-on: macos-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: JDK macOS
+      uses: actions/setup-java@v2
+      with:
+        java-package: jdk+fx
+        java-version: '17'
+        distribution: 'zulu'
+    - name: Gradle Mac
+      uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
+      with:
+        arguments: -PcomposeBuildOs=mac packageDmg
+    - name: Upload DMG
+      uses: actions/upload-artifact@v2.3.1
+      with:
+        name: macos-intel
+        path: build/compose/binaries/main/dmg
+

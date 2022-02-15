@@ -1,70 +1,54 @@
 package terminodiff.terminodiff.ui
 
 import androidx.compose.foundation.ScrollState
-import androidx.compose.foundation.background
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.scrollable
-import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
+import androidx.compose.foundation.layout.padding
+import androidx.compose.material.Scaffold
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.dp
-import li.flor.nativejfilechooser.NativeJFileChooser
-import org.apache.commons.lang3.SystemUtils
+import ca.uhn.fhir.context.FhirContext
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.SplitPaneState
-import org.jetbrains.compose.splitpane.VerticalSplitPane
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.preferences.AppPreferences
-import terminodiff.ui.AppIconResource
-import terminodiff.ui.AppImageIcon
+import terminodiff.terminodiff.engine.resources.InputResource
+import terminodiff.terminodiff.ui.panes.diff.DiffPaneContent
+import terminodiff.terminodiff.ui.panes.loaddata.LoadDataPaneContent
 import terminodiff.ui.TerminoDiffTopAppBar
-import terminodiff.ui.cursorForHorizontalResize
-import terminodiff.ui.panes.conceptdiff.ConceptDiffPanel
-import terminodiff.ui.panes.graph.ShowGraphsPanel
-import terminodiff.ui.panes.metadatadiff.MetadataDiffPanel
 import terminodiff.ui.theme.TerminoDiffTheme
-import java.io.File
-import javax.swing.JFileChooser
-import javax.swing.filechooser.FileNameExtensionFilter
 
 @OptIn(ExperimentalSplitPaneApi::class)
 @Composable
 fun TerminodiffAppContent(
     localizedStrings: LocalizedStrings,
     diffDataContainer: DiffDataContainer,
+    fhirContext: FhirContext,
     scrollState: ScrollState,
     useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
     onChangeDarkTheme: () -> Unit,
     splitPaneState: SplitPaneState,
 ) {
-    val onLoadLeftFile: () -> Unit = {
-        showLoadFileDialog(localizedStrings.loadLeftFile)?.let {
-            diffDataContainer.leftFilename = it
-        }
+    var showDiff by remember { mutableStateOf(false) }
+    val onLoadLeftFile: (InputResource) -> Unit = {
+        diffDataContainer.leftResource = it
     }
-    val onLoadRightFile: () -> Unit = {
-        showLoadFileDialog(localizedStrings.loadRightFile)?.let {
-            diffDataContainer.rightFilename = it
-        }
+    val onLoadRightFile: (InputResource) -> Unit = {
+        diffDataContainer.rightResource = it
     }
 
-    TerminodiffContentWindow(
-        localizedStrings = localizedStrings,
+    TerminodiffContentWindow(localizedStrings = localizedStrings,
         scrollState = scrollState,
         useDarkTheme = useDarkTheme,
         onLocaleChange = onLocaleChange,
         onChangeDarkTheme = onChangeDarkTheme,
-        onLoadLeftFile = onLoadLeftFile,
-        onLoadRightFile = onLoadRightFile,
+        fhirContext = fhirContext,
+        onLoadLeft = onLoadLeftFile,
+        onLoadRight = onLoadRightFile,
         onReload = { diffDataContainer.reload() },
         diffDataContainer = diffDataContainer,
-        splitPaneState = splitPaneState
-    )
+        splitPaneState = splitPaneState,
+        showDiff = showDiff) { newValue -> showDiff = newValue }
 }
 
 @OptIn(ExperimentalSplitPaneApi::class)
@@ -75,196 +59,47 @@ fun TerminodiffContentWindow(
     useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
     onChangeDarkTheme: () -> Unit,
-    onLoadLeftFile: () -> Unit,
-    onLoadRightFile: () -> Unit,
+    fhirContext: FhirContext,
+    onLoadLeft: (InputResource) -> Unit,
+    onLoadRight: (InputResource) -> Unit,
     onReload: () -> Unit,
     diffDataContainer: DiffDataContainer,
     splitPaneState: SplitPaneState,
+    showDiff: Boolean,
+    setShowDiff: (Boolean) -> Unit,
 ) {
     TerminoDiffTheme(useDarkTheme = useDarkTheme) {
-        Scaffold(
-            topBar = {
-                TerminoDiffTopAppBar(
-                    localizedStrings = localizedStrings,
-                    onLocaleChange = onLocaleChange,
-                    onLoadLeftFile = onLoadLeftFile,
-                    onLoadRightFile = onLoadRightFile,
-                    onChangeDarkTheme = onChangeDarkTheme,
-                    onReload = onReload
-                )
-            },
-            backgroundColor = MaterialTheme.colorScheme.background
-        ) { scaffoldPadding ->
-            when (diffDataContainer.leftCodeSystem != null && diffDataContainer.rightCodeSystem != null) {
-                true -> ContainerInitializedContent(
-                    modifier = Modifier.padding(scaffoldPadding),
+        Scaffold(topBar = {
+            TerminoDiffTopAppBar(
+                localizedStrings = localizedStrings,
+                onLocaleChange = onLocaleChange,
+                onChangeDarkTheme = onChangeDarkTheme,
+                onReload = onReload,
+                onShowLoadScreen = {
+                    setShowDiff.invoke(false)
+                }
+            )
+        }, backgroundColor = MaterialTheme.colorScheme.background) { scaffoldPadding ->
+            when (diffDataContainer.leftCodeSystem != null && diffDataContainer.rightCodeSystem != null && showDiff) {
+                true -> DiffPaneContent(modifier = Modifier.padding(scaffoldPadding),
                     scrollState = scrollState,
                     strings = localizedStrings,
                     useDarkTheme = useDarkTheme,
                     diffDataContainer = diffDataContainer,
-                    splitPaneState = splitPaneState
-                )
-                false -> ContainerUninitializedContent(
+                    splitPaneState = splitPaneState)
+                false -> LoadDataPaneContent(
                     modifier = Modifier.padding(scaffoldPadding),
                     scrollState = scrollState,
                     localizedStrings = localizedStrings,
-                    leftFile = diffDataContainer.leftFilename,
-                    rightFile = diffDataContainer.rightFilename,
-                    onLoadLeftFile = onLoadLeftFile,
-                    onLoadRightFile = onLoadRightFile,
+                    leftResource = diffDataContainer.leftResource,
+                    rightResource = diffDataContainer.rightResource,
+                    onLoadLeft = onLoadLeft,
+                    onLoadRight = onLoadRight,
+                    fhirContext = fhirContext,
+                    onGoButtonClick = { setShowDiff.invoke(true) },
                 )
             }
         }
     }
 }
 
-@Composable
-private fun ContainerUninitializedContent(
-    modifier: Modifier = Modifier,
-    scrollState: ScrollState,
-    localizedStrings: LocalizedStrings,
-    onLoadLeftFile: () -> Unit,
-    onLoadRightFile: () -> Unit,
-    leftFile: File?,
-    rightFile: File?,
-) {
-    Column(modifier.scrollable(scrollState, Orientation.Vertical)) {
-        Card(
-            modifier = Modifier.padding(8.dp).fillMaxWidth(),
-            elevation = 8.dp,
-            backgroundColor = MaterialTheme.colorScheme.secondaryContainer,
-            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
-        ) {
-            val buttonColors = ButtonDefaults.buttonColors(
-                backgroundColor = MaterialTheme.colorScheme.primary,
-                contentColor = MaterialTheme.colorScheme.onPrimary
-            )
-            Column(Modifier.padding(4.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(
-                    localizedStrings.noDataLoadedTitle,
-                    style = MaterialTheme.typography.headlineMedium,
-                    color = MaterialTheme.colorScheme.onSecondaryContainer
-                )
-                Row {
-                    Button(
-                        modifier = Modifier.padding(4.dp),
-                        colors = buttonColors,
-                        onClick = onLoadLeftFile,
-                        elevation = ButtonDefaults.elevation(defaultElevation = 8.dp)
-                    ) {
-                        AppImageIcon(
-                            relativePath = AppIconResource.icLoadLeftFile,
-                            label = localizedStrings.loadLeftFile,
-                            tint = buttonColors.contentColor(true).value
-                        )
-                        Text(localizedStrings.loadLeftFile)
-                    }
-                    Button(
-                        modifier = Modifier.padding(4.dp),
-                        onClick = onLoadRightFile,
-                        colors = buttonColors,
-                    ) {
-                        AppImageIcon(
-                            relativePath = AppIconResource.icLoadRightFile,
-                            label = localizedStrings.loadRightFile,
-                            tint = buttonColors.contentColor(true).value
-                        )
-                        Text(localizedStrings.loadRightFile)
-                    }
-                }
-                when {
-                    leftFile != null -> localizedStrings.leftFileOpenFilename_.invoke(leftFile)
-                    rightFile != null -> localizedStrings.rightFileOpenFilename_.invoke(rightFile)
-                    else -> null
-                }?.let { openFilenameText ->
-                    Text(
-                        text = openFilenameText,
-                        color = MaterialTheme.colorScheme.onSecondaryContainer,
-                        style = MaterialTheme.typography.bodyMedium
-                    )
-                }
-            }
-        }
-    }
-}
-
-@OptIn(ExperimentalSplitPaneApi::class)
-@Composable
-private fun ContainerInitializedContent(
-    modifier: Modifier = Modifier,
-    scrollState: ScrollState,
-    strings: LocalizedStrings,
-    useDarkTheme: Boolean,
-    diffDataContainer: DiffDataContainer,
-    splitPaneState: SplitPaneState,
-) {
-    Column(
-        modifier = modifier.scrollable(scrollState, Orientation.Vertical),
-    ) {
-        ShowGraphsPanel(
-            leftCs = diffDataContainer.leftCodeSystem!!,
-            rightCs = diffDataContainer.rightCodeSystem!!,
-            diffGraph = diffDataContainer.codeSystemDiff!!.differenceGraph,
-            localizedStrings = strings,
-            useDarkTheme = useDarkTheme,
-        )
-        VerticalSplitPane(splitPaneState = splitPaneState) {
-            first(100.dp) {
-                ConceptDiffPanel(
-                    diffDataContainer = diffDataContainer,
-                    localizedStrings = strings,
-                    useDarkTheme = useDarkTheme
-                )
-            }
-            second(100.dp) {
-                MetadataDiffPanel(
-                    diffDataContainer = diffDataContainer,
-                    localizedStrings = strings,
-                    useDarkTheme = useDarkTheme,
-                )
-            }
-            splitter {
-                visiblePart {
-                    Box(Modifier.height(3.dp).fillMaxWidth()
-                        .background(MaterialTheme.colorScheme.primary))
-                }
-                handle {
-                    Box(
-                        Modifier
-                            .markAsHandle()
-                            .cursorForHorizontalResize()
-                            .background(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.5f))
-                            .height(9.dp)
-                            .fillMaxWidth()
-                    )
-                }
-            }
-        }
-    }
-}
-
-fun getFileChooser(title: String): JFileChooser {
-    return when (SystemUtils.IS_OS_MAC) {
-        // NativeJFileChooser hangs on Azul Zulu 11 + JavaFX on macOS 12.1 aarch64.
-        // With Azul Zulu w/o JFX, currently the file browser does not work at all on a M1 MBA.
-        // Hence, the non-native file chooser from Swing is used instead, which is not *nearly* as nice
-        // as the native dialog on Windows, but it seems to be much more stable.
-        true -> JFileChooser(AppPreferences.fileBrowserDirectory)
-        else -> NativeJFileChooser(AppPreferences.fileBrowserDirectory)
-    }.apply {
-        dialogTitle = title
-        isAcceptAllFileFilterUsed = false
-        addChoosableFileFilter(FileNameExtensionFilter("FHIR+JSON (*.json)", "json", "JSON"))
-        addChoosableFileFilter(FileNameExtensionFilter("FHIR+XML (*.xml)", "xml", "XML"))
-    }
-}
-
-fun showLoadFileDialog(title: String): File? = getFileChooser(title).let { chooser ->
-    when (chooser.showOpenDialog(null)) {
-        JFileChooser.CANCEL_OPTION -> null
-        JFileChooser.APPROVE_OPTION -> {
-            return@let chooser.selectedFile?.absoluteFile ?: return null
-        }
-        else -> null
-    }
-}

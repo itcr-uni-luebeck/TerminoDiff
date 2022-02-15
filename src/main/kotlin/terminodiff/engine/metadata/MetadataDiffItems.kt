@@ -169,7 +169,7 @@ class IdentifierListDiffItem(localizedStrings: LocalizedStrings) :
 class ContactComparisonItem(
     localizedStrings: LocalizedStrings,
 ) : MetadataKeyedListDiffItem<ContactDetail, String>({ contact }, false, localizedStrings, { it.contact }) {
-    override fun getKey(instance: ContactDetail): String = instance.name
+    override fun getKey(instance: ContactDetail): String = instance.name ?: ""
 
     override fun getStringValue(instance: ContactDetail): String = formatDisplay(instance)
 

@@ -23,6 +23,7 @@ import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.terminodiff.ui.panes.conceptdiff.display.DisplayDetailsDialog
 import terminodiff.terminodiff.ui.panes.conceptdiff.propertydesignation.PropertyDesignationDialog
 import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.theme.getDiffColors
@@ -33,6 +34,10 @@ import terminodiff.ui.util.ToggleableChipSpec
 import java.util.*
 
 private val logger: Logger = LoggerFactory.getLogger("conceptdiffpanel")
+
+private enum class DetailsDialogKind {
+    PROPERTY_DESIGNATION, DISPLAY, DEFINITION
+}
 
 @Composable
 fun ConceptDiffPanel(
@@ -57,12 +62,27 @@ fun ConceptDiffPanel(
         filterSpecs.associate { it.name to filterDiffItems(diffDataContainer, it.name).shownCodes.size }
     }
 
-    var propertyDialogData: ConceptTableData? by remember { mutableStateOf(null) }
+    var dialogData: Pair<ConceptTableData, DetailsDialogKind>? by remember { mutableStateOf(null) }
 
-    propertyDialogData?.let { conceptTableData ->
-        PropertyDesignationDialog(conceptTableData, localizedStrings, useDarkTheme) {
-            propertyDialogData = null
+    dialogData?.let { (data, kind) ->
+        val onClose: () -> Unit = { dialogData = null }
+        when (kind) {
+            DetailsDialogKind.PROPERTY_DESIGNATION -> PropertyDesignationDialog(data,
+                localizedStrings,
+                useDarkTheme,
+                onClose)
+            DetailsDialogKind.DISPLAY -> DisplayDetailsDialog(data = data,
+                localizedStrings = localizedStrings,
+                label = localizedStrings.display,
+                useDarkTheme = useDarkTheme,
+                onClose = onClose) { it.display }
+            DetailsDialogKind.DEFINITION -> DisplayDetailsDialog(data = data,
+                localizedStrings = localizedStrings,
+                label = localizedStrings.definition,
+                useDarkTheme = useDarkTheme,
+                onClose = onClose) { it.definition }
         }
+
     }
 
     Card(
@@ -89,8 +109,13 @@ fun ConceptDiffPanel(
                 diffColors = diffColors,
                 lazyListState = lazyListState,
                 showPropertyDialog = {
-                    propertyDialogData = it
-                    logger.info("showing details dialog for concept ${it.code}")
+                    dialogData = it to DetailsDialogKind.PROPERTY_DESIGNATION
+                },
+                showDisplayDetailsDialog = {
+                    dialogData = it to DetailsDialogKind.DISPLAY
+                },
+                showDefinitionDetailsDialog = {
+                    dialogData = it to DetailsDialogKind.DEFINITION
                 })
         }
     }
@@ -158,12 +183,23 @@ fun DiffDataTable(
     diffColors: DiffColors,
     lazyListState: LazyListState,
     showPropertyDialog: (ConceptTableData) -> Unit,
+    showDisplayDetailsDialog: (ConceptTableData) -> Unit,
+    showDefinitionDetailsDialog: (ConceptTableData) -> Unit,
 ) {
     if (diffDataContainer.codeSystemDiff == null) throw IllegalStateException("the diff data container is not initialized")
 
-    val columnSpecs = conceptDiffColumnSpecs(localizedStrings, diffColors, showPropertyDialog)
+    val columnSpecs = conceptDiffColumnSpecs(localizedStrings,
+        diffColors,
+        showPropertyDialog,
+        showDisplayDetailsDialog,
+        showDefinitionDetailsDialog)
 
-    TableScreen(tableData = tableData, lazyListState = lazyListState, columnSpecs = columnSpecs)
+    TableScreen(
+        tableData = tableData,
+        lazyListState = lazyListState,
+        columnSpecs = columnSpecs,
+        localizedStrings = localizedStrings,
+    )
 }
 
 data class ConceptTableData(
@@ -179,7 +215,10 @@ data class ConceptTableData(
 
 @Composable
 fun TableScreen(
-    tableData: TableData, lazyListState: LazyListState, columnSpecs: List<ColumnSpec<ConceptTableData>>,
+    tableData: TableData,
+    lazyListState: LazyListState,
+    columnSpecs: List<ColumnSpec<ConceptTableData>>,
+    localizedStrings: LocalizedStrings,
 ) {
     val containedData: List<ConceptTableData> = tableData.shownCodes.map { code ->
         ConceptTableData(code = code,
@@ -187,10 +226,13 @@ fun TableScreen(
             rightDetails = tableData.rightGraphBuilder.nodeTree[code],
             diff = tableData.conceptDiff[code])
     }
-    LazyTable(columnSpecs = columnSpecs,
-        lazyListState = lazyListState,
-        tableData = containedData,
-        keyFun = { it.code },
+    LazyTable(
+        columnSpecs = columnSpecs,
         backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-        zebraStripingColor = MaterialTheme.colorScheme.primaryContainer)
+        lazyListState = lazyListState,
+        zebraStripingColor = MaterialTheme.colorScheme.primaryContainer,
+        tableData = containedData,
+        localizedStrings = localizedStrings,
+        keyFun = { it.code },
+    )
 }

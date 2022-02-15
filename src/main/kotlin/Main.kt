@@ -105,6 +105,7 @@ fun AppWindow(
             localizedStrings = localizedStrings,
             diffDataContainer = diffDataContainer,
             scrollState = scrollState,
+            fhirContext = fhirContext,
             useDarkTheme = useDarkTheme,
             onLocaleChange = {
                 locale = when (locale) {
@@ -116,7 +117,7 @@ fun AppWindow(
                 diffDataContainer.localizedStrings = getStrings(locale)
             },
             onChangeDarkTheme = onChangeDarkTheme,
-            splitPaneState = splitPaneState
+            splitPaneState = splitPaneState,
         )
     }
 }

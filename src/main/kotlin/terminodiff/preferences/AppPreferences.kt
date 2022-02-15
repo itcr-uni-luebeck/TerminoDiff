@@ -25,6 +25,7 @@ object AppPreferences {
     var language: String by preference(userPref, "language_", SupportedLocale.defaultLocale.name)
     var darkModeEnabled: Boolean by preference(userPref, "dark_mode_enabled", false)
     var fileBrowserDirectory: String by preference(userPref, "file_browser_directory", System.getProperty("user.home"))
+    var terminologyServerUrl: String by preference(userPref, "terminology_server_url", "https://r4.ontoserver.csiro.au/fhir")
 }
 
 inline fun <reified T : Any> preference(preferences: Preferences, key: String, defaultValue: T) =
