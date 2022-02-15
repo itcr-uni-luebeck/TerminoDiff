@@ -17,6 +17,7 @@ jobs:
   setup:
     runs-on: ubuntu-latest
     steps:
+    - uses: actions/checkout@v2
     - run: echo "PACKAGEVERSION=$(grep 'composeBuildVersion' gradle.properties | sed s/composeBuildVersion=//)" | tee -a $GITHUB_ENV
     - run: echo "VERSION=$(grep 'projectVersion' gradle.properties | sed s/projectVersion=//)" | tee -a $GITHUB_ENV
   build-ubuntu:
