@@ -80,9 +80,14 @@ private fun rightDesignationValueColumnSpec(localizedStrings: LocalizedStrings) 
 
 
 fun <T> propertyCodeColumnSpec(localizedStrings: LocalizedStrings, codeGetter: (T) -> String) =
-    ColumnSpec<T>(localizedStrings.code, 0.2f) {
+    ColumnSpec.StringSearchableColumnSpec<T>(title = localizedStrings.code, weight = 0.2f, instanceGetter = {
+        codeGetter.invoke(this)
+    }, content = {
         textForValue(codeGetter.invoke(it))
-    }
+    })
+/*ColumnSpec.StringSearchableColumnSpec<T>(localizedStrings.code, 0.2f, instanceGetter = { codeGetter(this)}) {
+    textForValue(codeGetter.invoke(it))
+}*/
 
 private fun <T> propertyTypeColumnSpec(localizedStrings: LocalizedStrings, typeGetter: (T) -> CodeSystem.PropertyType) =
     ColumnSpec<T>(localizedStrings.propertyType, weight = 0.2f) {

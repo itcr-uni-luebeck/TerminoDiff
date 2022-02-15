@@ -291,7 +291,7 @@ fun <T> ShowFilterDialog(
     onClose: () -> Unit,
 ) {
     var inputText: String by remember { mutableStateOf(searchState.getSearchQueryFor(title)) }
-    Dialog(onCloseRequest = onClose) {
+    Dialog(onCloseRequest = onClose, title = localizedStrings.search) {
         Column(modifier = Modifier.fillMaxSize().background(colorScheme.primaryContainer),
             verticalArrangement = Arrangement.SpaceAround,
             horizontalAlignment = Alignment.CenterHorizontally) {
