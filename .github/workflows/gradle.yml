@@ -14,22 +14,11 @@ on:
     branches: [ develop, main ]
 
 jobs:
-  setup:
-    runs-on: ubuntu-latest
-    outputs:
-      packageversion: ${{ steps.packageversion.outputs.packageversion }}
-      version: ${{ steps.version.outputs.version }}
-    steps:
-      - name: packageversion
-        run: echo "::set-ouput name=packageversion::$(grep 'composeBuildVersion' gradle.properties | sed s/composeBuildVersion=//)"
-      #- name: version
-      #  run: echo "::set-ouput name=version::$(grep 'projectVersion' gradle.properties | sed s/projectVersion=//)"
   build-ubuntu:
     needs: setup
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
-    - run: echo "DEBNAME=terminodiff-${{ needs.setup.outputs.packageversion }}.deb.zip" | tee -a $GITHUB_ENV
     - name: JDK Ubuntu
       uses: actions/setup-java@v2
       with:
@@ -43,14 +32,13 @@ jobs:
     - name: Upload DEB
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: ${{ env.DEBNAME }}
+        name: ubuntu
         path: build/compose/binaries/main/deb
   build-windows:
     needs: setup
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
-    - run: echo "EXENAME=terminodiff-${{ needs.setup.outputs.packageversion }}.exe.zip" | tee -a $GITHUB_ENV
     - name: JDK Windows
       uses: actions/setup-java@v2
       with:
@@ -64,14 +52,13 @@ jobs:
     - name: Upload EXE
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: ${{ env.EXENAME }}
+        name: windows
         path: build/compose/binaries/main/exe
   build-mac:
     needs: setup
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
-    - run: echo "DMGNAME=terminodiff-${{ needs.setup.outputs.packageversion }}_intel.dmg.zip" | tee -a $GITHUB_ENV
     - name: JDK macOS
       uses: actions/setup-java@v2
       with:
@@ -85,6 +72,6 @@ jobs:
     - name: Upload DMG
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: ${{ env.DMGNAME }}
+        name: macos-intel
         path: build/compose/binaries/main/dmg
 
