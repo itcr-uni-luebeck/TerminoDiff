@@ -45,50 +45,27 @@ fun <T> LazyTable(
     localizedStrings: LocalizedStrings,
     keyFun: (T) -> String?,
 ) = Column(modifier = modifier.fillMaxWidth().padding(4.dp)) {
-    var currentFilterTitleToPredicate: Pair<String, (T, String) -> Boolean>? by remember { mutableStateOf(null) }
-    var showFilterDialog: Boolean by remember { mutableStateOf(false) }
-    var currentFilterString: String by remember { mutableStateOf("") }
-    val filteredData by derivedStateOf {
-        when {
-            currentFilterTitleToPredicate == null -> tableData
-            currentFilterString.isBlank() -> tableData
-            else -> tableData.filter { // apply the filter string
-                currentFilterTitleToPredicate!!.second.invoke(it, currentFilterString)
-            }
-        }
-    }
-    if (showFilterDialog) {
-        currentFilterTitleToPredicate!!.let { (title, _) ->
-            ShowFilterDialog(title = title,
-                localizedStrings = localizedStrings,
-                textFieldValue = currentFilterString,
-                onClose = { filter ->
-                    if (filter != null) {
-                        currentFilterString = filter
-                    }
-                    showFilterDialog = false
-                })
+    val searchState by remember { mutableStateOf(SearchState(columnSpecs, tableData)) }
+    var showFilterDialogFor: String? by remember { mutableStateOf(null) }
+
+    if (showFilterDialogFor != null) {
+        ShowFilterDialog(title = showFilterDialogFor!!,
+            searchState = searchState,
+            localizedStrings = localizedStrings) {
+            showFilterDialogFor = null
         }
     }
 
     // draw the header row
     Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
         columnSpecs.forEach { columnSpec ->
-            val filteredColumnTitle = currentFilterTitleToPredicate?.first
             HeaderCell(columnSpec = columnSpec,
                 cellBorderColor = cellBorderColor,
                 contentColor = foregroundColor,
                 localizedStrings = localizedStrings,
-                filteredColumnTitle = filteredColumnTitle,
-                searchFilterPresent = currentFilterString.isNotBlank(),
-                onSearchClearClick = {
-                    currentFilterTitleToPredicate = null
-                    currentFilterString = ""
-                },
-                onSearchClick = { title, filterFun ->
-                    currentFilterTitleToPredicate = title to filterFun
-                    showFilterDialog = true
-                })
+                searchState = searchState,
+                onSearchClick = { showFilterDialogFor = it },
+                onSearchClearClick = searchState::clearSearchFor)
         }
     }
     Divider(color = cellBorderColor, thickness = 1.dp)
@@ -96,7 +73,7 @@ fun <T> LazyTable(
 // the actual cells, contained by LazyColumn
     Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         LazyColumn(state = lazyListState) {
-            itemsIndexed(items = filteredData, key = { index, _ ->
+            itemsIndexed(items = searchState.filteredData, key = { index, _ ->
                 "$keyFun-$index"
             }) { index, data ->
                 val rowBackground = when (zebraStripingColor) {
@@ -134,37 +111,6 @@ fun <T> LazyTable(
     }
 }
 
-@Composable
-fun ShowFilterDialog(
-    title: String,
-    localizedStrings: LocalizedStrings,
-    textFieldValue: String,
-    onClose: (String?) -> Unit,
-) {
-    var inputText: String by remember { mutableStateOf(textFieldValue) }
-    Dialog(onCloseRequest = {
-        onClose(null)
-    }) {
-        Column(modifier = Modifier.fillMaxSize().background(colorScheme.primaryContainer),
-            verticalArrangement = Arrangement.SpaceAround,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            LabeledTextField(value = inputText, onValueChange = { inputText = it }, labelText = title)
-            Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly) {
-                Button(modifier = Modifier.wrapContentSize(),
-                    onClick = { onClose(null) },
-                    colors = ButtonDefaults.buttonColors(colorScheme.tertiary, colorScheme.onTertiary)) {
-                    Text(localizedStrings.closeReject, color = colorScheme.onTertiary)
-                }
-                Button(modifier = Modifier.wrapContentSize(), onClick = {
-                    onClose(inputText)
-                }, colors = ButtonDefaults.buttonColors(colorScheme.secondary, colorScheme.onSecondary)) {
-                    Text(localizedStrings.closeAccept, color = colorScheme.onSecondary)
-                }
-            }
-        }
-    }
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -173,45 +119,39 @@ fun <T> RowScope.HeaderCell(
     cellBorderColor: Color,
     contentColor: Color,
     localizedStrings: LocalizedStrings,
-    searchFilterPresent: Boolean,
-    onSearchClearClick: (() -> Unit),
-    onSearchClick: (String, (T, String) -> Boolean) -> Unit,
-    filteredColumnTitle: String?,
+    searchState: SearchState<T>,
+    onSearchClick: (String) -> Unit,
+    onSearchClearClick: (String) -> Unit,
 ) {
     Box(Modifier.border(1.dp, cellBorderColor).weight(columnSpec.weight).fillMaxHeight().padding(2.dp)) {
         Row(modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically) {
-            Text(text = columnSpec.title,
+            val columnName = columnSpec.title
+            Text(text = columnName,
                 style = MaterialTheme.typography.bodyLarge,
                 color = contentColor,
                 fontWeight = FontWeight.Bold,
                 fontStyle = FontStyle.Italic,
                 textAlign = TextAlign.Center)
             if (columnSpec.searchPredicate != null) {
-                val enableSearch = when (filteredColumnTitle) {
-                    null -> true
-                    else -> !searchFilterPresent || filteredColumnTitle == columnSpec.title
-                }
                 CompositionLocalProvider(LocalMinimumTouchTargetEnforcement provides false) {
-                    MouseOverPopup(localizedStrings.search) {
-                        IconButton(
-                            modifier = Modifier.size(32.dp).padding(4.dp),
-                            onClick = { onSearchClick(columnSpec.title, columnSpec.searchPredicate) },
-                            enabled = enableSearch) {
+                    val searchMouseover = when (searchState.isFilteringFor(columnName)) {
+                        true -> searchState.getSearchQueryFor(columnName)
+                        else -> "\"${localizedStrings.search}\""
+                    }
+                    MouseOverPopup(searchMouseover) {
+                        IconButton(modifier = Modifier.size(32.dp).padding(4.dp),
+                            onClick = { onSearchClick(columnName) }) {
                             Icon(Icons.Default.Search,
                                 contentDescription = localizedStrings.search,
-                                tint = when (enableSearch) {
-                                    true -> contentColor
-                                    else -> contentColor.copy(0.5f)
-                                })
+                                tint = contentColor)
                         }
                     }
-                    if (searchFilterPresent && filteredColumnTitle == columnSpec.title) {
+                    if (searchState.isFilteringFor(columnName)) {
                         MouseOverPopup(text = localizedStrings.clearSearch) {
-                            IconButton(
-                                modifier = Modifier.size(32.dp).padding(4.dp),
-                                onClick = onSearchClearClick) {
+                            IconButton(modifier = Modifier.size(32.dp).padding(4.dp),
+                                onClick = { onSearchClearClick(columnName) }) {
                                 Icon(Icons.Default.Backspace,
                                     contentDescription = localizedStrings.clearSearch,
                                     tint = contentColor)
@@ -264,22 +204,15 @@ open class ColumnSpec<T>(
         mergeIf: ((T) -> Boolean)? = null,
         tooltipText: ((T) -> String?)? = null,
         content: @Composable (T) -> Unit,
-    ) : ColumnSpec<T>(
-        title = title,
-        weight = weight,
-        searchPredicate = { value, search ->
-            when (val instanceValue = instanceGetter.invoke(value)?.lowercase(Locale.getDefault())) {
-                null -> false
-                else -> {
-                    val fuzzyScore = FuzzySearch.partialRatio(instanceValue, search.lowercase(Locale.getDefault()))
-                    fuzzyScore >= 75
-                }
+    ) : ColumnSpec<T>(title = title, weight = weight, searchPredicate = { value, search ->
+        when (val instanceValue = instanceGetter.invoke(value)?.lowercase(Locale.getDefault())) {
+            null -> false
+            else -> {
+                val fuzzyScore = FuzzySearch.partialRatio(instanceValue, search.lowercase(Locale.getDefault()))
+                fuzzyScore >= 75
             }
-        },
-        mergeIf = mergeIf,
-        tooltipText = tooltipText,
-        content = content
-    ) {
+        }
+    }, mergeIf = mergeIf, tooltipText = tooltipText, content = content) {
         /**
          * constructor overload that takes care of drawing the content by providing a tooltip and content as selectable text, with default styling
          */
@@ -298,5 +231,88 @@ open class ColumnSpec<T>(
                 SelectableText(text = it.instanceGetter())
             },
         )
+    }
+}
+
+class SearchState<T>(
+    private val columnSpecs: List<ColumnSpec<T>>,
+    private val tableData: List<T>,
+) {
+    private val searchableColumns: List<ColumnSpec<T>> by derivedStateOf {
+        columnSpecs.filter { it.searchPredicate != null }
+    }
+    private val searchableColumnTitles: List<String> by derivedStateOf {
+        searchableColumns.map { it.title }
+    }
+
+    private val searchQueries = mutableStateMapOf<String, String?>().apply {
+        searchableColumnTitles.forEach { this[it] = null }
+    }
+
+    private val predicates: Map<String, (T, String) -> Boolean> by derivedStateOf {
+        searchableColumns.associate { it.title to it.searchPredicate!! }
+    }
+
+    fun isFilteringFor(columnTitle: String) = searchQueries.entries.firstOrNull() { it.key == columnTitle }?.let {
+        it.value != null
+    } ?: false
+
+    private fun filterData(tableData: List<T>) = when (searchQueries.any { it.value != null }) {
+        false -> tableData
+        else -> tableData.filter { data ->
+            val presentFilters = searchQueries.filterValues { it != null }
+            val presentPredicates = presentFilters.entries.associate { entry ->
+                val predicate = predicates[entry.key]!!
+                entry.key to { predicate.invoke(data, entry.value!!) }
+            }
+            presentPredicates.all { it.value() }
+        }
+    }
+
+    val filteredData by derivedStateOf { filterData(tableData) }
+
+    fun clearSearchFor(columnName: String) {
+        searchQueries[columnName] = null
+    }
+
+    fun getSearchQueryFor(columnName: String) = searchQueries[columnName] ?: ""
+
+    fun setSearchQueryFor(columnName: String, newValue: String) {
+        searchQueries[columnName] = newValue
+    }
+
+}
+
+@Composable
+fun <T> ShowFilterDialog(
+    title: String,
+    searchState: SearchState<T>,
+    localizedStrings: LocalizedStrings,
+    onClose: () -> Unit,
+) {
+    var inputText: String by remember { mutableStateOf(searchState.getSearchQueryFor(title)) }
+    Dialog(onCloseRequest = onClose) {
+        Column(modifier = Modifier.fillMaxSize().background(colorScheme.primaryContainer),
+            verticalArrangement = Arrangement.SpaceAround,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            LabeledTextField(value = inputText,
+                onValueChange = { inputText = it },
+                labelText = title,
+                singleLine = true)
+            Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
+                horizontalArrangement = Arrangement.SpaceEvenly) {
+                Button(modifier = Modifier.wrapContentSize(),
+                    onClick = onClose,
+                    colors = ButtonDefaults.buttonColors(colorScheme.tertiary, colorScheme.onTertiary)) {
+                    Text(localizedStrings.closeReject, color = colorScheme.onTertiary)
+                }
+                Button(modifier = Modifier.wrapContentSize(), onClick = {
+                    searchState.setSearchQueryFor(title, inputText)
+                    onClose()
+                }, colors = ButtonDefaults.buttonColors(colorScheme.secondary, colorScheme.onSecondary)) {
+                    Text(localizedStrings.closeAccept, color = colorScheme.onSecondary)
+                }
+            }
+        }
     }
 }
