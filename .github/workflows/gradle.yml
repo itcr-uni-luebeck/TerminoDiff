@@ -15,7 +15,6 @@ on:
 
 jobs:
   build-ubuntu:
-    needs: setup
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -35,7 +34,6 @@ jobs:
         name: ubuntu
         path: build/compose/binaries/main/deb
   build-windows:
-    needs: setup
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
@@ -55,7 +53,6 @@ jobs:
         name: windows
         path: build/compose/binaries/main/exe
   build-mac:
-    needs: setup
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
