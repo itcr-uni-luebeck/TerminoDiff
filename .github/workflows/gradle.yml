@@ -5,23 +5,27 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
 
-name: Java CI with Gradle
+name: Native Distributions
 
 on:
   push:
     branches: [ develop, main ]
   pull_request:
-    branches: [ develop, main ]
+    branches: [ main ]
 
 jobs:
-        #  setup:
-        #    runs-on: ubuntu-latest
-        #    steps:
-        #    - uses: actions/checkout@v2
-        #    - run: echo "PACKAGEVERSION=$(grep 'composeBuildVersion' gradle.properties | sed s/composeBuildVersion=//)" | tee -a $GITHUB_ENV
-        #    - run: echo "VERSION=$(grep 'projectVersion' gradle.properties | sed s/projectVersion=//)" | tee -a $GITHUB_ENV
+  setup:
+    runs-on: ubuntu-latest
+    outputs:
+      packageversion: ${{ steps.packageversion.outputs.packageversion }}
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - name: packageversion
+        run: echo "::set-ouput name=packageversion::$(grep 'composeBuildVersion' gradle.properties | sed s/composeBuildVersion=//)"
+      #- name: version
+      #  run: echo "::set-ouput name=version::$(grep 'projectVersion' gradle.properties | sed s/projectVersion=//)"
   build-ubuntu:
-        #    needs: setup
+    needs: setup
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
@@ -35,12 +39,11 @@ jobs:
       uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
       with:
         arguments: -PcomposeBuildOs=ubuntu packageDeb
-        #- run: echo DEBNAME="terminodiff-$PACKAGEVERSION.deb" | tee -a $GITHUB_ENV
-        #- run: echo DEBPATH="build/compose/binaries/main/deb/$DEBNAME" | tee =a $GITHUB_ENV
+    - run: echo "DEBNAME=terminodiff-${needs.setup.outputs.packageversion}.deb.zip" | tee -a $GITHUB_ENV
     - name: Upload DEB
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: ubuntu
+        name: ${{ DEBNAME }}
         path: build/compose/binaries/main/deb
   build-windows:
     runs-on: windows-latest
@@ -56,10 +59,11 @@ jobs:
       uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
       with:
         arguments: -PcomposeBuildOs=windows packageExe
+    - run: echo "EXENAME=terminodiff-${needs.setup.outputs.packageversion}.exe.zip" | tee -a $GITHUB_ENV
     - name: Upload EXE
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: windows
+        name: ${{ EXENAME }}
         path: build/compose/binaries/main/exe
   build-mac:
     runs-on: macos-latest
@@ -75,9 +79,10 @@ jobs:
       uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
       with:
         arguments: -PcomposeBuildOs=mac packageDmg
+    - run: echo "DMGNAME=terminodiff-${needs.setup.outputs.packageversion}_intel.dmg.zip" | tee -a $GITHUB_ENV
     - name: Upload DMG
       uses: actions/upload-artifact@v2.3.1
       with:
-        name: mac
+        name: ${{ DMGNAME }}
         path: build/compose/binaries/main/dmg
 
