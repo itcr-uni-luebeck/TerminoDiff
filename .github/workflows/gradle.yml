@@ -29,6 +29,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - run: echo "DEBNAME=terminodiff-${{ needs.setup.outputs.packageversion }}.deb.zip" | tee -a $GITHUB_ENV
     - name: JDK Ubuntu
       uses: actions/setup-java@v2
       with:
@@ -39,7 +40,6 @@ jobs:
       uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
       with:
         arguments: -PcomposeBuildOs=ubuntu packageDeb
-    - run: echo "DEBNAME=terminodiff-${needs.setup.outputs.packageversion}.deb.zip" | tee -a $GITHUB_ENV
     - name: Upload DEB
       uses: actions/upload-artifact@v2.3.1
       with:
@@ -50,6 +50,7 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v2
+    - run: echo "EXENAME=terminodiff-${{ needs.setup.outputs.packageversion }}.exe.zip" | tee -a $GITHUB_ENV
     - name: JDK Windows
       uses: actions/setup-java@v2
       with:
@@ -60,7 +61,6 @@ jobs:
       uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
       with:
         arguments: -PcomposeBuildOs=windows packageExe
-    - run: echo "EXENAME=terminodiff-${needs.setup.outputs.packageversion}.exe.zip" | tee -a $GITHUB_ENV
     - name: Upload EXE
       uses: actions/upload-artifact@v2.3.1
       with:
@@ -71,6 +71,7 @@ jobs:
     runs-on: macos-latest
     steps:
     - uses: actions/checkout@v2
+    - run: echo "DMGNAME=terminodiff-${{ needs.setup.outputs.packageversion }}_intel.dmg.zip" | tee -a $GITHUB_ENV
     - name: JDK macOS
       uses: actions/setup-java@v2
       with:
@@ -81,7 +82,6 @@ jobs:
       uses: gradle/gradle-build-action@937999e9cc2425eddc7fd62d1053baf041147db7
       with:
         arguments: -PcomposeBuildOs=mac packageDmg
-    - run: echo "DMGNAME=terminodiff-${needs.setup.outputs.packageversion}_intel.dmg.zip" | tee -a $GITHUB_ENV
     - name: Upload DMG
       uses: actions/upload-artifact@v2.3.1
       with:
