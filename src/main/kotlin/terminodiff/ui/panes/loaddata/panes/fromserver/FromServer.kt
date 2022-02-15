@@ -111,7 +111,7 @@ private suspend fun listCodeSystems(
     val list = retrieveBundleOfDownloadableResources(ktorClient, codeSystemUrl, fhirContext)
     list?.sortedBy { it.canonicalUrl }?.sortedBy { it.version }
 } catch (e: Exception) {
-    logger.info("Error reqesting from FHIR Base $urlString: ${e.message}")
+    logger.info("Error requesting from FHIR Base $urlString: ${e.message}")
     null
 }
 
@@ -120,7 +120,9 @@ suspend fun retrieveBundleOfDownloadableResources(
     initialUrl: Url,
     fhirContext: FhirContext,
 ): List<DownloadableCodeSystem>? {
-    var nextUrl: Url? = initialUrl
+    var nextUrl: Url? = URLBuilder(initialUrl).apply {
+        parameters.append("_count", "256")
+    }.build()
     val resources = mutableListOf<DownloadableCodeSystem>()
     while (nextUrl != null) {
         val thisUrl = nextUrl
@@ -160,6 +162,7 @@ suspend fun retrieveBundleOfDownloadableResources(
                     }
                 }
                 resources.addAll(entries)
+                logger.debug("Read a page of ${entries.size}, now read ${resources.size}")
                 nextUrl = bundle.getLink("next")?.url?.let { Url(it) }
             } catch (e: DataFormatException) {
                 return null
@@ -330,13 +333,13 @@ private fun LoadButton(
 }
 
 data class DownloadableCodeSystem(
-    val physicalUrl: String,
-    val canonicalUrl: String,
     val id: String,
+    val physicalUrl: String,
+    val canonicalUrl: String?,
     val version: String?,
     val metaVersion: String?,
     val name: String?,
     val title: String?,
-    val content: CodeSystem.CodeSystemContentMode,
+    val content: CodeSystem.CodeSystemContentMode?,
     val lastChange: Date?,
 )
