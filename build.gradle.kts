@@ -7,9 +7,9 @@ plugins {
     id("org.jetbrains.compose") version "1.0.0"
     id("org.openjfx.javafxplugin") version "0.0.11"
 }
-
+val projectVersion: String by project
 group = "de.uzl.itcr"
-version = "1.0.0"
+version = projectVersion
 
 repositories {
     maven("https://maven.pkg.jetbrains.space/public/p/compose/dev")
@@ -73,50 +73,60 @@ tasks.withType<KotlinCompile> {
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
 }
 
+val composeBuildVersion: String by project
+val composeBuildOs: String? by project
+
 compose.desktop {
     application {
         mainClass = "terminodiff.MainKt"
-        nativeDistributions {
-            val resourceDir = project.layout.projectDirectory.dir("resources")
-            appResourcesRootDir.set(resourceDir)
-            licenseFile.set(project.file("LICENSE"))
-            packageName = "TerminoDiff"
-            packageVersion = "1.0.0"
-            description = "Visually compare HL7 FHIR Terminology"
-            vendor = "IT Center for Clinical Reserach, University of Lübeck"
-            copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
+        if (composeBuildOs != null) {
+            nativeDistributions {
+                val resourceDir = project.layout.projectDirectory.dir("resources")
+                appResourcesRootDir.set(resourceDir)
+                licenseFile.set(project.file("LICENSE"))
+                packageName = "TerminoDiff"
+                packageVersion = composeBuildVersion
+                description = "Visually compare HL7 FHIR Terminology"
+                vendor = "IT Center for Clinical Reserach, University of Lübeck"
+                copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
 
-            /*linux {
-                iconFile.set(resourceDir.file("common/terminodiff.png"))
-                rpmLicenseType = "GPL-3.0"
-                debMaintainer = "j.wiedekopf@uni-luebeck.de"
-                appCategory = "Development"
-                targetFormats(
-                    // TargetFormat.Deb,
-                    TargetFormat.Rpm,
-                    TargetFormat.AppImage,
-                )
-            }*/
-            /*macOS {
-                jvmArgs += listOf("-Dskiko.renderApi=SOFTWARE")
-                bundleID = "de.uzl.itcr.terminodiff"
-                signing {
-                    sign.set(false)
+                when (composeBuildOs) {
+                    "ubuntu", "redhat" -> linux {
+                        iconFile.set(resourceDir.file("common/terminodiff.png"))
+                        rpmLicenseType = "GPL-3.0"
+                        debMaintainer = "j.wiedekopf@uni-luebeck.de"
+                        appCategory = "Development"
+                        when (composeBuildOs) {
+                            "ubuntu" -> targetFormats(
+                                TargetFormat.Deb,
+                            )
+                            "redhat" -> targetFormats(
+                                TargetFormat.Rpm
+                            )
+                        }
+                    }
+                    "mac" -> macOS {
+                        jvmArgs += listOf("-Dskiko.renderApi=SOFTWARE")
+                        bundleID = "de.uzl.itcr.terminodiff"
+                        signing {
+                            sign.set(false)
+                        }
+                        iconFile.set(resourceDir.file("macos/terminodiff.icns"))
+                        targetFormats(
+                            TargetFormat.Dmg
+                        )
+                    }
+                    "windows" -> windows {
+                        iconFile.set(resourceDir.file("windows/terminodiff.ico"))
+                        perUserInstall = true
+                        dirChooser = true
+                        upgradeUuid = "ECFA19D9-D1F2-4AF5-9E5E-59A8F21C3A79"
+                        menuGroup = "TerminoDiff"
+                        targetFormats(
+                            TargetFormat.Exe
+                        )
+                    }
                 }
-                iconFile.set(resourceDir.file("macos/terminodiff.icns"))
-                targetFormats(
-                    TargetFormat.Dmg
-                )
-            }*/
-            windows {
-                iconFile.set(resourceDir.file("windows/terminodiff.ico"))
-                perUserInstall = true
-                dirChooser = true
-                upgradeUuid = "ECFA19D9-D1F2-4AF5-9E5E-59A8F21C3A79"
-                menuGroup = "TerminoDiff"
-                targetFormats(
-                    TargetFormat.Exe
-                )
             }
         }
     }
