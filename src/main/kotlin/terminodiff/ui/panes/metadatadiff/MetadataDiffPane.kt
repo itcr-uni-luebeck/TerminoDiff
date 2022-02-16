@@ -91,8 +91,7 @@ fun MetadataDiffTable(
             zebraStripingColor = MaterialTheme.colorScheme.primaryContainer,
             tableData = comparisons,
             localizedStrings = localizedStrings,
-            keyFun = { it.diffItem.label.invoke(localizedStrings) },
-        )
+        ) { it.diffItem.label.invoke(localizedStrings) }
     }
 
 

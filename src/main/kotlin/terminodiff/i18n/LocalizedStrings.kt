@@ -29,6 +29,7 @@ abstract class LocalizedStrings(
     val code: String = "Code",
     val conceptDiff: String,
     val conceptDiffResults_: (ConceptDiffItem.ConceptDiffResultEnum) -> String,
+    val concepts_: (Int) -> String,
     val contact: String,
     val content: String = "Content",
     val count: String,
@@ -42,10 +43,12 @@ abstract class LocalizedStrings(
     val diffGraph: String,
     val display: String = "Display",
     val displayAndInWhich_: (String?, DiffGraphElementKind) -> String,
+    val elements_: (Int) -> String,
     val experimental: String,
     val fhirTerminologyServer: String,
     val fileFromPath_: (String) -> String,
     val fileFromUrl_: (String) -> String,
+    val filtered: String,
     val fileSystem: String,
     val hierarchyMeaning: String,
     val id: String = "ID",
@@ -152,6 +155,12 @@ class GermanStrings : LocalizedStrings(
             ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identisch"
         }
     },
+    concepts_ = {
+        when (it) {
+            1 -> "Konzept"
+            else -> "Konzepte"
+        }
+    },
     contact = "Kontakt",
     count = "Anzahl",
     date = "Datum",
@@ -167,11 +176,18 @@ class GermanStrings : LocalizedStrings(
         }
         "'$display' ($where)"
     },
+    elements_ = {
+        when (it) {
+            0 -> "Element"
+            else -> "Elemente"
+        }
+    },
     experimental = "Experimentell?",
     fhirTerminologyServer = "FHIR-Terminologieserver",
     fileFromPath_ = { "Datei von: $it" },
     fileFromUrl_ = { "FHIR-Server von: $it" },
     fileSystem = "Dateisystem",
+    filtered = "gefiltert",
     hierarchyMeaning = "Hierachie-Bedeutung",
     identical = "Identisch",
     identifiers = "IDs",
@@ -288,6 +304,12 @@ class EnglishStrings : LocalizedStrings(
             ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identical"
         }
     },
+    concepts_ = {
+        when (it) {
+            1 -> "concept"
+            else -> "concepts"
+        }
+    },
     contact = "Contact",
     count = "Count",
     date = "Date",
@@ -303,11 +325,18 @@ class EnglishStrings : LocalizedStrings(
         }
         "'$display' ($where)"
     },
+    elements_ = {
+        when (it) {
+            0 -> "element"
+            else -> "elements"
+        }
+    },
     experimental = "Experimental?",
     fhirTerminologyServer = "FHIR Terminology Server",
     fileFromPath_ = { "File from: $it" },
     fileFromUrl_ = { "FHIR Server from: $it" },
     fileSystem = "Filesystem",
+    filtered = "filtered",
     hierarchyMeaning = "Hierarchy Meaning",
     identical = "Identical",
     identifiers = "Identifiers",

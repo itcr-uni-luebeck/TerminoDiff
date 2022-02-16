@@ -47,7 +47,7 @@ fun ConceptDiffPanel(
 ) {
     val diffColors by remember { mutableStateOf(getDiffColors(useDarkTheme = useDarkTheme)) }
     var activeFilter by remember { mutableStateOf(ToggleableChipSpec.showDifferent) }
-    val tableData by derivedStateOf { filterDiffItems(diffDataContainer, activeFilter) }
+    val chipFilteredTableData by derivedStateOf { filterDiffItems(diffDataContainer, activeFilter) }
     val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
     val coroutineScope = rememberCoroutineScope()
     val filterSpecs by derivedStateOf {
@@ -104,7 +104,7 @@ fun ConceptDiffPanel(
                 }
             }
             DiffDataTable(diffDataContainer = diffDataContainer,
-                tableData = tableData,
+                tableData = chipFilteredTableData,
                 localizedStrings = localizedStrings,
                 diffColors = diffColors,
                 lazyListState = lazyListState,
@@ -188,11 +188,13 @@ fun DiffDataTable(
 ) {
     if (diffDataContainer.codeSystemDiff == null) throw IllegalStateException("the diff data container is not initialized")
 
-    val columnSpecs = conceptDiffColumnSpecs(localizedStrings,
-        diffColors,
-        showPropertyDialog,
-        showDisplayDetailsDialog,
-        showDefinitionDetailsDialog)
+    val columnSpecs by derivedStateOf {
+        conceptDiffColumnSpecs(localizedStrings,
+            diffColors,
+            showPropertyDialog,
+            showDisplayDetailsDialog,
+            showDefinitionDetailsDialog)
+    }
 
     TableScreen(
         tableData = tableData,
@@ -220,11 +222,13 @@ fun TableScreen(
     columnSpecs: List<ColumnSpec<ConceptTableData>>,
     localizedStrings: LocalizedStrings,
 ) {
-    val containedData: List<ConceptTableData> = tableData.shownCodes.map { code ->
-        ConceptTableData(code = code,
-            leftDetails = tableData.leftGraphBuilder.nodeTree[code],
-            rightDetails = tableData.rightGraphBuilder.nodeTree[code],
-            diff = tableData.conceptDiff[code])
+    val containedData: List<ConceptTableData> by derivedStateOf {
+        tableData.shownCodes.map { code ->
+            ConceptTableData(code = code,
+                leftDetails = tableData.leftGraphBuilder.nodeTree[code],
+                rightDetails = tableData.rightGraphBuilder.nodeTree[code],
+                diff = tableData.conceptDiff[code])
+        }
     }
     LazyTable(
         columnSpecs = columnSpecs,
@@ -233,6 +237,6 @@ fun TableScreen(
         zebraStripingColor = MaterialTheme.colorScheme.primaryContainer,
         tableData = containedData,
         localizedStrings = localizedStrings,
-        keyFun = { it.code },
-    )
+        countLabel = localizedStrings.concepts_
+    ) { it.code }
 }

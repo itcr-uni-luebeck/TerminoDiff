@@ -155,10 +155,9 @@ fun DesignationTable(
         zebraStripingColor = colorScheme.tertiaryContainer,
         tableData = tableData,
         localizedStrings = localizedStrings,
-        keyFun = {
-            it.language ?: "null"
-        },
-    )
+    ) {
+        it.language ?: "null"
+    }
 }
 
 @Composable
@@ -175,8 +174,7 @@ fun DiffDesignationTable(
     zebraStripingColor = colorScheme.tertiaryContainer,
     tableData = diff.designationComparison,
     localizedStrings = localizedStrings,
-    keyFun = { it.key.toString() },
-)
+) { it.key.toString() }
 
 @Composable
 fun SingleConceptPropertyTable(
@@ -197,8 +195,7 @@ fun SingleConceptPropertyTable(
         zebraStripingColor = colorScheme.tertiaryContainer,
         tableData = tableData,
         localizedStrings = localizedStrings,
-        keyFun = { it.propertyCode },
-    )
+    ) { it.propertyCode }
 }
 
 @Composable
@@ -215,5 +212,4 @@ fun DiffPropertyTable(
     zebraStripingColor = colorScheme.tertiaryContainer,
     tableData = conceptDiff.propertyComparison,
     localizedStrings = localizedStrings,
-    keyFun = { it.key },
-)
+) { it.key }
