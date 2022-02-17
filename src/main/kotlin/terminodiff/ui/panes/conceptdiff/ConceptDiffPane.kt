@@ -44,6 +44,7 @@ fun ConceptDiffPanel(
     diffDataContainer: DiffDataContainer,
     localizedStrings: LocalizedStrings,
     useDarkTheme: Boolean,
+    onShowGraph: (String) -> Unit,
 ) {
     val diffColors by remember { mutableStateOf(getDiffColors(useDarkTheme = useDarkTheme)) }
     var activeFilter by remember { mutableStateOf(ToggleableChipSpec.showDifferent) }
@@ -103,20 +104,23 @@ fun ConceptDiffPanel(
                     lazyListState.scrollToItem(0)
                 }
             }
-            DiffDataTable(diffDataContainer = diffDataContainer,
+            DiffDataTable(
+                diffDataContainer = diffDataContainer,
                 tableData = chipFilteredTableData,
                 localizedStrings = localizedStrings,
                 diffColors = diffColors,
                 lazyListState = lazyListState,
-                showPropertyDialog = {
+                onShowPropertyDialog = {
                     dialogData = it to DetailsDialogKind.PROPERTY_DESIGNATION
                 },
-                showDisplayDetailsDialog = {
+                onShowDisplayDetailsDialog = {
                     dialogData = it to DetailsDialogKind.DISPLAY
                 },
-                showDefinitionDetailsDialog = {
+                onShowDefinitionDetailsDialog = {
                     dialogData = it to DetailsDialogKind.DEFINITION
-                })
+                },
+                onShowGraph = onShowGraph
+            )
         }
     }
 }
@@ -182,18 +186,22 @@ fun DiffDataTable(
     localizedStrings: LocalizedStrings,
     diffColors: DiffColors,
     lazyListState: LazyListState,
-    showPropertyDialog: (ConceptTableData) -> Unit,
-    showDisplayDetailsDialog: (ConceptTableData) -> Unit,
-    showDefinitionDetailsDialog: (ConceptTableData) -> Unit,
+    onShowPropertyDialog: (ConceptTableData) -> Unit,
+    onShowDisplayDetailsDialog: (ConceptTableData) -> Unit,
+    onShowDefinitionDetailsDialog: (ConceptTableData) -> Unit,
+    onShowGraph: (String) -> Unit,
 ) {
     if (diffDataContainer.codeSystemDiff == null) throw IllegalStateException("the diff data container is not initialized")
 
     val columnSpecs by derivedStateOf {
-        conceptDiffColumnSpecs(localizedStrings,
-            diffColors,
-            showPropertyDialog,
-            showDisplayDetailsDialog,
-            showDefinitionDetailsDialog)
+        conceptDiffColumnSpecs(
+            localizedStrings = localizedStrings,
+            diffColors = diffColors,
+            onShowPropertyDialog = onShowPropertyDialog,
+            onShowDisplayDetailsDialog = onShowDisplayDetailsDialog,
+            onShowDefinitionDetailsDialog = onShowDefinitionDetailsDialog,
+            onShowGraph = onShowGraph
+        )
     }
 
     TableScreen(

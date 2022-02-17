@@ -9,18 +9,23 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.SplitPaneState
 import org.jetbrains.compose.splitpane.VerticalSplitPane
+import org.slf4j.LoggerFactory
+import terminodiff.engine.graph.CodeSystemDiffBuilder
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.terminodiff.engine.graph.CombinedGraphBuilder
 import terminodiff.ui.cursorForHorizontalResize
 import terminodiff.ui.panes.conceptdiff.ConceptDiffPanel
 import terminodiff.ui.panes.graph.ShowGraphsPanel
 import terminodiff.ui.panes.metadatadiff.MetadataDiffPanel
+
+private val logger = LoggerFactory.getLogger("DiffPane")
 
 @OptIn(ExperimentalSplitPaneApi::class)
 @Composable
@@ -32,6 +37,7 @@ fun DiffPaneContent(
     diffDataContainer: DiffDataContainer,
     splitPaneState: SplitPaneState,
 ) {
+    var neighborhoodDisplay: NeighborhoodDisplay? by remember { mutableStateOf(null) }
     Column(
         modifier = modifier.scrollable(scrollState, Orientation.Vertical),
     ) {
@@ -47,7 +53,18 @@ fun DiffPaneContent(
                 ConceptDiffPanel(
                     diffDataContainer = diffDataContainer,
                     localizedStrings = strings,
-                    useDarkTheme = useDarkTheme
+                    useDarkTheme = useDarkTheme,
+                    onShowGraph = { focusCode ->
+                        diffDataContainer.codeSystemDiff?.let { diff ->
+                            if (neighborhoodDisplay?.focusCode == focusCode) {
+                                neighborhoodDisplay!!.changeLayers(1)
+                            } else {
+                                neighborhoodDisplay = NeighborhoodDisplay(focusCode, diff)
+                            }
+                            // TODO: 17/02/22 use the neighborhoodDisplay
+                            println("edges: ${neighborhoodDisplay?.neighborhoodGraph?.edgeSet()?.size}")
+                        }
+                    }
                 )
             }
             second(100.dp) {
@@ -75,4 +92,23 @@ fun DiffPaneContent(
             }
         }
     }
+}
+
+data class NeighborhoodDisplay(
+    val focusCode: String,
+    val codeSystemDiff: CodeSystemDiffBuilder,
+) {
+    var layers by mutableStateOf(1)
+
+    val neighborhoodGraph by derivedStateOf {
+        codeSystemDiff.combinedGraph?.getSubgraph(focusCode, layers)?.also {
+            logger.info("neighborhood of $focusCode and $layers layers: ${it.vertexSet().size} vertices and ${it.edgeSet().size} edges")
+        }
+    }
+
+    fun changeLayers(delta: Int) {
+        layers = (layers + delta).coerceAtLeast(1)
+    }
+
+
 }

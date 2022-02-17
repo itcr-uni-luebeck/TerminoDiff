@@ -3,7 +3,7 @@ package terminodiff.ui.graphs
 import net.mahdilamb.colormap.Colormaps
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import terminodiff.engine.graph.DiffGraphElementKind
+import terminodiff.terminodiff.engine.graph.GraphSide
 import java.awt.Color
 
 private val logger: Logger = LoggerFactory.getLogger(EdgeColorRegistry::class.java)
@@ -14,7 +14,7 @@ class EdgeColorRegistry {
         private val colorMap = Colormaps.Qualitative.Tab10()
         private val propertyColorMap = mutableMapOf<String, Color>()
 
-        fun getDiffGraphColor(inWhich: DiffGraphElementKind): Color {
+        fun getDiffGraphColor(inWhich: GraphSide): Color {
             return colorMap.get((inWhich.ordinal).toFloat() * 0.1f)
         }
 

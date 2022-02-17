@@ -1,14 +1,13 @@
 package terminodiff.engine.graph
 
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.*
 import org.jgrapht.Graph
 import org.jgrapht.graph.builder.GraphTypeBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.engine.concepts.ConceptDiff
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.terminodiff.engine.graph.*
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
 import terminodiff.terminodiff.engine.metadata.MetadataDiff
 import terminodiff.ui.graphs.EdgeColorRegistry
@@ -20,7 +19,7 @@ private val logger: Logger = LoggerFactory.getLogger("CodeSystemDiffBuilder")
 class CodeSystemDiffBuilder(
     private val leftBuilder: CodeSystemGraphBuilder,
     private val rightBuilder: CodeSystemGraphBuilder,
-    private val localizedStrings: LocalizedStrings
+    private val localizedStrings: LocalizedStrings,
 ) {
 
     val metadataDifferences by derivedStateOf {
@@ -30,12 +29,21 @@ class CodeSystemDiffBuilder(
         }
     }
     val conceptDifferences by mutableStateOf(TreeMap<String, ConceptDiff>())
-    val onlyInLeftConcepts = mutableListOf<String>()
-    val onlyInRightConcepts = mutableListOf<String>()
+    val onlyInLeftConcepts = mutableStateListOf<String>()
+    val onlyInRightConcepts = mutableStateListOf<String>()
+    private val inBothConcepts = mutableStateListOf<String>()
     val differenceGraph: Graph<DiffNode, DiffEdge> by derivedStateOf {
         GraphTypeBuilder.directed<DiffNode, DiffEdge>().allowingSelfLoops(true).allowingMultipleEdges(true)
             .weighted(false).edgeClass(DiffEdge::class.java).buildGraph()
     }
+
+    var combinedGraph: CombinedGraphBuilder? by mutableStateOf(null)
+
+    /*val combinedGraph: CombinedGraphBuilder? by derivedStateOf {
+        codeSystemDiff?.buildCombinedGraph()?.also {
+            terminodiff.engine.resources.logger.info("Combined graph: ${it.graph.vertexSet().count()} vertices, ${it.graph.edgeSet().count()} edges")
+        }
+    }*/
 
     fun build(): CodeSystemDiffBuilder {
         leftBuilder.nodeTree.mapNotNull { (code, leftConcept) ->
@@ -44,67 +52,68 @@ class CodeSystemDiffBuilder(
                 onlyInLeftConcepts.add(code)
                 return@mapNotNull null
             }
-            code to ConceptDiff.compareConcept(
-                leftConcept = leftConcept,
+            inBothConcepts.add(code)
+            code to ConceptDiff.compareConcept(leftConcept = leftConcept,
                 rightConcept = rightConcept,
                 leftProperties = leftBuilder.simplePropertyCodeTypes,
-                rightProperties = rightBuilder.simplePropertyCodeTypes
-            )
+                rightProperties = rightBuilder.simplePropertyCodeTypes)
         }.forEach { (code, conceptDiff) ->
             conceptDifferences[code] = conceptDiff
         }
         onlyInRightConcepts.addAll(rightBuilder.nodeTree.keys.filter { it !in conceptDifferences.keys })
         buildDiffGraph()
-        logger.info(
-            "Built diff graph, ${differenceGraph.vertexSet().count()} vertices, ${
-                differenceGraph.edgeSet().count()
-            } edges"
-        )
+        logger.info("Built diff graph, ${differenceGraph.vertexSet().count()} vertices, ${
+            differenceGraph.edgeSet().count()
+        } edges")
         logger.info("only in left graph: ${onlyInLeftConcepts.size} concepts")
         logger.info("only in right graph: ${onlyInRightConcepts.size} concepts")
-        logger.debug("Diff edges: (${differenceGraph.edgeSet().size}): {}", differenceGraph.edgeSet().joinToString("; ", limit = 5))
+        logger.debug("Diff edges: (${differenceGraph.edgeSet().size}): {}",
+            differenceGraph.edgeSet().joinToString("; ", limit = 5))
+        combinedGraph = buildCombinedGraph()
         return this
     }
 
     private fun edgesOnlyInX(
-        graphBuilder: CodeSystemGraphBuilder, otherGraphBuilder: CodeSystemGraphBuilder, kind: DiffGraphElementKind
-    ) =
-        graphBuilder.graph.edgeSet().minus(otherGraphBuilder.graph.edgeSet()).also {
-            logger.debug("only in $kind: (${it.size}): {}", it.joinToString(separator = "; ", limit = 5))
-        }.mapNotNull { edge ->
-            val toConcept = graphBuilder.nodeTree[edge.to]
-            val fromConcept = graphBuilder.nodeTree[edge.from]
-            when {
-                toConcept == null -> {
-                    logger.warn("the target code '${edge.to}' for property '${edge.propertyCode}' (from ${edge.from}) was not found in $kind")
-                    return@mapNotNull null
-                }
-                fromConcept == null -> {
-                    logger.warn("the origin code '${edge.from}' for property '${edge.propertyCode}' (to ${edge.to}) was not found in $kind")
-                    return@mapNotNull null
-                }
-                else -> DiffEdge(
-                    fromCode = edge.from,
-                    fromDisplay = fromConcept.display,
-                    toCode = edge.to,
-                    toDisplay = toConcept.display,
-                    propertyCode = edge.propertyCode,
-                    inWhich = kind
-                )
+        graphBuilder: CodeSystemGraphBuilder, otherGraphBuilder: CodeSystemGraphBuilder, kind: GraphSide,
+    ) = graphBuilder.graph.edgeSet().minus(otherGraphBuilder.graph.edgeSet()).also {
+        logger.debug("only in $kind: (${it.size}): {}", it.joinToString(separator = "; ", limit = 5))
+    }.mapNotNull { edge ->
+        val toConcept = graphBuilder.nodeTree[edge.to]
+        val fromConcept = graphBuilder.nodeTree[edge.from]
+        when {
+            toConcept == null -> {
+                logger.warn("the target code '${edge.to}' for property '${edge.propertyCode}' (from ${edge.from}) was not found in $kind")
+                return@mapNotNull null
             }
+            fromConcept == null -> {
+                logger.warn("the origin code '${edge.from}' for property '${edge.propertyCode}' (to ${edge.to}) was not found in $kind")
+                return@mapNotNull null
+            }
+            else -> DiffEdge(fromCode = edge.from,
+                fromDisplay = fromConcept.display,
+                toCode = edge.to,
+                toDisplay = toConcept.display,
+                propertyCode = edge.propertyCode,
+                inWhich = kind)
         }
+    }
+
+    private fun edgesInBoth() = leftBuilder.graph.edgeSet().intersect(rightBuilder.graph.edgeSet()).map { edge ->
+        CombinedEdge(edge.from, edge.to, edge.propertyCode, GraphSide.BOTH)
+    }
+
 
     private fun buildDiffGraph() {
         // add those vertices that are only in one of the graphs, this is easy
         differenceGraph.addAllVertices(onlyInLeftConcepts.map { code ->
-            DiffNode(code, leftBuilder.nodeTree[code]!!.display, DiffGraphElementKind.LEFT)
+            DiffNode(code, leftBuilder.nodeTree[code]!!.display, GraphSide.LEFT)
         })
         differenceGraph.addAllVertices(onlyInRightConcepts.map { code ->
-            DiffNode(code, rightBuilder.nodeTree[code]!!.display, DiffGraphElementKind.RIGHT)
+            DiffNode(code, rightBuilder.nodeTree[code]!!.display, GraphSide.RIGHT)
         })
 
-        val edgesOnlyInLeft = edgesOnlyInX(leftBuilder, rightBuilder, DiffGraphElementKind.LEFT)
-        val edgesOnlyInRight = edgesOnlyInX(rightBuilder, leftBuilder, DiffGraphElementKind.RIGHT)
+        val edgesOnlyInLeft = edgesOnlyInX(leftBuilder, rightBuilder, GraphSide.LEFT)
+        val edgesOnlyInRight = edgesOnlyInX(rightBuilder, leftBuilder, GraphSide.RIGHT)
 
         addVerticesForEdges(edgesOnlyInLeft)
         addVerticesForEdges(edgesOnlyInRight)
@@ -114,15 +123,44 @@ class CodeSystemDiffBuilder(
             val toNode = differenceGraph.vertexSet().find { v -> v.code == it.toCode }!!
             Triple(fromNode, toNode, it)
         }
-
         differenceGraph.addAllEdges(diffEdges)
     }
 
     private fun addVerticesForEdges(edgeList: List<DiffEdge>) {
         edgeList.forEach {
-            differenceGraph.addVertex(DiffNode(it.fromCode, it.fromDisplay, DiffGraphElementKind.BOTH))
-            differenceGraph.addVertex(DiffNode(it.toCode, it.toDisplay, DiffGraphElementKind.BOTH))
+            differenceGraph.addVertex(DiffNode(it.fromCode, it.fromDisplay, GraphSide.BOTH))
+            differenceGraph.addVertex(DiffNode(it.toCode, it.toDisplay, GraphSide.BOTH))
         }
+    }
+
+    private fun buildCombinedGraph(): CombinedGraphBuilder {
+        val combinedGraphBuilder = CombinedGraphBuilder()
+        val nodes = inBothConcepts.map { code ->
+            val displayLeft = leftBuilder.nodeTree[code]?.display
+            val displayRight = rightBuilder.nodeTree[code]?.display
+            CombinedVertex(code = code, displayLeft = displayLeft, displayRight = displayRight, GraphSide.BOTH)
+        }.plus(onlyInLeftConcepts.map { leftCode ->
+            CombinedVertex(code = leftCode,
+                displayLeft = leftBuilder.nodeTree[leftCode]?.display,
+                side = GraphSide.LEFT)
+        }).plus(onlyInRightConcepts.map { rightCode ->
+            CombinedVertex(code = rightCode,
+                displayRight = rightBuilder.nodeTree[rightCode]?.display,
+                side = GraphSide.RIGHT)
+        })
+        combinedGraphBuilder.graph.addAllVertices(nodes)
+        edgesInBoth().plus(
+            differenceGraph.edgeSet().map { diffEdge ->
+                CombinedEdge(diffEdge.fromCode,
+                    diffEdge.toCode,
+                    property = diffEdge.propertyCode,
+                    side = diffEdge.inWhich)
+            }).forEach(combinedGraphBuilder.graph::addCombinedEdge)
+
+        logger.info("Combined graph: ${
+            combinedGraphBuilder.graph.vertexSet().count()
+        } vertices, ${combinedGraphBuilder.graph.edgeSet().count()} edges")
+        return combinedGraphBuilder
     }
 }
 
@@ -130,12 +168,8 @@ fun <V, E> Graph<V, E>.addAllVertices(vertices: List<V>) = vertices.forEach(this
 fun Graph<DiffNode, DiffEdge>.addAllEdges(edges: List<Triple<DiffNode, DiffNode, DiffEdge>>) =
     edges.forEach { this.addEdge(it.first, it.second, it.third) }
 
-enum class DiffGraphElementKind {
-    BOTH, LEFT, RIGHT
-}
-
 data class DiffNode(
-    val code: String, val display: String?, val inWhich: DiffGraphElementKind
+    val code: String, val display: String?, val inWhich: GraphSide,
 ) {
     override fun hashCode(): Int = code.hashCode()
     override fun equals(other: Any?): Boolean {
@@ -159,7 +193,7 @@ data class DiffEdge(
     val toCode: String,
     val toDisplay: String?,
     val propertyCode: String,
-    val inWhich: DiffGraphElementKind
+    val inWhich: GraphSide,
 ) {
     fun getTooltip(): String = "'$fromCode' -> '$toCode' [$propertyCode]"
     fun getColor(): Color = EdgeColorRegistry.getDiffGraphColor(inWhich)

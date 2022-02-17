@@ -6,6 +6,8 @@ import terminodiff.engine.graph.*
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.java.ui.CodeSystemGraphJFrame
 import terminodiff.java.ui.DiffGraphJFrame
+import terminodiff.java.ui.NeighborhoodJFrame
+import terminodiff.terminodiff.ui.panes.diff.NeighborhoodDisplay
 
 /**
  * Using JUNGRAPHT from Kotlin does not seem to work reliably, as the needed builder classes are not accessible (?)
@@ -29,3 +31,8 @@ fun diffGraphLayoutFrame(
     localizedStrings: LocalizedStrings,
     frameTitle: String
 ) = DiffGraphJFrame(diffGraph, useDarkTheme, localizedStrings, frameTitle)
+
+fun neighboorhoodGraphFrame(
+    neighborhoodDisplay: NeighborhoodDisplay,
+    localizedStrings: LocalizedStrings
+) = NeighborhoodJFrame(neighborhoodDisplay, localizedStrings)

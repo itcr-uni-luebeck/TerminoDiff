@@ -1,10 +1,11 @@
 package terminodiff.i18n
 
+import org.jgrapht.Graph
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.engine.concepts.KeyedListDiffResultKind
-import terminodiff.engine.graph.DiffGraphElementKind
 import terminodiff.engine.resources.DiffDataContainer.*
+import terminodiff.terminodiff.engine.graph.GraphSide
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
 import terminodiff.terminodiff.engine.resources.InputResource
 
@@ -42,7 +43,7 @@ abstract class LocalizedStrings(
     val differentValue: String,
     val diffGraph: String,
     val display: String = "Display",
-    val displayAndInWhich_: (String?, DiffGraphElementKind) -> String,
+    val displayAndInWhich_: (String?, GraphSide) -> String,
     val elements_: (Int) -> String,
     val experimental: String,
     val fhirTerminologyServer: String,
@@ -50,6 +51,7 @@ abstract class LocalizedStrings(
     val fileFromUrl_: (String) -> String,
     val filtered: String,
     val fileSystem: String,
+    val graph: String = "Graph",
     val hierarchyMeaning: String,
     val id: String = "ID",
     val identical: String,
@@ -170,9 +172,9 @@ class GermanStrings : LocalizedStrings(
     diffGraph = "Differenz-Graph",
     displayAndInWhich_ = { display, inWhich ->
         val where = when (inWhich) {
-            DiffGraphElementKind.LEFT -> "nur links"
-            DiffGraphElementKind.RIGHT -> "nur rechts"
-            DiffGraphElementKind.BOTH -> "in beiden"
+            GraphSide.LEFT -> "nur links"
+            GraphSide.RIGHT -> "nur rechts"
+            GraphSide.BOTH -> "in beiden"
         }
         "'$display' ($where)"
     },
@@ -319,9 +321,9 @@ class EnglishStrings : LocalizedStrings(
     diffGraph = "Difference Graph",
     displayAndInWhich_ = { display, inWhich ->
         val where = when (inWhich) {
-            DiffGraphElementKind.LEFT -> "only left"
-            DiffGraphElementKind.RIGHT -> "only right"
-            DiffGraphElementKind.BOTH -> "in both"
+            GraphSide.LEFT -> "only left"
+            GraphSide.RIGHT -> "only right"
+            GraphSide.BOTH -> "in both"
         }
         "'$display' ($where)"
     },
