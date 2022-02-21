@@ -81,12 +81,15 @@ fun TerminodiffContentWindow(
             )
         }, backgroundColor = MaterialTheme.colorScheme.background) { scaffoldPadding ->
             when (diffDataContainer.leftCodeSystem != null && diffDataContainer.rightCodeSystem != null && showDiff) {
-                true -> DiffPaneContent(modifier = Modifier.padding(scaffoldPadding),
+                true -> DiffPaneContent(
+                    modifier = Modifier.padding(scaffoldPadding),
                     scrollState = scrollState,
                     strings = localizedStrings,
                     useDarkTheme = useDarkTheme,
+                    localizedStrings = localizedStrings,
                     diffDataContainer = diffDataContainer,
-                    splitPaneState = splitPaneState)
+                    splitPaneState = splitPaneState
+                )
                 false -> LoadDataPaneContent(
                     modifier = Modifier.padding(scaffoldPadding),
                     scrollState = scrollState,
