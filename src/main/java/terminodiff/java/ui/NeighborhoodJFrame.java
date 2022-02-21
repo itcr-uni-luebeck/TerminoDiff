@@ -4,9 +4,13 @@ import org.jgrapht.Graph;
 import org.jungrapht.visualization.VisualizationViewer;
 import org.jungrapht.visualization.decorators.EdgeShape;
 import org.jungrapht.visualization.renderers.Renderer.VertexLabel.Position;
+import terminodiff.engine.resources.DiffDataContainer;
 import terminodiff.i18n.LocalizedStrings;
 import terminodiff.terminodiff.engine.graph.CombinedEdge;
 import terminodiff.terminodiff.engine.graph.CombinedVertex;
+import terminodiff.terminodiff.engine.graph.GraphSide;
+import terminodiff.ui.graphs.ColorRegistry;
+import terminodiff.ui.graphs.Registry;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,14 +20,16 @@ public class NeighborhoodJFrame extends GraphJFrame<CombinedVertex, CombinedEdge
     final private JButton addLayerButton = new JButton();
     final private JLabel layerText = new JLabel();
     private int currentLayer = 1;
+    private final String focusCode;
 
     public void setCurrentLayer(int newLayer) {
         currentLayer = newLayer;
         layerText.setText(String.valueOf(newLayer));
     }
 
-    public NeighborhoodJFrame(Graph<CombinedVertex, CombinedEdge> graph, Boolean isDarkTheme, LocalizedStrings localizedStrings, String frameTitle) {
+    public NeighborhoodJFrame(Graph<CombinedVertex, CombinedEdge> graph, String focusCode, Boolean isDarkTheme, LocalizedStrings localizedStrings, String frameTitle) {
         super(graph, isDarkTheme, localizedStrings, frameTitle);
+        this.focusCode = focusCode;
         removeLayerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
         removeLayerButton.setText(localizedStrings.getRemoveLayer());
         addLayerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
@@ -52,21 +58,50 @@ public class NeighborhoodJFrame extends GraphJFrame<CombinedVertex, CombinedEdge
 
     @Override
     protected void configureBothViewers(VisualizationViewer<CombinedVertex, CombinedEdge> viewer) {
+        viewer.getRenderContext().setVertexStrokeFunction(v -> {
+            if (v.getCode().equals(focusCode)) {
+                return new BasicStroke(5f);
+            } else {
+                return new BasicStroke(1f);
+            }
+        });
+        viewer.getRenderContext().setVertexFillPaintFunction(CombinedVertex::getColor);
+        viewer.getRenderContext().setVertexFillPaintFunction(CombinedVertex::getColor);
         viewer.getRenderContext().setVertexLabelDrawPaintFunction(CombinedVertex::getColor);
         viewer.getRenderContext().setEdgeShapeFunction((g, e) -> EdgeShape.CUBIC_CURVE);
-        viewer.getRenderContext().setVertexFillPaintFunction(CombinedVertex::getColor);
         viewer.getRenderContext().setArrowFillPaintFunction(CombinedEdge::getColor);
         viewer.getRenderContext().setEdgeDrawPaintFunction(CombinedEdge::getColor);
     }
 
     private void addBottomControls() {
-        JPanel bottomPanel = new JPanel(new GridLayout(1, 3));
+        JPanel bottomPanel = new JPanel(new GridLayout(1, 2));
+        JPanel layerPanel = new JPanel(new GridLayout(1, 3));
+        JPanel legendPanel = new JPanel(new FlowLayout());
         JComponent removeLayer = ControlHelpers.getContainer(Box.createHorizontalBox(), ControlHelpers.getCenteredContainer(localizedStrings.getRemoveLayer(), removeLayerButton));
         JComponent labelLayer = ControlHelpers.getContainer(Box.createHorizontalBox(), ControlHelpers.getCenteredContainer(localizedStrings.getLayers(), layerText));
         JComponent addLayer = ControlHelpers.getContainer(Box.createHorizontalBox(), ControlHelpers.getCenteredContainer(localizedStrings.getAddLayer(), addLayerButton));
-        bottomPanel.add(removeLayer);
-        bottomPanel.add(labelLayer);
-        bottomPanel.add(addLayer);
+        layerPanel.add(removeLayer);
+        layerPanel.add(labelLayer);
+        labelLayer.add(addLayer);
+        legendPanel.add(getLegend());
+        bottomPanel.add(layerPanel);
+        bottomPanel.add(legendPanel);
         container.add(bottomPanel, BorderLayout.SOUTH);
+    }
+
+    private JComponent getLegend() {
+        JPanel legendPanel = new JPanel();
+        for (GraphSide side : GraphSide.values()) {
+            Color color = ColorRegistry.Companion.getColor(Registry.SIDES, side.name());
+            JPanel panel = new JPanel(new FlowLayout());
+            JPanel colorRectangle = new JPanel();
+            colorRectangle.setBackground(color);
+            colorRectangle.setSize(10, 10);
+            JLabel label = new JLabel(side.name());
+            panel.add(colorRectangle);
+            panel.add(label);
+            legendPanel.add(panel);
+        }
+        return ControlHelpers.getContainer(Box.createHorizontalBox(), ControlHelpers.getCenteredContainer("Legend", legendPanel));
     }
 }

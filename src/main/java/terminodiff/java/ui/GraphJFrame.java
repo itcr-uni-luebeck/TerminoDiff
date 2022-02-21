@@ -58,8 +58,8 @@ public abstract class GraphJFrame<V, E> extends JFrame {
         visualizationModel.setLayoutAlgorithm(layoutAlgorithm);
         mainVisualizationViewer = VisualizationViewer.builder(visualizationModel).graphMouse(graphMouse).viewSize(preferredSizeMain).build();
         satelliteVisualizationViewer = SatelliteVisualizationViewer.builder(mainVisualizationViewer).viewSize(preferredSizeSatellite).graphMouse(DefaultSatelliteGraphMouse.builder().build()).transparent(false).build();
-        configureViewers(mainVisualizationViewer, satelliteVisualizationViewer);
         configureTheme(mainVisualizationViewer, isDarkTheme);
+        configureViewers(mainVisualizationViewer, satelliteVisualizationViewer);
         mainVisualizationViewer.scaleToLayout();
         satelliteVisualizationViewer.scaleToLayout();
         configureLayoutComboBox();

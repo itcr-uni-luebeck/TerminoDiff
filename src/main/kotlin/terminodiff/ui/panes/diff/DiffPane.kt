@@ -105,10 +105,12 @@ fun showNeighboorhoodJFrame(
     useDarkTheme: Boolean,
     localizedStrings: LocalizedStrings,
 ) {
-    NeighborhoodJFrame(neighborhoodDisplay.getNeighborhoodGraph(),
-        useDarkTheme,
-        localizedStrings,
-        localizedStrings.graph).apply {
+    NeighborhoodJFrame(
+        /* graph = */ neighborhoodDisplay.getNeighborhoodGraph(),
+        /* focusCode = */ neighborhoodDisplay.focusCode,
+        /* isDarkTheme = */ useDarkTheme,
+        /* localizedStrings = */ localizedStrings,
+        /* frameTitle = */ localizedStrings.graph).apply {
         addClickListener { delta ->
             val newValue = neighborhoodDisplay.changeLayers(delta)
             this.setGraph(neighborhoodDisplay.getNeighborhoodGraph())
