@@ -1,6 +1,5 @@
 package terminodiff.i18n
 
-import org.jgrapht.Graph
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.engine.concepts.KeyedListDiffResultKind
@@ -14,6 +13,7 @@ import terminodiff.terminodiff.engine.resources.InputResource
  * to recompose when the language changes.
  */
 abstract class LocalizedStrings(
+    val addLayer: String,
     val anUnknownErrorOccurred: String,
     val boolean_: (Boolean?) -> String,
     val bothValuesAreNull: String,
@@ -59,6 +59,7 @@ abstract class LocalizedStrings(
     val invalid: String,
     val jurisdiction: String,
     val keyedListResult_: (List<KeyedListDiffResult<*, *>>) -> String,
+    val layers: String,
     val loadLeft: String,
     val loadRight: String,
     val loadFromFile: String,
@@ -94,6 +95,7 @@ abstract class LocalizedStrings(
     val propertyDesignationForCode_: (String) -> String,
     val propertyType: String,
     val reload: String,
+    val removeLayer: String,
     val search: String,
     val select: String,
     val side_: (Side) -> String,
@@ -132,6 +134,7 @@ enum class SupportedLocale {
 }
 
 class GermanStrings : LocalizedStrings(
+    addLayer = "Ebene hinzufügen",
     anUnknownErrorOccurred = "Ein unbekannter Fehler ist aufgetrefen",
     boolean_ = {
         when (it) {
@@ -205,6 +208,7 @@ class GermanStrings : LocalizedStrings(
             )
         }.joinToString()
     },
+    layers = "Ebenen",
     loadLeft = "Links laden",
     loadRight = "Rechts laden",
     loadFromFile = "Vom Dateisystem laden",
@@ -244,6 +248,7 @@ class GermanStrings : LocalizedStrings(
     propertyDesignationForCode_ = { code -> "Eigenschaften und Designationen für Konzept '$code'" },
     propertyType = "Typ",
     reload = "Neu laden",
+    removeLayer = "Ebene entfernen",
     search = "Suchen",
     select = "Auswahl",
     side_ = {
@@ -281,6 +286,7 @@ class GermanStrings : LocalizedStrings(
 )
 
 class EnglishStrings : LocalizedStrings(
+    addLayer = "Add layer",
     anUnknownErrorOccurred = "An unknown error occured.",
     boolean_ = {
         when (it) {
@@ -354,6 +360,7 @@ class EnglishStrings : LocalizedStrings(
             )
         }.joinToString()
     },
+    layers = "Layers",
     loadLeft = "Load left",
     loadRight = "Load right",
     loadFromFile = "Load from file",
@@ -393,6 +400,7 @@ class EnglishStrings : LocalizedStrings(
     propertyDesignationForCode_ = { code -> "Properties and designations for concept '$code'" },
     propertyType = "Type",
     reload = "Reload",
+    removeLayer = "Remove layers",
     search = "Search",
     select = "Select",
     side_ = {

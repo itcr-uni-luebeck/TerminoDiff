@@ -10,7 +10,7 @@ import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.graph.*
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
 import terminodiff.terminodiff.engine.metadata.MetadataDiff
-import terminodiff.ui.graphs.EdgeColorRegistry
+import terminodiff.ui.graphs.ColorRegistry
 import java.awt.Color
 import java.util.*
 
@@ -175,16 +175,13 @@ data class DiffNode(
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
-
         other as DiffNode
-
         if (code != other.code) return false
-
         return true
     }
 
     fun getTooltip(localizedStrings: LocalizedStrings) = localizedStrings.displayAndInWhich_(display, inWhich)
-    fun getColor(): Color = EdgeColorRegistry.getDiffGraphColor(inWhich)
+    fun getColor(): Color = ColorRegistry.getDiffGraphColor(inWhich)
 }
 
 data class DiffEdge(
@@ -196,5 +193,5 @@ data class DiffEdge(
     val inWhich: GraphSide,
 ) {
     fun getTooltip(): String = "'$fromCode' -> '$toCode' [$propertyCode]"
-    fun getColor(): Color = EdgeColorRegistry.getDiffGraphColor(inWhich)
+    fun getColor(): Color = ColorRegistry.getDiffGraphColor(inWhich)
 }

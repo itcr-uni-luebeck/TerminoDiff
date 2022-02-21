@@ -19,7 +19,7 @@ import org.slf4j.LoggerFactory
 import terminodiff.engine.graph.CodeSystemDiffBuilder
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.terminodiff.engine.graph.CombinedGraphBuilder
+import terminodiff.java.ui.NeighborhoodJFrame
 import terminodiff.ui.cursorForHorizontalResize
 import terminodiff.ui.panes.conceptdiff.ConceptDiffPanel
 import terminodiff.ui.panes.graph.ShowGraphsPanel
@@ -34,10 +34,17 @@ fun DiffPaneContent(
     scrollState: ScrollState,
     strings: LocalizedStrings,
     useDarkTheme: Boolean,
+    localizedStrings: LocalizedStrings,
     diffDataContainer: DiffDataContainer,
     splitPaneState: SplitPaneState,
 ) {
     var neighborhoodDisplay: NeighborhoodDisplay? by remember { mutableStateOf(null) }
+
+    if (neighborhoodDisplay != null) {
+        showNeighboorhoodJFrame(neighborhoodDisplay!!, useDarkTheme, localizedStrings)
+        neighborhoodDisplay = null
+    }
+
     Column(
         modifier = modifier.scrollable(scrollState, Orientation.Vertical),
     ) {
@@ -61,8 +68,7 @@ fun DiffPaneContent(
                             } else {
                                 neighborhoodDisplay = NeighborhoodDisplay(focusCode, diff)
                             }
-                            // TODO: 17/02/22 use the neighborhoodDisplay
-                            println("edges: ${neighborhoodDisplay?.neighborhoodGraph?.edgeSet()?.size}")
+                            //println("edges: ${neighborhoodDisplay?.neighborhoodGraph?.edgeSet()?.size}")
                         }
                     }
                 )
@@ -94,21 +100,35 @@ fun DiffPaneContent(
     }
 }
 
+fun showNeighboorhoodJFrame(
+    neighborhoodDisplay: NeighborhoodDisplay,
+    useDarkTheme: Boolean,
+    localizedStrings: LocalizedStrings,
+) {
+    NeighborhoodJFrame(neighborhoodDisplay.getNeighborhoodGraph(),
+        useDarkTheme,
+        localizedStrings,
+        localizedStrings.graph).apply {
+        addClickListener { delta ->
+            val newValue = neighborhoodDisplay.changeLayers(delta)
+            this.setGraph(neighborhoodDisplay.getNeighborhoodGraph())
+            newValue
+        }
+    }
+}
+
 data class NeighborhoodDisplay(
     val focusCode: String,
     val codeSystemDiff: CodeSystemDiffBuilder,
 ) {
     var layers by mutableStateOf(1)
 
-    val neighborhoodGraph by derivedStateOf {
-        codeSystemDiff.combinedGraph?.getSubgraph(focusCode, layers)?.also {
-            logger.info("neighborhood of $focusCode and $layers layers: ${it.vertexSet().size} vertices and ${it.edgeSet().size} edges")
-        }
+    fun getNeighborhoodGraph() = codeSystemDiff.combinedGraph?.getSubgraph(focusCode, layers)?.also {
+        logger.info("neighborhood of $focusCode and $layers layers: ${it.vertexSet().size} vertices and ${it.edgeSet().size} edges")
     }
 
-    fun changeLayers(delta: Int) {
+    fun changeLayers(delta: Int): Int {
         layers = (layers + delta).coerceAtLeast(1)
+        return layers
     }
-
-
 }

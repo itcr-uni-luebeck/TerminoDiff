@@ -4,6 +4,7 @@ import org.jgrapht.Graph;
 import org.jungrapht.visualization.VisualizationViewer;
 import org.jungrapht.visualization.decorators.EdgeShape;
 import org.jungrapht.visualization.renderers.Renderer;
+import org.jungrapht.visualization.renderers.Renderer.VertexLabel.Position;
 import terminodiff.engine.graph.DiffEdge;
 import terminodiff.engine.graph.DiffNode;
 import terminodiff.i18n.LocalizedStrings;
@@ -16,12 +17,13 @@ public class DiffGraphJFrame extends GraphJFrame<DiffNode, DiffEdge> {
         super(graph, isDarkTheme, localizedStrings, frameTitle);
     }
 
+    @SuppressWarnings("DuplicatedCode")
     @Override
     protected void configureMainViewer(VisualizationViewer<DiffNode, DiffEdge> mainViewer) {
         mainViewer.setVertexToolTipFunction(n -> n.getTooltip(localizedStrings));
         mainViewer.setEdgeToolTipFunction(DiffEdge::getTooltip);
         mainViewer.getRenderContext().setVertexLabelFunction(DiffNode::getCode);
-        mainViewer.getRenderContext().setVertexLabelPosition(Renderer.VertexLabel.Position.W);
+        mainViewer.getRenderContext().setVertexLabelPosition(Position.W);
         mainViewer.getRenderContext().setEdgeLabelFunction(DiffEdge::getPropertyCode);
         mainVisualizationViewer.getRenderContext().setEdgeWidth(2.0f);
         mainVisualizationViewer.getRenderContext().setEdgeArrowLength(5);

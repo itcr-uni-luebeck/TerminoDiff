@@ -5,16 +5,19 @@ import androidx.compose.runtime.mutableStateOf
 import org.jgrapht.Graph
 import org.jgrapht.graph.builder.GraphTypeBuilder
 import org.jgrapht.traverse.AbstractGraphIterator
-import org.jgrapht.traverse.ClosestFirstIterator
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import terminodiff.i18n.LocalizedStrings
+import terminodiff.ui.graphs.ColorRegistry
+import terminodiff.ui.graphs.Registry
 
 val logger: Logger = LoggerFactory.getLogger(CombinedGraphBuilder::class.java)
 
 class CombinedGraphBuilder {
 
     fun getSubgraph(focusCode: String, layers: Int): CombinedGraph {
-        val focusConcept = graph.nodeByCode(focusCode) ?: throw IllegalStateException("The focus concept is not in the combined graph")
+        val focusConcept =
+            graph.nodeByCode(focusCode) ?: throw IllegalStateException("The focus concept is not in the combined graph")
         val diffEdgeTraversal = DiffEdgeTraversal(graph, focusConcept, layers)
         return diffEdgeTraversal.traverse()
     }
@@ -37,6 +40,10 @@ data class CombinedEdge(
             GraphSide.LEFT, GraphSide.RIGHT -> 0
             else -> 1
         }
+
+    fun getTooltip() = "'$fromCode' -> '$toCode' [$property]"
+
+    fun getColor() = ColorRegistry.getColor(Registry.SIDES, side.name)
 }
 
 data class CombinedVertex(
@@ -44,7 +51,15 @@ data class CombinedVertex(
     val displayLeft: String? = null,
     val displayRight: String? = null,
     val side: GraphSide,
-)
+) {
+    fun getTooltip(localizedStrings: LocalizedStrings): String = localizedStrings.displayAndInWhich_(when (side) {
+        GraphSide.LEFT -> displayLeft
+        GraphSide.RIGHT -> displayRight
+        GraphSide.BOTH -> if (displayLeft == displayRight) displayLeft else "$displayLeft vs. $displayRight"
+    }, side)
+
+    fun getColor() = ColorRegistry.getColor(Registry.SIDES, side.name)
+}
 
 fun CombinedGraph.addCombinedEdge(edge: CombinedEdge) {
     val fromNode = this.vertexSet().find { it.code == edge.fromCode } ?: return
@@ -122,7 +137,7 @@ class DiffEdgeTraversal(
         }
         visitedNodeDepths.keys.forEach(subgraph::addVertex)
         visitedEdges.forEach(subgraph::addCombinedEdge)
-        logger.info("Built subgraph for focus concept '${startingVertex.code}' (${startingVertex.side}) with radius=$radius in $iteration iterations. Got ${subgraph.vertexSet().size} vertices and ${subgraph.edgeSet().size} edges.")
+        logger.info("Built subgraph for focus concept '${startingVertex.code}' (${startingVertex.side}) with " + "radius=$radius in $iteration iterations. Got ${subgraph.vertexSet().size} vertices and ${subgraph.edgeSet().size} edges.")
         return subgraph
     }
 }

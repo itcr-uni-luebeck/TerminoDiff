@@ -86,6 +86,7 @@ fun TerminodiffContentWindow(
                     scrollState = scrollState,
                     strings = localizedStrings,
                     useDarkTheme = useDarkTheme,
+                    localizedStrings = localizedStrings,
                     diffDataContainer = diffDataContainer,
                     splitPaneState = splitPaneState
                 )

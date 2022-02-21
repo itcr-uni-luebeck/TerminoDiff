@@ -1,5 +1,6 @@
 package terminodiff.java.ui;
 
+import org.jetbrains.annotations.Nullable;
 import org.jgrapht.Graph;
 import org.jungrapht.visualization.SatelliteVisualizationViewer;
 import org.jungrapht.visualization.VisualizationModel;
@@ -55,23 +56,17 @@ public abstract class GraphJFrame<V, E> extends JFrame {
         this.localizedStrings = localizedStrings;
         visualizationModel = configureVisualizationModel(graph, layoutSize);
         visualizationModel.setLayoutAlgorithm(layoutAlgorithm);
-
         mainVisualizationViewer = VisualizationViewer.builder(visualizationModel).graphMouse(graphMouse).viewSize(preferredSizeMain).build();
         satelliteVisualizationViewer = SatelliteVisualizationViewer.builder(mainVisualizationViewer).viewSize(preferredSizeSatellite).graphMouse(DefaultSatelliteGraphMouse.builder().build()).transparent(false).build();
-
         configureViewers(mainVisualizationViewer, satelliteVisualizationViewer);
-
         configureTheme(mainVisualizationViewer, isDarkTheme);
         mainVisualizationViewer.scaleToLayout();
         satelliteVisualizationViewer.scaleToLayout();
-
         configureLayoutComboBox();
-
         mainVisualizationViewer.getComponent().setLayout(null);
         mainVisualizationViewer.add(satelliteVisualizationViewer.getComponent());
         Dimension satelliteVisualizationViewerSize = satelliteVisualizationViewer.getSize();
         configureResizeHandler(mainVisualizationViewer, satelliteVisualizationViewer, satelliteVisualizationViewerSize);
-
         JPanel controlPanel = new JPanel(new GridLayout(1, 1));
         JComponent top = ControlHelpers.getContainer(Box.createHorizontalBox(), ControlHelpers.getCenteredContainer("Layouts", layoutComboBox));
         controlPanel.add(top);
@@ -130,4 +125,7 @@ public abstract class GraphJFrame<V, E> extends JFrame {
         return VisualizationModel.builder(graph).layoutAlgorithm(layoutAlgorithm).layoutSize(layoutSize).build();
     }
 
+    public void setGraph(@Nullable Graph<V, E> newGraph) {
+        visualizationModel.setGraph(newGraph);
+    }
 }
