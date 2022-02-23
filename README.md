@@ -86,7 +86,6 @@ as the computed difference graph. To illustrate, consider these two CodeSystems:
 |-----------------------------------------------|-------------------------------------------------|
 | ![Left CS for diff graph](images/left-cs.png) | ![Right CS for diff graph](images/right-cs.png) |
 
-
 Going from "left" to "right", the concept `C` was removed, leading to changes in the edge going from `D` to `A`. Also, a
 new type of edge, `related-to` was introduced.
 
@@ -156,7 +155,9 @@ We utilize the following libraries alongside *Compose*:
 - [Apache Commons Lang](https://commons.apache.org/proper/commons-lang/)
 - [FlatLaf](https://www.formdev.com/flatlaf/) for dark window chrome on Windows
 - [ktor](https://ktor.io) for coroutine-based HTTP
-- [JavaWuzzy](https://github.com/xdrop/fuzzywuzzy) for fuzzy string matching, a port of [FuzzyWuzzy](https://pypi.org/project/fuzzywuzzy/) in Python
+- [JavaWuzzy](https://github.com/xdrop/fuzzywuzzy) for fuzzy string matching, a port
+  of [FuzzyWuzzy](https://pypi.org/project/fuzzywuzzy/) in Python
+- [RSyntaxTextArea](https://github.com/bobbylight/RSyntaxTextArea) for the JSON editor in the `ConceptMap` panel
 
 ### Localization
 
@@ -178,7 +179,8 @@ implementation takes in a list of column specifications that render the provided
 The table supports merging adjacent columns (if a predicate returns `true`), tooltips (e.g. on the lower table, when
 English is not selected as the language, the default name of the FHIR attribute is shown in the tooltip of the left-hand
 column), and zebra striping. In the top table, the table data is also pre-filtered using a generic set of filter
-buttons.
+buttons. Column specs can declare that they are searchable, which yields a search button next to the column name. Search
+parameters can be combined at will.
 
 ### Graph window
 
@@ -211,7 +213,7 @@ We are looking at implementing the following features:
 - [x] support for the `vread` mechanism to compare across instance versions on FHIR Terminology servers
 - [ ] a visualization of the neighborhood of any concept in the graph, to view the connections a concept has across the
   network of concepts
-    - integrating this feature into the difference graph, so that layers of context can be added iteratively 
+    - integrating this feature into the difference graph, so that layers of context can be added iteratively
 - support for other types of resources in FHIR, especially `ValueSet` and `ConceptMap`, likely with TS support.
 
 ## How do I cite this?

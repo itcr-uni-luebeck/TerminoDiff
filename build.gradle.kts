@@ -6,7 +6,6 @@ plugins {
     kotlin("jvm") version "1.5.31"
     id("org.jetbrains.compose") version "1.0.0"
     id("org.openjfx.javafxplugin") version "0.0.11"
-    id("antlr")
 }
 val projectVersion: String by project
 group = "de.uzl.itcr"
@@ -18,10 +17,8 @@ repositories {
     mavenCentral()
 }
 
-
-
 val hapiVersion = "5.6.2"
-val slf4jVersion = "1.7.35"
+val slf4jVersion = "1.7.36"
 val graphStreamVersion = "2.0"
 val jGraphTVersion = "1.5.1"
 val material3DesktopVersion = "1.0.0"
@@ -54,7 +51,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("me.xdrop:fuzzywuzzy:1.4.0")
-    antlr("org.antlr:antlr4:4.9.3")
+    implementation("com.fifesoft:rsyntaxtextarea:3.1.6")
 }
 
 tasks.test {
@@ -66,15 +63,6 @@ java {
     targetCompatibility = JavaVersion.VERSION_11
 }
 
-sourceSets {
-    main {
-        java {
-            srcDir("build/generated-src/antlr")
-            srcDir("src/main/antlr")
-        }
-    }
-}
-
 javafx {
     // add javafx to the classpath
     version = "17.0.1"
@@ -84,7 +72,6 @@ javafx {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
-    dependsOn(":generateGrammarSource")
 }
 
 val composeBuildVersion: String by project

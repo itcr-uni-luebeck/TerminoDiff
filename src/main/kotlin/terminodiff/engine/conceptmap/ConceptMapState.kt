@@ -7,7 +7,7 @@ import org.hl7.fhir.r4.model.DateTimeType
 import org.hl7.fhir.r4.model.Enumerations
 import terminodiff.engine.resources.DiffDataContainer
 
-class ConceptMapSuggester(
+class ConceptMapState(
     diffDataContainer: DiffDataContainer,
 ) {
     val conceptMap by mutableStateOf(TerminodiffConceptMap(diffDataContainer))

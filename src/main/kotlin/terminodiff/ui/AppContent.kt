@@ -1,5 +1,6 @@
 package terminodiff.terminodiff.ui
 
+import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.Scaffold
@@ -84,36 +85,38 @@ fun TerminodiffContentWindow(
     showDiff: Boolean,
     setShowDiff: (Boolean) -> Unit,
 ) {
-    TerminoDiffTheme(useDarkTheme = useDarkTheme) {
-        Scaffold(topBar = {
-            TerminoDiffTopAppBar(localizedStrings = localizedStrings,
-                onLocaleChange = onLocaleChange,
-                onChangeDarkTheme = onChangeDarkTheme,
-                onReload = onReload,
-                onShowLoadScreen = {
-                    setShowDiff.invoke(false)
-                })
-        }, backgroundColor = MaterialTheme.colorScheme.background) { scaffoldPadding ->
-            when (diffDataContainer.leftCodeSystem != null && diffDataContainer.rightCodeSystem != null && showDiff) {
-                true -> DiffPaneContent(modifier = Modifier.padding(scaffoldPadding),
-                    scrollState = scrollState,
-                    strings = localizedStrings,
-                    useDarkTheme = useDarkTheme,
-                    localizedStrings = localizedStrings,
-                    diffDataContainer = diffDataContainer,
-                    fhirContext = fhirContext,
-                    splitPaneState = splitPaneState)
-                false -> LoadDataPaneContent(
-                    modifier = Modifier.padding(scaffoldPadding),
-                    scrollState = scrollState,
-                    localizedStrings = localizedStrings,
-                    leftResource = diffDataContainer.leftResource,
-                    rightResource = diffDataContainer.rightResource,
-                    onLoadLeft = onLoadLeft,
-                    onLoadRight = onLoadRight,
-                    fhirContext = fhirContext,
-                    onGoButtonClick = { setShowDiff.invoke(true) },
-                )
+    Crossfade(useDarkTheme) { darkTheme ->
+        TerminoDiffTheme(useDarkTheme = darkTheme) {
+            Scaffold(topBar = {
+                TerminoDiffTopAppBar(localizedStrings = localizedStrings,
+                    onLocaleChange = onLocaleChange,
+                    onChangeDarkTheme = onChangeDarkTheme,
+                    onReload = onReload,
+                    onShowLoadScreen = {
+                        setShowDiff.invoke(false)
+                    })
+            }, backgroundColor = MaterialTheme.colorScheme.background) { scaffoldPadding ->
+                when (diffDataContainer.leftCodeSystem != null && diffDataContainer.rightCodeSystem != null && showDiff) {
+                    true -> DiffPaneContent(modifier = Modifier.padding(scaffoldPadding),
+                        scrollState = scrollState,
+                        strings = localizedStrings,
+                        useDarkTheme = darkTheme,
+                        localizedStrings = localizedStrings,
+                        diffDataContainer = diffDataContainer,
+                        fhirContext = fhirContext,
+                        splitPaneState = splitPaneState)
+                    false -> LoadDataPaneContent(
+                        modifier = Modifier.padding(scaffoldPadding),
+                        scrollState = scrollState,
+                        localizedStrings = localizedStrings,
+                        leftResource = diffDataContainer.leftResource,
+                        rightResource = diffDataContainer.rightResource,
+                        onLoadLeft = onLoadLeft,
+                        onLoadRight = onLoadRight,
+                        fhirContext = fhirContext,
+                        onGoButtonClick = { setShowDiff.invoke(true) },
+                    )
+                }
             }
         }
     }

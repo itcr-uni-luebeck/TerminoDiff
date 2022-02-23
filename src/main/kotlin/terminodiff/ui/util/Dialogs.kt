@@ -6,6 +6,7 @@ import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
@@ -18,12 +19,13 @@ fun TerminodiffDialog(
     windowPosition: WindowPosition = WindowPosition(Alignment.Center),
     size: DpSize = DpSize(1024.dp, 512.dp),
     onCloseRequest: () -> Unit,
+    contentPadding: Dp = 4.dp,
     content: @Composable ColumnScope.() -> Unit,
 ) = Dialog(onCloseRequest = onCloseRequest,
     title = title,
     state = rememberDialogState(position = windowPosition, size = size)) {
     //CompositionLocalProvider(LocalContentColor provides colorScheme.onPrimaryContainer) {
-        Column(modifier = Modifier.background(colorScheme.primaryContainer).fillMaxSize().padding(4.dp),
+        Column(modifier = Modifier.background(colorScheme.primaryContainer).fillMaxSize().padding(contentPadding),
             verticalArrangement = Arrangement.SpaceEvenly,
             horizontalAlignment = Alignment.CenterHorizontally,
             content = content)

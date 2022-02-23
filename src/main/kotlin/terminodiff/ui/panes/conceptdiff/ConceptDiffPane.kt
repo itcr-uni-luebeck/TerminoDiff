@@ -90,7 +90,7 @@ fun ConceptDiffPanel(
     }
 
     if (showConceptMapDialog) {
-        ConceptMapDialog(diffDataContainer, localizedStrings, fhirContext) {
+        ConceptMapDialog(diffDataContainer, localizedStrings, fhirContext, useDarkTheme) {
             showConceptMapDialog = false
         }
     }

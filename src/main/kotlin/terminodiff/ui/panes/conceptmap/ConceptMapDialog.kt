@@ -1,32 +1,45 @@
 package terminodiff.terminodiff.ui.panes.conceptmap
 
-import androidx.compose.foundation.gestures.rememberScrollableState
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
+import androidx.compose.material.*
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.runtime.*
+import androidx.compose.ui.window.Window
 import ca.uhn.fhir.context.FhirContext
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.terminodiff.engine.conceptmap.ConceptMapSuggester
-import terminodiff.terminodiff.ui.util.TerminodiffDialog
+import terminodiff.terminodiff.engine.conceptmap.ConceptMapState
+import terminodiff.terminodiff.ui.panes.conceptmap.mapping.ConceptMappingEditorContent
+import terminodiff.terminodiff.ui.panes.conceptmap.meta.ConceptMapMetaEditorContent
 
+@OptIn(ExperimentalMaterialApi::class)
 @Composable
 fun ConceptMapDialog(
     diffDataContainer: DiffDataContainer,
     localizedStrings: LocalizedStrings,
     fhirContext: FhirContext,
+    isDarkTheme: Boolean,
     onCloseRequest: () -> Unit,
 ) {
-    val suggestedMap by remember { mutableStateOf(ConceptMapSuggester(diffDataContainer)) }
-    val fhirJsonScrollState = rememberScrollableState { it }
-    TerminodiffDialog(
-        localizedStrings.conceptMap,
+    val conceptMapState by remember { mutableStateOf(ConceptMapState(diffDataContainer)) }
+    val scaffoldState = rememberBackdropScaffoldState(BackdropValue.Concealed)
+    Window(
+        title = localizedStrings.conceptMap,
         onCloseRequest = onCloseRequest,
     ) {
-        val fhir = fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(
-            suggestedMap.conceptMap.toFhir
+        BackdropScaffold(
+            scaffoldState = scaffoldState,
+            appBar = {},
+            backLayerBackgroundColor = colorScheme.background,
+            backLayerContentColor = colorScheme.onBackground,
+            frontLayerBackgroundColor = colorScheme.primaryContainer,
+            frontLayerContentColor = colorScheme.onPrimaryContainer,
+            stickyFrontLayer = false,
+            backLayerContent = {
+                ConceptMapMetaEditorContent(conceptMapState, localizedStrings, isDarkTheme, fhirContext)
+            },
+            frontLayerContent = {
+                ConceptMappingEditorContent(conceptMapState = conceptMapState)
+            }
         )
-        JSONDisplay(fhir, fhirJsonScrollState)
     }
 }
