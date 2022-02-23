@@ -4,6 +4,7 @@
 // Derived from http://json.org
 
 grammar JSON;
+
 @header {
     package terminodiff.antlr.json;
 }

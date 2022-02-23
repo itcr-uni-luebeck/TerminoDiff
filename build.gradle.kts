@@ -84,6 +84,7 @@ javafx {
 tasks.withType<KotlinCompile> {
     kotlinOptions.jvmTarget = "11"
     kotlinOptions.freeCompilerArgs += "-Xopt-in=kotlin.RequiresOptIn"
+    dependsOn(":generateGrammarSource")
 }
 
 val composeBuildVersion: String by project
@@ -100,7 +101,7 @@ compose.desktop {
                 packageName = "TerminoDiff"
                 packageVersion = composeBuildVersion
                 description = "Visually compare HL7 FHIR Terminology"
-                vendor = "IT Center for Clinical Reserach, University of Lübeck"
+                vendor = "IT Center for Clinical Research, University of Lübeck"
                 copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
 
                 when (composeBuildOs) {
