@@ -19,16 +19,19 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.*
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.ui.panes.loaddata.panes.LabeledTextField
+import terminodiff.terminodiff.ui.util.TerminodiffDialog
 import terminodiff.ui.MouseOverPopup
 import java.util.*
 
@@ -37,7 +40,6 @@ fun <T> LazyTable(
     modifier: Modifier = Modifier,
     columnSpecs: List<ColumnSpec<T>>,
     cellHeight: Dp = 50.dp,
-    //searchState: SearchState<T>,
     cellBorderColor: Color = colorScheme.onTertiaryContainer,
     backgroundColor: Color,
     foregroundColor: Color = colorScheme.contentColorFor(backgroundColor),
@@ -48,7 +50,6 @@ fun <T> LazyTable(
     countLabel: (Int) -> String = localizedStrings.elements_,
     keyFun: (T) -> String?,
 ) = Column(modifier = modifier.fillMaxWidth().padding(4.dp)) {
-    //val searchState by remember { mutableStateOf(SearchState(columnSpecs, tableData, localizedStrings)) }
     val searchState by produceState<SearchState<T>?>(null, columnSpecs, tableData, localizedStrings) {
         // using produceState enforces that the state resets if any of the parameters above ^ change. This is important for
         // table data (e.g. in the concept diff pane) and LocalizesStrings.
@@ -433,27 +434,27 @@ fun <T> ShowFilterDialog(
     onClose: () -> Unit,
 ) {
     var inputText: String by remember { mutableStateOf(searchState.getSearchQueryFor(title)) }
-    Dialog(onCloseRequest = onClose, title = localizedStrings.search) {
-        Column(modifier = Modifier.fillMaxSize().background(colorScheme.primaryContainer),
-            verticalArrangement = Arrangement.SpaceAround,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            LabeledTextField(value = inputText,
-                onValueChange = { inputText = it },
-                labelText = title,
-                singleLine = true)
-            Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly) {
-                Button(modifier = Modifier.wrapContentSize(),
-                    onClick = onClose,
-                    colors = ButtonDefaults.buttonColors(colorScheme.tertiary, colorScheme.onTertiary)) {
-                    Text(localizedStrings.closeReject, color = colorScheme.onTertiary)
-                }
-                Button(modifier = Modifier.wrapContentSize(), onClick = {
-                    searchState.setSearchQueryFor(title, inputText)
-                    onClose()
-                }, colors = ButtonDefaults.buttonColors(colorScheme.secondary, colorScheme.onSecondary)) {
-                    Text(localizedStrings.closeAccept, color = colorScheme.onSecondary)
-                }
+    TerminodiffDialog(
+        title = localizedStrings.search,
+        onCloseRequest = onClose,
+        size = DpSize(400.dp, 300.dp)
+    ) {
+        LabeledTextField(value = inputText,
+            onValueChange = { inputText = it },
+            labelText = title,
+            singleLine = true)
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly) {
+            Button(modifier = Modifier.wrapContentSize(),
+                onClick = onClose,
+                colors = ButtonDefaults.buttonColors(colorScheme.tertiary, colorScheme.onTertiary)) {
+                Text(localizedStrings.closeReject, color = colorScheme.onTertiary)
+            }
+            Button(modifier = Modifier.wrapContentSize(), onClick = {
+                searchState.setSearchQueryFor(title, inputText)
+                onClose()
+            }, colors = ButtonDefaults.buttonColors(colorScheme.secondary, colorScheme.onSecondary)) {
+                Text(localizedStrings.closeAccept, color = colorScheme.onSecondary)
             }
         }
     }

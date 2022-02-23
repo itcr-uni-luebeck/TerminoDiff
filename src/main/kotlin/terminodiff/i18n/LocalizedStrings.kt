@@ -25,6 +25,7 @@ abstract class LocalizedStrings(
     val clickForDetails: String,
     val closeAccept: String,
     val closeReject: String,
+    val conceptMap: String = "ConceptMap",
     val comparison: String,
     val compositional: String,
     val code: String = "Code",
