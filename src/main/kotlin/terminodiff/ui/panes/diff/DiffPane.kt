@@ -12,6 +12,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ca.uhn.fhir.context.FhirContext
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.SplitPaneState
 import org.jetbrains.compose.splitpane.VerticalSplitPane
@@ -36,6 +37,7 @@ fun DiffPaneContent(
     useDarkTheme: Boolean,
     localizedStrings: LocalizedStrings,
     diffDataContainer: DiffDataContainer,
+    fhirContext: FhirContext,
     splitPaneState: SplitPaneState,
 ) {
     var neighborhoodDisplay: NeighborhoodDisplay? by remember { mutableStateOf(null) }
@@ -61,17 +63,16 @@ fun DiffPaneContent(
                     diffDataContainer = diffDataContainer,
                     localizedStrings = strings,
                     useDarkTheme = useDarkTheme,
-                    onShowGraph = { focusCode ->
-                        diffDataContainer.codeSystemDiff?.let { diff ->
-                            if (neighborhoodDisplay?.focusCode == focusCode) {
-                                neighborhoodDisplay!!.changeLayers(1)
-                            } else {
-                                neighborhoodDisplay = NeighborhoodDisplay(focusCode, diff)
-                            }
-                            //println("edges: ${neighborhoodDisplay?.neighborhoodGraph?.edgeSet()?.size}")
+                    fhirContext = fhirContext
+                ) { focusCode ->
+                    diffDataContainer.codeSystemDiff?.let { diff ->
+                        if (neighborhoodDisplay?.focusCode == focusCode) {
+                            neighborhoodDisplay!!.changeLayers(1)
+                        } else {
+                            neighborhoodDisplay = NeighborhoodDisplay(focusCode, diff)
                         }
                     }
-                )
+                }
             }
             second(100.dp) {
                 MetadataDiffPanel(

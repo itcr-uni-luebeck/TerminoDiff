@@ -13,6 +13,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
+import ca.uhn.fhir.context.FhirContext
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -45,6 +46,7 @@ fun ConceptDiffPanel(
     diffDataContainer: DiffDataContainer,
     localizedStrings: LocalizedStrings,
     useDarkTheme: Boolean,
+    fhirContext: FhirContext,
     onShowGraph: (String) -> Unit,
 ) {
     val diffColors by remember { mutableStateOf(getDiffColors(useDarkTheme = useDarkTheme)) }
@@ -88,7 +90,7 @@ fun ConceptDiffPanel(
     }
 
     if (showConceptMapDialog) {
-        ConceptMapDialog(diffDataContainer, localizedStrings) {
+        ConceptMapDialog(diffDataContainer, localizedStrings, fhirContext) {
             showConceptMapDialog = false
         }
     }

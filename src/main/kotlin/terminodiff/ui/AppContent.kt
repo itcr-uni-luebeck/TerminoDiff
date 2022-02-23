@@ -7,6 +7,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import ca.uhn.fhir.context.FhirContext
+import kotlinx.coroutines.launch
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.SplitPaneState
 import terminodiff.engine.resources.DiffDataContainer
@@ -16,6 +17,9 @@ import terminodiff.terminodiff.ui.panes.diff.DiffPaneContent
 import terminodiff.terminodiff.ui.panes.loaddata.LoadDataPaneContent
 import terminodiff.ui.TerminoDiffTopAppBar
 import terminodiff.ui.theme.TerminoDiffTheme
+import java.io.File
+import java.net.InetAddress
+import java.util.*
 
 @OptIn(ExperimentalSplitPaneApi::class)
 @Composable
@@ -35,6 +39,18 @@ fun TerminodiffAppContent(
     }
     val onLoadRightFile: (InputResource) -> Unit = {
         diffDataContainer.rightResource = it
+    }
+
+    val coroutineScope = rememberCoroutineScope()
+    when (InetAddress.getLocalHost().hostName.lowercase(Locale.getDefault())) {
+        // STOPSHIP: 23/02/22
+        "joshua-athena-windows" -> coroutineScope.launch {
+            diffDataContainer.leftResource = InputResource(InputResource.Kind.FILE,
+                File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2020_10_01.json"))
+            diffDataContainer.rightResource = InputResource(InputResource.Kind.FILE,
+                File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json"))
+            showDiff = true
+        }
     }
 
     TerminodiffContentWindow(localizedStrings = localizedStrings,
@@ -70,26 +86,23 @@ fun TerminodiffContentWindow(
 ) {
     TerminoDiffTheme(useDarkTheme = useDarkTheme) {
         Scaffold(topBar = {
-            TerminoDiffTopAppBar(
-                localizedStrings = localizedStrings,
+            TerminoDiffTopAppBar(localizedStrings = localizedStrings,
                 onLocaleChange = onLocaleChange,
                 onChangeDarkTheme = onChangeDarkTheme,
                 onReload = onReload,
                 onShowLoadScreen = {
                     setShowDiff.invoke(false)
-                }
-            )
+                })
         }, backgroundColor = MaterialTheme.colorScheme.background) { scaffoldPadding ->
             when (diffDataContainer.leftCodeSystem != null && diffDataContainer.rightCodeSystem != null && showDiff) {
-                true -> DiffPaneContent(
-                    modifier = Modifier.padding(scaffoldPadding),
+                true -> DiffPaneContent(modifier = Modifier.padding(scaffoldPadding),
                     scrollState = scrollState,
                     strings = localizedStrings,
                     useDarkTheme = useDarkTheme,
                     localizedStrings = localizedStrings,
                     diffDataContainer = diffDataContainer,
-                    splitPaneState = splitPaneState
-                )
+                    fhirContext = fhirContext,
+                    splitPaneState = splitPaneState)
                 false -> LoadDataPaneContent(
                     modifier = Modifier.padding(scaffoldPadding),
                     scrollState = scrollState,

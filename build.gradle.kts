@@ -6,6 +6,7 @@ plugins {
     kotlin("jvm") version "1.5.31"
     id("org.jetbrains.compose") version "1.0.0"
     id("org.openjfx.javafxplugin") version "0.0.11"
+    id("antlr")
 }
 val projectVersion: String by project
 group = "de.uzl.itcr"
@@ -16,6 +17,8 @@ repositories {
     google()
     mavenCentral()
 }
+
+
 
 val hapiVersion = "5.6.2"
 val slf4jVersion = "1.7.35"
@@ -51,6 +54,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("me.xdrop:fuzzywuzzy:1.4.0")
+    antlr("org.antlr:antlr4:4.9.3")
 }
 
 tasks.test {
@@ -60,6 +64,15 @@ tasks.test {
 java {
     sourceCompatibility = JavaVersion.VERSION_11
     targetCompatibility = JavaVersion.VERSION_11
+}
+
+sourceSets {
+    main {
+        java {
+            srcDir("build/generated-src/antlr")
+            srcDir("src/main/antlr")
+        }
+    }
 }
 
 javafx {
