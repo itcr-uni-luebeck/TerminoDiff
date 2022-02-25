@@ -1,31 +1,39 @@
 package terminodiff.terminodiff.engine.conceptmap
 
 import androidx.compose.runtime.*
+import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator
 import org.hl7.fhir.r4.model.ConceptMap
 import org.hl7.fhir.r4.model.ConceptMap.*
 import org.hl7.fhir.r4.model.DateTimeType
 import org.hl7.fhir.r4.model.Enumerations
 import terminodiff.engine.resources.DiffDataContainer
+import terminodiff.terminodiff.engine.graph.logger
 
 class ConceptMapState(
-    diffDataContainer: DiffDataContainer,
+    diffDataContainer: DiffDataContainer
 ) {
     val conceptMap by mutableStateOf(TerminodiffConceptMap(diffDataContainer))
 }
 
 class TerminodiffConceptMap(diffDataContainer: DiffDataContainer) {
-    var canonicalUrl: String? by mutableStateOf(null)
-    var version: String? by mutableStateOf(null)
-    var name: String? by mutableStateOf(null)
-    var title: String? by mutableStateOf(null)
+
+    val id: MutableState<String?> = mutableStateOf(null)
+    val canonicalUrl: MutableState<String?> = mutableStateOf(null)
+    val version: MutableState<String?> = mutableStateOf(null)
+    val name: MutableState<String?> = mutableStateOf(null)
+    val title: MutableState<String?> = mutableStateOf(null)
+    var sourceValueSet: MutableState<String?> = mutableStateOf(null)
+    val targetValueSet: MutableState<String?> = mutableStateOf(null)
     var group by mutableStateOf(ConceptMapGroup(diffDataContainer))
 
     val toFhir by derivedStateOf {
         ConceptMap().apply {
-            this.url = this@TerminodiffConceptMap.canonicalUrl
-            this.version = this@TerminodiffConceptMap.version
-            this.name = this@TerminodiffConceptMap.version
-            this.title = this@TerminodiffConceptMap.title
+            this.id = this@TerminodiffConceptMap.id.value
+            this.url = this@TerminodiffConceptMap.canonicalUrl.value
+            this.version = this@TerminodiffConceptMap.version.value
+            this.name = this@TerminodiffConceptMap.version.value
+            this.title = this@TerminodiffConceptMap.title.value
             this.dateElement = DateTimeType.now()
             this.group.add(this@TerminodiffConceptMap.group.toFhir)
         }

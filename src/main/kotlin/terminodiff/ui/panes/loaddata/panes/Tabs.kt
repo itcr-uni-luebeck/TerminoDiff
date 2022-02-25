@@ -66,48 +66,6 @@ fun TabsContent(
     }
 }
 
-@Composable
-fun LabeledTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    modifier: Modifier = Modifier,
-    labelText: String,
-    singleLine: Boolean = true,
-    trailingIconVector: ImageVector? = null,
-    trailingIconDescription: String? = null,
-    onTrailingIconClick: (() -> Unit)? = null,
-) = TextField(value = value,
-    onValueChange = onValueChange,
-    modifier = modifier,
-    singleLine = singleLine,
-    label = {
-        Text(text = labelText, color = colorScheme.onSecondaryContainer.copy(0.75f))
-    },
-    trailingIcon = {
-        trailingIconVector?.let { imageVector ->
-            if (trailingIconDescription == null) throw IllegalArgumentException("a content description has to be specified if a trailing icon is provided")
-            MouseOverPopup(
-                text = trailingIconDescription
-            ) {
-                when (onTrailingIconClick) {
-                    null -> Icon(imageVector = imageVector,
-                        contentDescription = trailingIconDescription,
-                        tint = colorScheme.onSecondaryContainer)
-                    else -> IconButton(onClick = onTrailingIconClick) {
-                        Icon(imageVector = imageVector,
-                            contentDescription = trailingIconDescription,
-                            tint = colorScheme.onSecondaryContainer)
-                    }
-                }
-            }
-
-        }
-    },
-    colors = TextFieldDefaults.textFieldColors(backgroundColor = colorScheme.secondaryContainer,
-        textColor = colorScheme.onSecondaryContainer,
-        focusedIndicatorColor = colorScheme.onSecondaryContainer.copy(0.75f)))
-
-
 typealias LoadListener = (InputResource) -> Unit
 
 sealed class LoadFilesTabItem(

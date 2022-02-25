@@ -34,10 +34,10 @@ import org.slf4j.LoggerFactory
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
 import terminodiff.terminodiff.engine.resources.InputResource
-import terminodiff.terminodiff.ui.panes.loaddata.panes.LabeledTextField
 import terminodiff.terminodiff.ui.panes.loaddata.panes.LoadListener
 import terminodiff.terminodiff.ui.panes.loaddata.panes.fromserver.VReadDialog
 import terminodiff.terminodiff.ui.panes.loaddata.panes.fromserver.fromServerPaneColumnSpecs
+import terminodiff.terminodiff.ui.util.LabeledTextField
 import terminodiff.ui.AppIconResource
 import terminodiff.ui.ImageRelativePath
 import terminodiff.ui.MouseOverPopup
@@ -206,9 +206,9 @@ fun FromServerScreen(
             onSelectLeft = onLoadLeftFile,
             onSelectRight = onLoadRightFile)
     }
-    LabeledTextField(value = baseServerUrl,
+    LabeledTextField(modifier = Modifier.fillMaxWidth().padding(12.dp),
+        value = baseServerUrl,
         onValueChange = onChangeBaseServerUrl,
-        modifier = Modifier.fillMaxWidth().padding(12.dp),
         labelText = localizedStrings.fhirTerminologyServer,
         trailingIconVector = trailingIcon,
         trailingIconDescription = trailingIconDescription)

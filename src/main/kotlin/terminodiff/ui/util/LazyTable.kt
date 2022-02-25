@@ -30,7 +30,7 @@ import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.terminodiff.ui.panes.loaddata.panes.LabeledTextField
+import terminodiff.terminodiff.ui.util.LabeledTextField
 import terminodiff.terminodiff.ui.util.TerminodiffDialog
 import terminodiff.ui.MouseOverPopup
 import java.util.*
@@ -434,15 +434,8 @@ fun <T> ShowFilterDialog(
     onClose: () -> Unit,
 ) {
     var inputText: String by remember { mutableStateOf(searchState.getSearchQueryFor(title)) }
-    TerminodiffDialog(
-        title = localizedStrings.search,
-        onCloseRequest = onClose,
-        size = DpSize(400.dp, 300.dp)
-    ) {
-        LabeledTextField(value = inputText,
-            onValueChange = { inputText = it },
-            labelText = title,
-            singleLine = true)
+    TerminodiffDialog(title = localizedStrings.search, onCloseRequest = onClose, size = DpSize(400.dp, 300.dp)) {
+        LabeledTextField(value = inputText, onValueChange = { inputText = it }, labelText = title, singleLine = true, )
         Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(modifier = Modifier.wrapContentSize(),
