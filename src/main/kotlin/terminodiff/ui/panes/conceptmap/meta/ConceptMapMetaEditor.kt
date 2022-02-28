@@ -1,14 +1,11 @@
 package terminodiff.terminodiff.ui.panes.conceptmap.meta
 
-import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.runtime.*
@@ -17,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
+import libraries.sahruday.carousel.*
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.conceptmap.ConceptMapState
 import terminodiff.terminodiff.engine.conceptmap.TerminodiffConceptMap
@@ -35,21 +33,33 @@ fun ConceptMapMetaEditorContent(
     val fhirJson by derivedStateOf {
         fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMapState.conceptMap.toFhir)
     }
-    val scrollState = rememberScrollState()
-    Column(Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-        Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-            verticalAlignment = Alignment.CenterVertically) {
-            Text(localizedStrings.conceptMap, style = typography.titleMedium)
-            Button(onClick = {
-                showJsonViewer(fhirJson, isDarkTheme)
-            },
-                colors = ButtonDefaults.buttonColors(backgroundColor = colorScheme.primary,
-                    contentColor = colorScheme.onPrimary)) {
-                Icon(Icons.Default.LocalFireDepartment, "JSON", tint = colorScheme.onPrimary)
-                Text("JSON")
+    val scrollState = rememberCarouselScrollState()//rememberScrollState()
+    Row(modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)) {
+        Column(Modifier.weight(0.98f), horizontalAlignment = Alignment.CenterHorizontally) {
+            Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically) {
+                Text(localizedStrings.conceptMap, style = typography.titleMedium)
+                Button(onClick = {
+                    showJsonViewer(fhirJson, isDarkTheme)
+                },
+                    colors = ButtonDefaults.buttonColors(backgroundColor = colorScheme.primary,
+                        contentColor = colorScheme.onPrimary)) {
+                    Icon(Icons.Default.LocalFireDepartment, "JSON", tint = colorScheme.onPrimary)
+                    Text("JSON")
+                }
             }
+            ConceptMapMetaEditorForm(conceptMapState, localizedStrings, scrollState)
         }
-        ConceptMapMetaEditorForm(conceptMapState, localizedStrings, scrollState)
+        Column(Modifier.fillMaxHeight().weight(0.02f),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            Carousel(state = scrollState,
+                Modifier.fillMaxHeight(0.8f).width(2.dp),
+                colors = CarouselDefaults.colors(thumbColor = colorScheme.onPrimaryContainer,
+                    backgroundColor = colorScheme.primaryContainer))
+        }
+
     }
 }
 
@@ -57,7 +67,7 @@ fun ConceptMapMetaEditorContent(
 private fun ConceptMapMetaEditorForm(
     conceptMapState: ConceptMapState,
     localizedStrings: LocalizedStrings,
-    scrollState: ScrollState,
+    scrollState: CarouselScrollState,
 ) = Column(
     Modifier.fillMaxSize().verticalScroll(scrollState),
     horizontalAlignment = Alignment.CenterHorizontally,
@@ -78,15 +88,15 @@ private fun ConceptMapMetaEditorForm(
                     val trailingIconVector: ImageVector?
                     val trailingIconDescription: String?
                     when (validation) {
-                        null -> {
+                        null, EditTextSpec.ValidationResult.VALID -> {
                             isError = false
                             trailingIconVector = null
                             trailingIconDescription = null
                         }
-                        true -> {
+                        EditTextSpec.ValidationResult.WARN -> {
                             isError = false
-                            trailingIconVector = null
-                            trailingIconDescription = null
+                            trailingIconVector = Icons.Default.Warning
+                            trailingIconDescription = localizedStrings.notRecommended
                         }
                         else -> {
                             isError = true
@@ -105,7 +115,7 @@ private fun ConceptMapMetaEditorForm(
                         isError = isError,
                         trailingIconVector = trailingIconVector,
                         trailingIconDescription = trailingIconDescription,
-                        trailingIconTint = colorScheme.error)
+                        trailingIconTint = if (validation == EditTextSpec.ValidationResult.INVALID) colorScheme.error else colorScheme.onTertiaryContainer)
                 }
             }
 
@@ -120,23 +130,56 @@ data class EditTextGroup(
 )
 
 fun getEditTextGroups(): List<EditTextGroup> = listOf(
-    EditTextGroup({ metadataDiff }, listOf(
-        EditTextSpec(title = { id },
-            valueState = { id },
-            validation = Regex("""[A-Za-z0-9\-.]{1,64}""")::matches),
-        EditTextSpec({ canonicalUrl }, { canonicalUrl }) { newValue ->
-            when {
-                newValue.isBlank() -> false
-                else -> newValue.isUrl()
-            }
-        },
-        EditTextSpec({ version }, { version }),
-        EditTextSpec({ name }, { name }),
-        EditTextSpec({ title }, { title }),
-        //EditTextSpec({ sourceValueSet }, { sourceValueSet }),
-        //EditTextSpec({ targetValueSet }, { targetValueSet }),
-    )),
-    // TODO: 25/02/22 add another group for the `group` parameter
+    EditTextGroup(
+        { metadataDiff },
+        listOf(
+            EditTextSpec(
+                title = { id },
+                valueState = { id },
+                validation = { input ->
+                    when (Regex("""[A-Za-z0-9\-.]{1,64}""").matches(input)) {
+                        true -> EditTextSpec.ValidationResult.VALID
+                        else -> EditTextSpec.ValidationResult.INVALID
+                    }
+                }),
+            EditTextSpec({ canonicalUrl }, { canonicalUrl }) { newValue ->
+                when {
+                    newValue.isBlank() -> EditTextSpec.ValidationResult.INVALID
+                    newValue.isUrl() -> EditTextSpec.ValidationResult.VALID
+                    else -> EditTextSpec.ValidationResult.INVALID
+                }
+            },
+            EditTextSpec({ version }, { version }) {
+                when {
+                    it.isBlank() -> EditTextSpec.ValidationResult.INVALID
+                    Regex("""^(\d+\.\d+\.\d+(-[A-Za-z0-9]+)?)|\d{8}${'$'}""").matches(
+                        it) -> EditTextSpec.ValidationResult.VALID
+                    else -> EditTextSpec.ValidationResult.WARN
+                }
+            },
+            EditTextSpec({ name }, { name }),
+            EditTextSpec({ title }, { title }),
+            EditTextSpec({ sourceValueSet }, { sourceValueSet }) { newValue ->
+                when {
+                    newValue.isBlank() -> EditTextSpec.ValidationResult.WARN
+                    newValue.isUrl() -> EditTextSpec.ValidationResult.VALID
+                    else -> EditTextSpec.ValidationResult.INVALID
+                }
+            },
+            EditTextSpec({ targetValueSet }, { targetValueSet }) { newValue ->
+                when {
+                    newValue.isBlank() -> EditTextSpec.ValidationResult.WARN
+                    newValue.isUrl() -> EditTextSpec.ValidationResult.VALID
+                    else -> EditTextSpec.ValidationResult.INVALID
+                }
+            },
+        )),
+    EditTextGroup({ group }, listOf(
+        EditTextSpec({ sourceUri }, { group.sourceUri }),
+        EditTextSpec({ sourceVersion }, { group.sourceVersion }),
+        EditTextSpec({ targetUri }, { group.targetUri }),
+        EditTextSpec({ targetVersion }, { group.targetVersion })
+    ))
 )
 
 data class EditTextSpec(
@@ -144,8 +187,19 @@ data class EditTextSpec(
     val valueState: TerminodiffConceptMap.() -> State<String?>,
     val singleLine: Boolean = true,
     val readOnly: Boolean = false,
-    val validation: ((String) -> Boolean)? = { it.isNotBlank() },
-)
+    val validation: ((String) -> ValidationResult)? = {
+        when (it.isNotBlank()) {
+            true -> ValidationResult.VALID
+            else -> ValidationResult.INVALID
+        }
+    },
+) {
+    enum class ValidationResult {
+        VALID,
+        INVALID,
+        WARN
+    }
+}
 
 fun String.isUrl(): Boolean = try {
     URL(this).let { true }

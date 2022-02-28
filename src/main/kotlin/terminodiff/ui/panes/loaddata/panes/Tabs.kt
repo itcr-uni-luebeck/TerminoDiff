@@ -1,6 +1,8 @@
 package terminodiff.terminodiff.ui.panes.loaddata.panes
 
-import androidx.compose.material.*
+import androidx.compose.material.LeadingIconTab
+import androidx.compose.material.TabRow
+import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fireplace
 import androidx.compose.material.icons.filled.Save
@@ -16,10 +18,9 @@ import kotlinx.coroutines.launch
 import libraries.accompanist.pager.ExperimentalPagerApi
 import libraries.accompanist.pager.HorizontalPager
 import libraries.accompanist.pager.PagerState
-import libraries.pager_indicators.pagerTabIndicatorOffset
+import libraries.accompanist.pager_indicators.pagerTabIndicatorOffset
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.resources.InputResource
-import terminodiff.ui.MouseOverPopup
 import terminodiff.ui.panes.loaddata.panes.fromserver.FromServerScreenWrapper
 
 @OptIn(ExperimentalPagerApi::class)

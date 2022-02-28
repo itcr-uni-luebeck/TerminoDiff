@@ -1,17 +1,14 @@
 package terminodiff.terminodiff.engine.conceptmap
 
 import androidx.compose.runtime.*
-import ca.uhn.fhir.context.FhirContext
-import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator
 import org.hl7.fhir.r4.model.ConceptMap
 import org.hl7.fhir.r4.model.ConceptMap.*
 import org.hl7.fhir.r4.model.DateTimeType
 import org.hl7.fhir.r4.model.Enumerations
 import terminodiff.engine.resources.DiffDataContainer
-import terminodiff.terminodiff.engine.graph.logger
 
 class ConceptMapState(
-    diffDataContainer: DiffDataContainer
+    diffDataContainer: DiffDataContainer,
 ) {
     val conceptMap by mutableStateOf(TerminodiffConceptMap(diffDataContainer))
 }
@@ -23,8 +20,8 @@ class TerminodiffConceptMap(diffDataContainer: DiffDataContainer) {
     val version: MutableState<String?> = mutableStateOf(null)
     val name: MutableState<String?> = mutableStateOf(null)
     val title: MutableState<String?> = mutableStateOf(null)
-    var sourceValueSet: MutableState<String?> = mutableStateOf(null)
-    val targetValueSet: MutableState<String?> = mutableStateOf(null)
+    val sourceValueSet: MutableState<String?> = mutableStateOf(null) // TODO: 28/02/22 generate this from the mapped concepts
+    val targetValueSet: MutableState<String?> = mutableStateOf(null) // TODO: 28/02/22 generate this from the concepts that are being mapped to
     var group by mutableStateOf(ConceptMapGroup(diffDataContainer))
 
     val toFhir by derivedStateOf {
@@ -41,49 +38,50 @@ class TerminodiffConceptMap(diffDataContainer: DiffDataContainer) {
 }
 
 class ConceptMapGroup(diffDataContainer: DiffDataContainer) {
-    var sourceUri: String? by mutableStateOf(diffDataContainer.leftCodeSystem?.url)
-    var sourceVersion: String? by mutableStateOf(diffDataContainer.leftCodeSystem?.version)
-    var targetUri: String? by mutableStateOf(diffDataContainer.rightCodeSystem?.url)
-    var targetVersion: String? by mutableStateOf(diffDataContainer.rightCodeSystem?.version)
+    val sourceUri = mutableStateOf(diffDataContainer.leftCodeSystem?.url)
+    val sourceVersion = mutableStateOf(diffDataContainer.leftCodeSystem?.version)
+    val targetUri = mutableStateOf(diffDataContainer.rightCodeSystem?.url)
+    val targetVersion = mutableStateOf(diffDataContainer.rightCodeSystem?.version)
     val elements = mutableStateListOf<ConceptMapElement>()
 
     val toFhir: ConceptMapGroupComponent by derivedStateOf {
         ConceptMapGroupComponent().apply {
-            this.source = this@ConceptMapGroup.sourceUri
-            this.sourceVersion = this@ConceptMapGroup.sourceVersion
-            this.target = this@ConceptMapGroup.targetUri
-            this.targetVersion = this@ConceptMapGroup.targetVersion
+            this.source = this@ConceptMapGroup.sourceUri.value
+            this.sourceVersion = this@ConceptMapGroup.sourceVersion.value
+            this.target = this@ConceptMapGroup.targetUri.value
+            this.targetVersion = this@ConceptMapGroup.targetVersion.value
             this.element.addAll(this@ConceptMapGroup.elements.map { it.toFhir })
         }
     }
 }
 
 class ConceptMapElement {
-    var code: String? by mutableStateOf(null)
-    var display: String? by mutableStateOf(null)
+    val code: MutableState<String?> = mutableStateOf(null)
+    val display: MutableState<String?> = mutableStateOf(null)
     val targets = mutableStateListOf<ConceptMapTarget>()
 
     val toFhir: SourceElementComponent by derivedStateOf {
         SourceElementComponent().apply {
-            this.code = this@ConceptMapElement.code
-            this.display = this@ConceptMapElement.display
+            this.code = this@ConceptMapElement.code.value
+            this.display = this@ConceptMapElement.display.value
             this.target.addAll(this@ConceptMapElement.targets.map { it.toFhir })
         }
     }
 }
 
 class ConceptMapTarget {
-    var code: String? by mutableStateOf(null)
-    var display: String? by mutableStateOf(null)
-    var equivalence: Enumerations.ConceptMapEquivalence by mutableStateOf(Enumerations.ConceptMapEquivalence.RELATEDTO)
-    var comment: String? by mutableStateOf(null)
+    val code: MutableState<String?> = mutableStateOf(null)
+    val display: MutableState<String?> = mutableStateOf(null)
+    val equivalence: MutableState<Enumerations.ConceptMapEquivalence> =
+        mutableStateOf(Enumerations.ConceptMapEquivalence.RELATEDTO)
+    val comment: MutableState<String?> = mutableStateOf(null)
 
     val toFhir: TargetElementComponent by derivedStateOf {
         TargetElementComponent().apply {
-            this.code = this@ConceptMapTarget.code
-            this.display = this@ConceptMapTarget.display
-            this.comment = this@ConceptMapTarget.comment
-            this.equivalence = this@ConceptMapTarget.equivalence
+            this.code = this@ConceptMapTarget.code.value
+            this.display = this@ConceptMapTarget.display.value
+            this.comment = this@ConceptMapTarget.comment.value
+            this.equivalence = this@ConceptMapTarget.equivalence.value
         }
     }
 }

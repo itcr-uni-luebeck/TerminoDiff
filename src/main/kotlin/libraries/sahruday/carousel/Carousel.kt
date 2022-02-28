@@ -1,4 +1,4 @@
-package terminodiff.ui.util
+package libraries.sahruday.carousel
 
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.MutatePriority

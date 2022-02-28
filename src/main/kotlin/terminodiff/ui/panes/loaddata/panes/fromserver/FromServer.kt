@@ -278,7 +278,7 @@ fun ListOfResources(
             baseServerUrl = baseServerUrl,
             iconImageVector = Icons.Default.Compare,
             enabled = !vReadDisabled,
-            tooltip = localizedStrings.vReadExplanationEnabled_.invoke(!vReadDisabled),
+            tooltip = localizedStrings.vreadExplanationEnabled_.invoke(selectedItem != null && !vReadDisabled),
             onClick = onShowVReadDialog)
 
         leftRightButton(text = localizedStrings.loadRight,

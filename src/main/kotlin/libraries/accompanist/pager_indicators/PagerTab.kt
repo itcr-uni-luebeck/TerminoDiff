@@ -1,4 +1,4 @@
-package libraries.pager_indicators
+package libraries.accompanist.pager_indicators
 
 import libraries.accompanist.pager.PagerState
 import androidx.compose.foundation.layout.fillMaxWidth

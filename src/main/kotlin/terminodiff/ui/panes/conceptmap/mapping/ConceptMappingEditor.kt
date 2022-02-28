@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -27,7 +28,6 @@ fun ConceptMappingEditorContent(conceptMapState: ConceptMapState) {
             Mauris mauris sem, dignissim eget facilisis eget, sodales sit amet elit. Nam vehicula est id metus ultrices, vel maximus diam fringilla. Etiam condimentum accumsan felis ac consectetur. Sed quis tincidunt nulla. Sed scelerisque nisl ante. Aenean eleifend semper risus a aliquam. Suspendisse auctor nisl eget velit consequat, non commodo risus condimentum. Sed commodo tellus eu consequat ultrices. Donec non laoreet nisl. Sed viverra dui ac metus rhoncus interdum. Curabitur a ullamcorper purus. Aenean purus mi, aliquet sit amet quam ut, rutrum dapibus risus. Fusce efficitur elit et justo dictum viverra.
 
             Fusce placerat neque vitae semper bibendum. Aliquam vitae lectus rhoncus, posuere sapien et, accumsan quam. Curabitur nec mauris in dui sagittis sollicitudin. Nunc eget nunc dapibus, fermentum tellus ut, dapibus nunc. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nunc eu ultricies mi, vel rhoncus lacus. Etiam in vehicula arcu. Duis fringilla, augue et sollicitudin rhoncus, mauris mauris lacinia quam, vitae euismod enim odio ac nibh. Nunc eu ex aliquam, lobortis metus in, faucibus ligula. Vestibulum eget tellus vel magna feugiat vehicula sit amet non libero. In sit amet mauris eu sem lacinia cursus. Nunc dictum sapien at placerat tempor. Curabitur porttitor ullamcorper sapien, id luctus est aliquam eget. Nam dictum, ex non tempus faucibus, quam diam maximus odio, vitae imperdiet tellus eros eu purus. Cras eget varius arcu. Sed faucibus vitae ante a mattis.
-        """.trimIndent())
-
+        """.trimIndent(), color = colorScheme.onPrimaryContainer)
     }
 }

@@ -28,6 +28,8 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
+import libraries.sahruday.carousel.Carousel
+import libraries.sahruday.carousel.CarouselDefaults
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.ui.util.LabeledTextField
@@ -145,7 +147,7 @@ private fun <T> CountIndicator(
 private fun ScrollBar(lazyListState: LazyListState, cellBorderColor: Color) {
     Carousel(state = lazyListState,
         colors = CarouselDefaults.colors(cellBorderColor),
-        modifier = Modifier.padding(8.dp).width(1.dp).fillMaxHeight(0.9f))
+        modifier = Modifier.padding(8.dp).width(2.dp).fillMaxHeight(0.9f))
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
