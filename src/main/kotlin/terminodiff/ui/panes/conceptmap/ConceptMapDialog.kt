@@ -56,7 +56,7 @@ fun ConceptMapDialog(
                     pagerState = pagerState,
                     localizedStrings = localizedStrings,
                     fhirContext = fhirContext) {
-                    ConceptMapTabItem.ConceptMapScreenData(conceptMapState, isDarkTheme)
+                    ConceptMapTabItem.ConceptMapScreenData(diffDataContainer, conceptMapState, isDarkTheme)
                 }
             }
         }
@@ -85,11 +85,15 @@ sealed class ConceptMapTabItem(
         icon = Icons.Default.AccountTree,
         title = { conceptMap },
         screen = { strings, _, data ->
-            ConceptMappingEditorContent(localizedStrings = strings, conceptMapState = data.conceptMapState)
+            ConceptMappingEditorContent(localizedStrings = strings,
+                conceptMapState = data.conceptMapState,
+                useDarkTheme = data.isDarkTheme,
+                codeSystemDiff = data.diffDataContainer.codeSystemDiff!!)
         }
     )
 
     class ConceptMapScreenData(
+        val diffDataContainer: DiffDataContainer,
         val conceptMapState: ConceptMapState,
         val isDarkTheme: Boolean,
     ) : ScreenData

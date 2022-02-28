@@ -18,10 +18,14 @@ class TerminodiffConceptMap(diffDataContainer: DiffDataContainer) {
     val id: MutableState<String?> = mutableStateOf(null)
     val canonicalUrl: MutableState<String?> = mutableStateOf(null)
     val version: MutableState<String?> = mutableStateOf(null)
-    val name: MutableState<String?> = mutableStateOf(null)
-    val title: MutableState<String?> = mutableStateOf(null)
-    val sourceValueSet: MutableState<String?> = mutableStateOf(null) // TODO: 28/02/22 generate this from the mapped concepts
-    val targetValueSet: MutableState<String?> = mutableStateOf(null) // TODO: 28/02/22 generate this from the concepts that are being mapped to
+    val name: MutableState<String?> =
+        mutableStateOf(null) // TODO: 28/02/22 generate this from the metadata as a suggestion
+    val title: MutableState<String?> =
+        mutableStateOf(null) // TODO: 28/02/22 generate this from the metadata as a suggestion
+    val sourceValueSet: MutableState<String?> =
+        mutableStateOf(null) // TODO: 28/02/22 generate this from the mapped concepts
+    val targetValueSet: MutableState<String?> =
+        mutableStateOf(null) // TODO: 28/02/22 generate this from the concepts that are being mapped to
     var group by mutableStateOf(ConceptMapGroup(diffDataContainer))
 
     val toFhir by derivedStateOf {
@@ -43,6 +47,20 @@ class ConceptMapGroup(diffDataContainer: DiffDataContainer) {
     val targetUri = mutableStateOf(diffDataContainer.rightCodeSystem?.url)
     val targetVersion = mutableStateOf(diffDataContainer.rightCodeSystem?.version)
     val elements = mutableStateListOf<ConceptMapElement>()
+
+    init {
+        populateElements(diffDataContainer)
+    }
+
+    private fun populateElements(diff: DiffDataContainer) {
+        diff.codeSystemDiff!!.onlyInLeftConcepts.map { code ->
+            val leftConcept = diff.leftGraphBuilder!!.nodeTree[code]!!
+            elements.add(ConceptMapElement().apply {
+                this.code.value = code
+                this.display.value = leftConcept.display
+            })
+        }
+    }
 
     val toFhir: ConceptMapGroupComponent by derivedStateOf {
         ConceptMapGroupComponent().apply {

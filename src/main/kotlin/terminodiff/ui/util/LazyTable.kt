@@ -52,10 +52,11 @@ fun <T> LazyTable(
     countLabel: (Int) -> String = localizedStrings.elements_,
     keyFun: (T) -> String?,
 ) = Column(modifier = modifier.fillMaxWidth().padding(4.dp)) {
+    val sortedData by derivedStateOf { tableData.sortedBy(keyFun) }
     val searchState by produceState<SearchState<T>?>(null, columnSpecs, tableData, localizedStrings) {
         // using produceState enforces that the state resets if any of the parameters above ^ change. This is important for
         // table data (e.g. in the concept diff pane) and LocalizesStrings.
-        value = SearchState(columnSpecs, tableData)
+        value = SearchState(columnSpecs, sortedData)
     }
     var showFilterDialogFor: String? by remember { mutableStateOf(null) }
 
@@ -206,7 +207,7 @@ private fun <T> ContentRows(
                     weight = spec.weight,
                     tooltipText = spec.tooltipText?.invoke(data),
                     backgroundColor = rowBackground,
-                    cellBorderColor,
+                    cellBorderColor = cellBorderColor,
                     foregroundColor = rowForeground) { spec.content(data) }
             }
         }
@@ -353,7 +354,7 @@ open class ColumnSpec<T>(
             mergeIf = mergeIf,
             tooltipText = { it.instanceGetter() },
             content = {
-                SelectableText(text = it.instanceGetter())
+                SelectableText(text = it.instanceGetter(), color = LocalContentColor.current)
             },
         )
     }
@@ -361,8 +362,7 @@ open class ColumnSpec<T>(
 
 class SearchState<T>(
     private val columnSpecs: List<ColumnSpec<T>>,
-    val tableData: List<T>,
-    //private val localizedStrings: LocalizedStrings, // needed to make sure that the app does not crash if user changes language after having searched
+    val tableData: List<T>
 ) {
     private val searchableColumns: List<ColumnSpec<T>> by derivedStateOf {
         columnSpecs.filter { it.searchPredicate != null }
