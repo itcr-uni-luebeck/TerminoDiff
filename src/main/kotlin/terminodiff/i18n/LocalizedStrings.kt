@@ -69,6 +69,7 @@ abstract class LocalizedStrings(
     val loadRight: String,
     val loadedResources: String,
     val metaVersion: String,
+    val metadata: String,
     val metadataDiff: String,
     val metadataDiffResults_: (MetadataComparisonResult) -> String,
     val name: String = "Name",
@@ -225,6 +226,7 @@ class GermanStrings : LocalizedStrings(
     loadLeft = "Links laden",
     loadRight = "Rechts laden",
     loadedResources = "Geladene Ressourcen",
+    metadata = "Metadaten",
     metadataDiff = "Metadaten-Diff",
     rightValue = "Rechter Wert",
     metadataDiffResults_ = {
@@ -383,6 +385,7 @@ class EnglishStrings : LocalizedStrings(
     loadLeft = "Load left",
     loadRight = "Load right",
     loadedResources = "Loaded resources",
+    metadata = "Metadata",
     metadataDiff = "Metadata Diff",
     metadataDiffResults_ = {
         when (it) {

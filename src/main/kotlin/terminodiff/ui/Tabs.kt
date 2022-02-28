@@ -1,17 +1,17 @@
-package terminodiff.terminodiff.ui.panes.loaddata.panes
+package terminodiff.ui
 
+import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Column
 import androidx.compose.material.LeadingIconTab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Fireplace
-import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import ca.uhn.fhir.context.FhirContext
 import kotlinx.coroutines.launch
@@ -21,11 +21,10 @@ import libraries.accompanist.pager.PagerState
 import libraries.accompanist.pager_indicators.pagerTabIndicatorOffset
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.resources.InputResource
-import terminodiff.ui.panes.loaddata.panes.fromserver.FromServerScreenWrapper
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun Tabs(tabs: List<LoadFilesTabItem>, pagerState: PagerState, localizedStrings: LocalizedStrings) {
+fun <T : TabItem.ScreenData> Tabs(tabs: List<TabItem<T>>, pagerState: PagerState, localizedStrings: LocalizedStrings) {
     val scope = rememberCoroutineScope()
     TabRow(selectedTabIndex = pagerState.currentPage,
         backgroundColor = colorScheme.tertiaryContainer,
@@ -54,35 +53,26 @@ fun Tabs(tabs: List<LoadFilesTabItem>, pagerState: PagerState, localizedStrings:
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
-fun TabsContent(
-    tabs: List<LoadFilesTabItem>,
+fun <T : TabItem.ScreenData> TabsContent(
+    tabs: List<TabItem<T>>,
     pagerState: PagerState,
     localizedStrings: LocalizedStrings,
-    onLoadLeft: LoadListener,
-    onLoadRight: LoadListener,
     fhirContext: FhirContext,
+    backgroundColor: Color = colorScheme.surface,
+    provideData: () -> T,
 ) {
     HorizontalPager(state = pagerState, count = tabs.size) { page ->
-        tabs[page].screen(localizedStrings, onLoadLeft, onLoadRight, fhirContext)
+        Column(Modifier.background(backgroundColor)) {  }
+        tabs[page].screen(localizedStrings, fhirContext, provideData.invoke())
     }
 }
 
 typealias LoadListener = (InputResource) -> Unit
 
-sealed class LoadFilesTabItem(
+abstract class TabItem<T : TabItem.ScreenData>(
     val icon: ImageVector,
     val title: LocalizedStrings.() -> String,
-    val screen: @Composable (LocalizedStrings, LoadListener, LoadListener, FhirContext) -> Unit,
+    val screen: @Composable (LocalizedStrings, FhirContext, T) -> Unit,
 ) {
-    object FromFile : LoadFilesTabItem(icon = Icons.Default.Save,
-        title = { fileSystem },
-        screen = { localizedStrings, onLoadLeft, onLoadRight, _ ->
-            FromFileScreenWrapper(localizedStrings, onLoadLeft, onLoadRight)
-        })
-
-    object FromTerminologyServer : LoadFilesTabItem(icon = Icons.Default.Fireplace,
-        title = { fhirTerminologyServer },
-        screen = { localizedStrings, onLoadLeft, onLoadRight, fhirContext ->
-            FromServerScreenWrapper(localizedStrings, onLoadLeft, onLoadRight, fhirContext)
-        })
+    interface ScreenData
 }

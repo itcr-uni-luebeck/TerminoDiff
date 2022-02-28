@@ -34,12 +34,12 @@ import org.slf4j.LoggerFactory
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
 import terminodiff.terminodiff.engine.resources.InputResource
-import terminodiff.terminodiff.ui.panes.loaddata.panes.LoadListener
 import terminodiff.terminodiff.ui.panes.loaddata.panes.fromserver.VReadDialog
 import terminodiff.terminodiff.ui.panes.loaddata.panes.fromserver.fromServerPaneColumnSpecs
 import terminodiff.terminodiff.ui.util.LabeledTextField
 import terminodiff.ui.AppIconResource
 import terminodiff.ui.ImageRelativePath
+import terminodiff.ui.LoadListener
 import terminodiff.ui.MouseOverPopup
 import terminodiff.ui.util.ColumnSpec
 import terminodiff.ui.util.LazyTable

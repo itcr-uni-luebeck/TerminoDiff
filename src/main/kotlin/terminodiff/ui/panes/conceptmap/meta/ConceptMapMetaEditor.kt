@@ -1,5 +1,6 @@
 package terminodiff.terminodiff.ui.panes.conceptmap.meta
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
@@ -33,21 +34,17 @@ fun ConceptMapMetaEditorContent(
     val fhirJson by derivedStateOf {
         fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMapState.conceptMap.toFhir)
     }
-    val scrollState = rememberCarouselScrollState()//rememberScrollState()
-    Row(modifier = Modifier.fillMaxWidth(),
+    val scrollState = rememberCarouselScrollState()
+    Row(modifier = Modifier.fillMaxWidth().background(colorScheme.tertiaryContainer),
         horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)) {
         Column(Modifier.weight(0.98f), horizontalAlignment = Alignment.CenterHorizontally) {
-            Row(horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically) {
-                Text(localizedStrings.conceptMap, style = typography.titleMedium)
-                Button(onClick = {
-                    showJsonViewer(fhirJson, isDarkTheme)
-                },
-                    colors = ButtonDefaults.buttonColors(backgroundColor = colorScheme.primary,
-                        contentColor = colorScheme.onPrimary)) {
-                    Icon(Icons.Default.LocalFireDepartment, "JSON", tint = colorScheme.onPrimary)
-                    Text("JSON")
-                }
+            Button(onClick = {
+                showJsonViewer(fhirJson, isDarkTheme)
+            },
+                colors = ButtonDefaults.buttonColors(backgroundColor = colorScheme.primary,
+                    contentColor = colorScheme.onPrimary)) {
+                Icon(Icons.Default.LocalFireDepartment, "JSON", tint = colorScheme.onPrimary)
+                Text("JSON")
             }
             ConceptMapMetaEditorForm(conceptMapState, localizedStrings, scrollState)
         }
@@ -57,7 +54,7 @@ fun ConceptMapMetaEditorContent(
             Carousel(state = scrollState,
                 Modifier.fillMaxHeight(0.8f).width(2.dp),
                 colors = CarouselDefaults.colors(thumbColor = colorScheme.onPrimaryContainer,
-                    backgroundColor = colorScheme.primaryContainer))
+                    backgroundColor = colorScheme.onPrimaryContainer.copy(0.25f)))
         }
 
     }
@@ -68,14 +65,14 @@ private fun ConceptMapMetaEditorForm(
     conceptMapState: ConceptMapState,
     localizedStrings: LocalizedStrings,
     scrollState: CarouselScrollState,
-) = Column(
-    Modifier.fillMaxSize().verticalScroll(scrollState),
+) = Column(Modifier.fillMaxSize().verticalScroll(scrollState).padding(4.dp),
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Top)) {
     getEditTextGroups().forEach { group ->
-        Card(Modifier.fillMaxWidth(0.9f), backgroundColor = colorScheme.secondaryContainer, elevation = 8.dp) {
-            Column(
-                modifier = Modifier.padding(8.dp),
+        Card(Modifier.fillMaxWidth(0.9f).padding(4.dp),
+            backgroundColor = colorScheme.secondaryContainer,
+            elevation = 8.dp) {
+            Column(modifier = Modifier.padding(8.dp),
                 verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Top),
                 horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(group.title.invoke(localizedStrings),
@@ -118,7 +115,6 @@ private fun ConceptMapMetaEditorForm(
                         trailingIconTint = if (validation == EditTextSpec.ValidationResult.INVALID) colorScheme.error else colorScheme.onTertiaryContainer)
                 }
             }
-
         }
     }
 
@@ -129,58 +125,48 @@ data class EditTextGroup(
     val specs: List<EditTextSpec>,
 )
 
-fun getEditTextGroups(): List<EditTextGroup> = listOf(
-    EditTextGroup(
-        { metadataDiff },
-        listOf(
-            EditTextSpec(
-                title = { id },
-                valueState = { id },
-                validation = { input ->
-                    when (Regex("""[A-Za-z0-9\-.]{1,64}""").matches(input)) {
-                        true -> EditTextSpec.ValidationResult.VALID
-                        else -> EditTextSpec.ValidationResult.INVALID
-                    }
-                }),
-            EditTextSpec({ canonicalUrl }, { canonicalUrl }) { newValue ->
-                when {
-                    newValue.isBlank() -> EditTextSpec.ValidationResult.INVALID
-                    newValue.isUrl() -> EditTextSpec.ValidationResult.VALID
-                    else -> EditTextSpec.ValidationResult.INVALID
-                }
-            },
-            EditTextSpec({ version }, { version }) {
-                when {
-                    it.isBlank() -> EditTextSpec.ValidationResult.INVALID
-                    Regex("""^(\d+\.\d+\.\d+(-[A-Za-z0-9]+)?)|\d{8}${'$'}""").matches(
-                        it) -> EditTextSpec.ValidationResult.VALID
-                    else -> EditTextSpec.ValidationResult.WARN
-                }
-            },
-            EditTextSpec({ name }, { name }),
-            EditTextSpec({ title }, { title }),
-            EditTextSpec({ sourceValueSet }, { sourceValueSet }) { newValue ->
-                when {
-                    newValue.isBlank() -> EditTextSpec.ValidationResult.WARN
-                    newValue.isUrl() -> EditTextSpec.ValidationResult.VALID
-                    else -> EditTextSpec.ValidationResult.INVALID
-                }
-            },
-            EditTextSpec({ targetValueSet }, { targetValueSet }) { newValue ->
-                when {
-                    newValue.isBlank() -> EditTextSpec.ValidationResult.WARN
-                    newValue.isUrl() -> EditTextSpec.ValidationResult.VALID
-                    else -> EditTextSpec.ValidationResult.INVALID
-                }
-            },
-        )),
-    EditTextGroup({ group }, listOf(
-        EditTextSpec({ sourceUri }, { group.sourceUri }),
-        EditTextSpec({ sourceVersion }, { group.sourceVersion }),
-        EditTextSpec({ targetUri }, { group.targetUri }),
-        EditTextSpec({ targetVersion }, { group.targetVersion })
-    ))
-)
+private val mandatoryUrlValidator: (String) -> EditTextSpec.ValidationResult = { newValue ->
+    when {
+        newValue.isBlank() -> EditTextSpec.ValidationResult.INVALID
+        newValue.isUrl() -> EditTextSpec.ValidationResult.VALID
+        else -> EditTextSpec.ValidationResult.INVALID
+    }
+}
+
+private val recommendedUrlValidator: (String) -> EditTextSpec.ValidationResult = { newValue ->
+    when {
+        newValue.isBlank() -> EditTextSpec.ValidationResult.WARN
+        newValue.isUrl() -> EditTextSpec.ValidationResult.VALID
+        else -> EditTextSpec.ValidationResult.INVALID
+    }
+}
+
+fun getEditTextGroups(): List<EditTextGroup> = listOf(EditTextGroup({ metadataDiff },
+    listOf(
+        EditTextSpec(title = { id }, valueState = { id }, validation = { input ->
+            when (Regex("""[A-Za-z0-9\-.]{1,64}""").matches(input)) {
+                true -> EditTextSpec.ValidationResult.VALID
+                else -> EditTextSpec.ValidationResult.INVALID
+            }
+        }),
+        EditTextSpec({ canonicalUrl }, { canonicalUrl }, validation = mandatoryUrlValidator),
+        EditTextSpec({ version }, { version }) {
+            when {
+                it.isBlank() -> EditTextSpec.ValidationResult.INVALID
+                Regex("""^(\d+\.\d+\.\d+(-[A-Za-z0-9]+)?)|\d{8}${'$'}""").matches(it) -> EditTextSpec.ValidationResult.VALID
+                else -> EditTextSpec.ValidationResult.WARN
+            }
+        },
+        EditTextSpec({ name }, { name }),
+        EditTextSpec({ title }, { title }),
+        EditTextSpec({ sourceValueSet }, { sourceValueSet }, validation = recommendedUrlValidator),
+        EditTextSpec({ targetValueSet }, { targetValueSet }, validation = recommendedUrlValidator),
+    )),
+    EditTextGroup({ group },
+        listOf(EditTextSpec({ sourceUri }, { group.sourceUri }, validation = mandatoryUrlValidator),
+            EditTextSpec({ sourceVersion }, { group.sourceVersion }),
+            EditTextSpec({ targetUri }, { group.targetUri }, validation = mandatoryUrlValidator),
+            EditTextSpec({ targetVersion }, { group.targetVersion }))))
 
 data class EditTextSpec(
     val title: LocalizedStrings.() -> String,
@@ -195,9 +181,7 @@ data class EditTextSpec(
     },
 ) {
     enum class ValidationResult {
-        VALID,
-        INVALID,
-        WARN
+        VALID, INVALID, WARN
     }
 }
 
