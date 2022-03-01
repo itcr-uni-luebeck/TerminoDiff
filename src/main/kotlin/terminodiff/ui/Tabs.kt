@@ -35,10 +35,10 @@ fun <T : TabItem.ScreenData> Tabs(tabs: List<TabItem<T>>, pagerState: PagerState
         tabs.forEachIndexed { index, tabItem ->
             LeadingIconTab(
                 icon = {
-                    Icon(tabItem.icon, contentDescription = null, tint = colorScheme.onTertiaryContainer)
+                    Icon(tabItem.spec.icon, contentDescription = null, tint = colorScheme.onTertiaryContainer)
                 },
                 text = {
-                    Text(tabItem.title.invoke(localizedStrings), color = colorScheme.onTertiaryContainer)
+                    Text(tabItem.spec.title.invoke(localizedStrings), color = colorScheme.onTertiaryContainer)
                 },
                 selected = pagerState.currentPage == index,
                 onClick = {
@@ -62,17 +62,22 @@ fun <T : TabItem.ScreenData> TabsContent(
     provideData: () -> T,
 ) {
     HorizontalPager(state = pagerState, count = tabs.size) { page ->
-        Column(Modifier.background(backgroundColor)) {  }
-        tabs[page].screen(localizedStrings, fhirContext, provideData.invoke())
+        Column(Modifier.background(backgroundColor)) { }
+        tabs[page].spec.screen(localizedStrings, fhirContext, provideData.invoke())
     }
 }
 
 typealias LoadListener = (InputResource) -> Unit
 
 abstract class TabItem<T : TabItem.ScreenData>(
-    val icon: ImageVector,
-    val title: LocalizedStrings.() -> String,
-    val screen: @Composable (LocalizedStrings, FhirContext, T) -> Unit,
+    val spec: TabItemSpec<T>
 ) {
+
+    data class TabItemSpec<T : ScreenData>(
+        val icon: ImageVector,
+        val title: LocalizedStrings.() -> String,
+        val screen: @Composable (LocalizedStrings, FhirContext, T) -> Unit,
+    )
+
     interface ScreenData
 }

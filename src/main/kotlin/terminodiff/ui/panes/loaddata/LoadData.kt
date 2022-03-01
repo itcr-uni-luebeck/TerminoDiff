@@ -164,7 +164,7 @@ sealed class LoadFilesTabItem(
     icon: ImageVector,
     title: LocalizedStrings.() -> String,
     screen: @Composable (LocalizedStrings, FhirContext, LoadFilesScreenData) -> Unit,
-) : TabItem<LoadFilesTabItem.LoadFilesScreenData>(icon, title, screen) {
+) : TabItem<LoadFilesTabItem.LoadFilesScreenData>(TabItemSpec(icon, title, screen)) {
 
     object FromFile : LoadFilesTabItem(icon = Icons.Default.Save,
         title = { fileSystem },

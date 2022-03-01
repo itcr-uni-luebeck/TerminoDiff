@@ -4,25 +4,20 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.LocalFireDepartment
-import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
 import libraries.sahruday.carousel.*
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.conceptmap.ConceptMapState
 import terminodiff.terminodiff.engine.conceptmap.TerminodiffConceptMap
-import terminodiff.terminodiff.ui.util.LabeledTextField
+import terminodiff.terminodiff.ui.util.*
 import terminodiff.ui.panes.conceptmap.showJsonViewer
-import java.net.MalformedURLException
-import java.net.URL
 
 @Composable
 fun ConceptMapMetaEditorContent(
@@ -69,61 +64,9 @@ private fun ConceptMapMetaEditorForm(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Top)) {
     getEditTextGroups().forEach { group ->
-        Card(Modifier.fillMaxWidth(0.9f).padding(4.dp),
-            backgroundColor = colorScheme.secondaryContainer,
-            elevation = 8.dp) {
-            Column(modifier = Modifier.padding(8.dp),
-                verticalArrangement = Arrangement.spacedBy(4.dp, Alignment.Top),
-                horizontalAlignment = Alignment.CenterHorizontally) {
-                Text(group.title.invoke(localizedStrings),
-                    style = typography.titleSmall,
-                    color = colorScheme.onTertiaryContainer)
-                group.specs.forEach { spec ->
-                    val valueState = spec.valueState.invoke(conceptMapState.conceptMap)
-                    val validation = spec.validation?.invoke(valueState.value ?: "")
-                    val isError: Boolean
-                    val trailingIconVector: ImageVector?
-                    val trailingIconDescription: String?
-                    when (validation) {
-                        null, EditTextSpec.ValidationResult.VALID -> {
-                            isError = false
-                            trailingIconVector = null
-                            trailingIconDescription = null
-                        }
-                        EditTextSpec.ValidationResult.WARN -> {
-                            isError = false
-                            trailingIconVector = Icons.Default.Warning
-                            trailingIconDescription = localizedStrings.notRecommended
-                        }
-                        else -> {
-                            isError = true
-                            trailingIconVector = Icons.Default.Error
-                            trailingIconDescription = localizedStrings.invalid
-                        }
-                    }
-                    LabeledTextField(modifier = Modifier.fillMaxWidth(0.8f),
-                        singleLine = spec.singleLine,
-                        readOnly = spec.readOnly,
-                        value = valueState.value ?: "",
-                        onValueChange = { newValue ->
-                            if (valueState is MutableState) valueState.value = newValue
-                        },
-                        labelText = spec.title.invoke(localizedStrings),
-                        isError = isError,
-                        trailingIconVector = trailingIconVector,
-                        trailingIconDescription = trailingIconDescription,
-                        trailingIconTint = if (validation == EditTextSpec.ValidationResult.INVALID) colorScheme.error else colorScheme.onTertiaryContainer)
-                }
-            }
-        }
+        EditTextGroup(group, localizedStrings, data = conceptMapState.conceptMap)
     }
-
 }
-
-data class EditTextGroup(
-    val title: LocalizedStrings.() -> String,
-    val specs: List<EditTextSpec>,
-)
 
 private val mandatoryUrlValidator: (String) -> EditTextSpec.ValidationResult = { newValue ->
     when {
@@ -141,7 +84,7 @@ private val recommendedUrlValidator: (String) -> EditTextSpec.ValidationResult =
     }
 }
 
-fun getEditTextGroups(): List<EditTextGroup> = listOf(EditTextGroup({ metadataDiff },
+fun getEditTextGroups(): List<EditTextGroupSpec<TerminodiffConceptMap>> = listOf(EditTextGroupSpec({ metadataDiff },
     listOf(
         EditTextSpec(title = { id }, valueState = { id }, validation = { input ->
             when (Regex("""[A-Za-z0-9\-.]{1,64}""").matches(input)) {
@@ -162,31 +105,9 @@ fun getEditTextGroups(): List<EditTextGroup> = listOf(EditTextGroup({ metadataDi
         EditTextSpec({ sourceValueSet }, { sourceValueSet }, validation = recommendedUrlValidator),
         EditTextSpec({ targetValueSet }, { targetValueSet }, validation = recommendedUrlValidator),
     )),
-    EditTextGroup({ group },
+    EditTextGroupSpec({ group },
         listOf(EditTextSpec({ sourceUri }, { group.sourceUri }, validation = mandatoryUrlValidator),
             EditTextSpec({ sourceVersion }, { group.sourceVersion }),
             EditTextSpec({ targetUri }, { group.targetUri }, validation = mandatoryUrlValidator),
             EditTextSpec({ targetVersion }, { group.targetVersion }))))
 
-data class EditTextSpec(
-    val title: LocalizedStrings.() -> String,
-    val valueState: TerminodiffConceptMap.() -> State<String?>,
-    val singleLine: Boolean = true,
-    val readOnly: Boolean = false,
-    val validation: ((String) -> ValidationResult)? = {
-        when (it.isNotBlank()) {
-            true -> ValidationResult.VALID
-            else -> ValidationResult.INVALID
-        }
-    },
-) {
-    enum class ValidationResult {
-        VALID, INVALID, WARN
-    }
-}
-
-fun String.isUrl(): Boolean = try {
-    URL(this).let { true }
-} catch (e: MalformedURLException) {
-    false
-}

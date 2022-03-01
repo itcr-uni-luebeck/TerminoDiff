@@ -126,7 +126,7 @@ data class NeighborhoodDisplay(
 ) {
     var layers by mutableStateOf(1)
 
-    fun getNeighborhoodGraph() = codeSystemDiff.combinedGraph?.getSubgraph(focusCode, layers)?.also {
+    fun getNeighborhoodGraph() = codeSystemDiff.combinedGraph!!.getSubgraph(focusCode, layers).also {
         logger.info("neighborhood of $focusCode and $layers layers: ${it.vertexSet().size} vertices and ${it.edgeSet().size} edges")
     }
 

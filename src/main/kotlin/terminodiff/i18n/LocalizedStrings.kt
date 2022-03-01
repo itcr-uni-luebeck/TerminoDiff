@@ -13,7 +13,9 @@ import terminodiff.terminodiff.engine.resources.InputResource
  * to recompose when the language changes.
  */
 abstract class LocalizedStrings(
+    val actions: String,
     val addLayer: String,
+    val addTarget: String,
     val anUnknownErrorOccurred: String,
     val boolean_: (Boolean?) -> String,
     val bothValuesAreNull: String,
@@ -26,6 +28,7 @@ abstract class LocalizedStrings(
     val closeAccept: String,
     val closeReject: String,
     val code: String = "Code",
+    val comments: String,
     val comparison: String,
     val compositional: String,
     val conceptDiff: String,
@@ -46,6 +49,7 @@ abstract class LocalizedStrings(
     val display: String = "Display",
     val displayAndInWhich_: (String?, GraphSide) -> String,
     val elements_: (Int) -> String,
+    val equivalence: String,
     val experimental: String,
     val fhirTerminologyServer: String,
     val fileFromPath_: (String) -> String,
@@ -53,6 +57,7 @@ abstract class LocalizedStrings(
     val fileSystem: String,
     val filtered: String,
     val graph: String = "Graph",
+    val graphFor_: (String) -> String = { c -> "Graph ($c)"},
     val group: String,
     val hierarchyMeaning: String,
     val id: String = "ID",
@@ -145,7 +150,9 @@ enum class SupportedLocale {
 }
 
 class GermanStrings : LocalizedStrings(
+    actions = "Aktionen",
     addLayer = "Ebene hinzufügen",
+    addTarget = "Ziel hinzufügen",
     anUnknownErrorOccurred = "Ein unbekannter Fehler ist aufgetrefen",
     boolean_ = {
         when (it) {
@@ -162,6 +169,7 @@ class GermanStrings : LocalizedStrings(
     clickForDetails = "Für Details klicken",
     closeAccept = "Akzeptieren",
     closeReject = "Verwerfen",
+    comments = "Kommentare",
     comparison = "Vergleich",
     compositional = "Kompositionell?",
     conceptDiff = "Konzept-Diff",
@@ -198,6 +206,7 @@ class GermanStrings : LocalizedStrings(
             else -> "Elemente"
         }
     },
+    equivalence = "Äquivalenz",
     experimental = "Experimentell?",
     fhirTerminologyServer = "FHIR-Terminologieserver",
     fileFromPath_ = { "Datei von: $it" },
@@ -305,7 +314,9 @@ class GermanStrings : LocalizedStrings(
 )
 
 class EnglishStrings : LocalizedStrings(
+    actions = "Actions",
     addLayer = "Add layer",
+    addTarget = "Add target",
     anUnknownErrorOccurred = "An unknown error occured.",
     boolean_ = {
         when (it) {
@@ -322,6 +333,7 @@ class EnglishStrings : LocalizedStrings(
     clickForDetails = "Click for details",
     closeAccept = "Accept",
     closeReject = "Reject",
+    comments = "Comments",
     comparison = "Comparison",
     compositional = "Compositional?",
     conceptDiff = "Concept Diff",
@@ -358,6 +370,7 @@ class EnglishStrings : LocalizedStrings(
             else -> "elements"
         }
     },
+    equivalence = "Equivalence",
     experimental = "Experimental?",
     fhirTerminologyServer = "FHIR Terminology Server",
     fileFromPath_ = { "File from: $it" },

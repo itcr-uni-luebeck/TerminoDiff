@@ -5,7 +5,10 @@ import org.hl7.fhir.r4.model.ConceptMap
 import org.hl7.fhir.r4.model.ConceptMap.*
 import org.hl7.fhir.r4.model.DateTimeType
 import org.hl7.fhir.r4.model.Enumerations
+import org.jgrapht.traverse.BreadthFirstIterator
 import terminodiff.engine.resources.DiffDataContainer
+import terminodiff.terminodiff.engine.graph.GraphSide
+import terminodiff.terminodiff.ui.panes.diff.NeighborhoodDisplay
 
 class ConceptMapState(
     diffDataContainer: DiffDataContainer,
@@ -28,6 +31,7 @@ class TerminodiffConceptMap(diffDataContainer: DiffDataContainer) {
         mutableStateOf(null) // TODO: 28/02/22 generate this from the concepts that are being mapped to
     var group by mutableStateOf(ConceptMapGroup(diffDataContainer))
 
+
     val toFhir by derivedStateOf {
         ConceptMap().apply {
             this.id = this@TerminodiffConceptMap.id.value
@@ -38,6 +42,10 @@ class TerminodiffConceptMap(diffDataContainer: DiffDataContainer) {
             this.dateElement = DateTimeType.now()
             this.group.add(this@TerminodiffConceptMap.group.toFhir)
         }
+    }
+
+    override fun toString(): String {
+        return "TerminodiffConceptMap(id=${id.value}, canonicalUrl=${canonicalUrl.value}, version=${version.value}, name=${name.value}, title=${title.value}, sourceValueSet=${sourceValueSet.value}, targetValueSet=${targetValueSet.value})"
     }
 }
 
@@ -53,13 +61,17 @@ class ConceptMapGroup(diffDataContainer: DiffDataContainer) {
     }
 
     private fun populateElements(diff: DiffDataContainer) {
-        diff.codeSystemDiff!!.onlyInLeftConcepts.map { code ->
-            val leftConcept = diff.leftGraphBuilder!!.nodeTree[code]!!
-            elements.add(ConceptMapElement().apply {
-                this.code.value = code
-                this.display.value = leftConcept.display
-            })
+        diff.codeSystemDiff!!.combinedGraph!!.affectedVertices.forEach { vertex ->
+            elements.add(ConceptMapElement(diff, vertex.code, vertex.getTooltip()))
         }
+//        diff.codeSystemDiff!!.onlyInLeftConcepts.map { code ->
+//            val leftConcept = diff.leftGraphBuilder!!.nodeTree[code]!!
+//            elements.add(ConceptMapElement(diff, code, leftConcept.display))
+//        }
+    }
+
+    override fun toString(): String {
+        return "ConceptMapGroup(sourceUri=${sourceUri.value}, sourceVersion=${sourceVersion.value}, targetUri=${targetUri.value}, targetVersion=${targetVersion.value})"
     }
 
     val toFhir: ConceptMapGroupComponent by derivedStateOf {
@@ -68,31 +80,63 @@ class ConceptMapGroup(diffDataContainer: DiffDataContainer) {
             this.sourceVersion = this@ConceptMapGroup.sourceVersion.value
             this.target = this@ConceptMapGroup.targetUri.value
             this.targetVersion = this@ConceptMapGroup.targetVersion.value
-            this.element.addAll(this@ConceptMapGroup.elements.map { it.toFhir })
+            this.element.addAll(this@ConceptMapGroup.elements.map { it.toFhir }
+                .filter(SourceElementComponent::hasTarget))
         }
     }
 }
 
-class ConceptMapElement {
-    val code: MutableState<String?> = mutableStateOf(null)
-    val display: MutableState<String?> = mutableStateOf(null)
-    val targets = mutableStateListOf<ConceptMapTarget>()
+class ConceptMapElement(diff: DiffDataContainer, code: String, display: String?) {
+    val code: MutableState<String> = mutableStateOf(code)
+    val display: MutableState<String?> = mutableStateOf(display)
+
+    val neighborhood by derivedStateOf {
+        NeighborhoodDisplay(this.code.value, diff.codeSystemDiff!!)
+    }
+
+    val suitableTargets by derivedStateOf {
+        // the list of targets is calculated from the neighborhood graph of the current vertex
+        neighborhood.getNeighborhoodGraph().vertexSet().filter { it.code != code } // the node itself can't be mapped to
+            .filter { it.side == GraphSide.BOTH } // we can only map to nodes that are shared across versions
+            .filter { v ->
+                val linkingEdges = diff.codeSystemDiff!!.combinedGraph!!.graph.edgeSet().filter { e ->
+                    (v.code == e.toCode && code == e.fromCode) || (v.code == e.fromCode && code == e.toCode)
+                }
+                return@filter linkingEdges.any { it.side != GraphSide.BOTH }
+            } // if the edge that links the current node, and the `v` node, is in both, disregard this node
+    }
+
+    val targets = mutableStateListOf<ConceptMapTarget>().apply {
+        suitableTargets.forEach { t ->
+            this.add(ConceptMapTarget().apply {
+                this.code.value = t.code
+                // TODO: 01/03/22 infer the equivalence as a best guess
+                this.equivalence.value = when {
+                    else -> null
+                }
+            })
+        }
+    }
 
     val toFhir: SourceElementComponent by derivedStateOf {
         SourceElementComponent().apply {
             this.code = this@ConceptMapElement.code.value
             this.display = this@ConceptMapElement.display.value
-            this.target.addAll(this@ConceptMapElement.targets.map { it.toFhir })
+            this.target.addAll(this@ConceptMapElement.targets.filter { it.equivalence.value != null }.map { it.toFhir })
         }
+    }
+
+    override fun toString(): String {
+        return "ConceptMapElement(code=${code.value}, display=${display.value})"
     }
 }
 
 class ConceptMapTarget {
     val code: MutableState<String?> = mutableStateOf(null)
     val display: MutableState<String?> = mutableStateOf(null)
-    val equivalence: MutableState<Enumerations.ConceptMapEquivalence> =
-        mutableStateOf(Enumerations.ConceptMapEquivalence.RELATEDTO)
+    val equivalence: MutableState<Enumerations.ConceptMapEquivalence?> = mutableStateOf(null)
     val comment: MutableState<String?> = mutableStateOf(null)
+
 
     val toFhir: TargetElementComponent by derivedStateOf {
         TargetElementComponent().apply {
@@ -101,5 +145,9 @@ class ConceptMapTarget {
             this.comment = this@ConceptMapTarget.comment.value
             this.equivalence = this@ConceptMapTarget.equivalence.value
         }
+    }
+
+    override fun toString(): String {
+        return "ConceptMapTarget(code=${code.value}, display=${display.value}, equivalence=${equivalence.value}, comment=${comment.value})"
     }
 }

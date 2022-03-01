@@ -454,3 +454,23 @@ fun <T> ShowFilterDialog(
         }
     }
 }
+
+fun <TableData, SubList> columnSpecForMultiRow(
+    title: String,
+    weight: Float,
+    elementListGetter: (TableData) -> List<SubList>,
+    dividerColor: Color,
+    rowContent: @Composable (TableData, SubList) -> Unit,
+) = ColumnSpec<TableData>(title = title, weight = weight) { td ->
+    val elements = elementListGetter.invoke(td)
+    Column(Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        elements.forEachIndexed { index, subList ->
+            rowContent(td, subList)
+            if (index < elements.size - 1) {
+                Divider(Modifier.fillMaxWidth(0.9f).height(1.dp), color = dividerColor)
+            }
+        }
+    }
+}
