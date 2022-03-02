@@ -25,6 +25,7 @@ import terminodiff.i18n.LocalizedStrings
 import terminodiff.ui.MouseOverPopup
 import java.net.MalformedURLException
 import java.net.URL
+import java.util.*
 import javax.swing.Icon
 
 fun isError(validationResult: EditTextSpec.ValidationResult?) = when (validationResult) {
@@ -229,7 +230,7 @@ fun <T> Dropdown(
 
 @Composable
 fun AutocompleteEditText(
-    autocompleteSuggestions: List<String>,
+    autocompleteSuggestions: SortedMap<String, String>,
     value: String?,
     limitSuggestions: Int = 5,
     filterSuggestions: (String?, String) -> Boolean = { input, suggestion -> suggestion.startsWith(input ?: "") },
@@ -239,9 +240,9 @@ fun AutocompleteEditText(
 ) {
     var hasFocus by remember { mutableStateOf(false) }
     val currentSuggestions by derivedStateOf {
-        autocompleteSuggestions.filter { suggestion ->
+        autocompleteSuggestions.filterKeys { suggestion ->
             filterSuggestions(value, suggestion)
-        }.sorted().take(limitSuggestions)
+        }.entries.take(limitSuggestions)
     }
     Box(Modifier.fillMaxWidth()) {
         val validation = validateInput?.invoke(value ?: "")
@@ -259,18 +260,18 @@ fun AutocompleteEditText(
         DropdownMenu(expanded = when {
             !hasFocus -> false
             currentSuggestions.isEmpty() -> false
-            currentSuggestions.size == 1 && currentSuggestions[0] == value -> false // the value is entered into the text field verbatim
+            currentSuggestions.size == 1 && currentSuggestions[0].key == value -> false // the value is entered into the text field verbatim
             else -> true
         }, modifier = Modifier.background(colorScheme.secondaryContainer), onDismissRequest = {
             hasFocus = false
         }, focusable = false) {
-            currentSuggestions.forEach { label ->
+            currentSuggestions.forEach { entry ->
                 DropdownMenuItem(onClick = {
-                    onValueChange(label)
+                    onValueChange(entry.key)
                     hasFocus = false
                 }) {
                     Text(
-                        text = label,
+                        text = entry.value,
                         color = colorScheme.onSecondaryContainer,
                     )
                 }

@@ -17,6 +17,7 @@ abstract class LocalizedStrings(
     val addLayer: String,
     val addTarget: String,
     val anUnknownErrorOccurred: String,
+    val automatic: String,
     val boolean_: (Boolean?) -> String,
     val bothValuesAreNull: String,
     val calculateDiff: String,
@@ -86,6 +87,7 @@ abstract class LocalizedStrings(
             else -> "$it items"
         }
     },
+    val ok: String = "OK",
     val oneValueIsNull: String,
     val onlyConceptDifferences: String,
     val onlyInLeft: String,
@@ -154,6 +156,7 @@ class GermanStrings : LocalizedStrings(
     addLayer = "Ebene hinzufügen",
     addTarget = "Ziel hinzufügen",
     anUnknownErrorOccurred = "Ein unbekannter Fehler ist aufgetrefen",
+    automatic = "Automatik",
     boolean_ = {
         when (it) {
             null -> "null"
@@ -318,6 +321,7 @@ class EnglishStrings : LocalizedStrings(
     addLayer = "Add layer",
     addTarget = "Add target",
     anUnknownErrorOccurred = "An unknown error occured.",
+    automatic = "Automatic",
     boolean_ = {
         when (it) {
             null -> "null"

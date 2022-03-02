@@ -28,12 +28,13 @@ import libraries.accompanist.pager.rememberPagerState
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.conceptmap.ConceptMapState
-import terminodiff.terminodiff.engine.graph.CombinedVertex
+import terminodiff.terminodiff.engine.graph.GraphSide
 import terminodiff.terminodiff.ui.panes.conceptmap.mapping.ConceptMappingEditorContent
 import terminodiff.terminodiff.ui.panes.conceptmap.meta.ConceptMapMetaEditorContent
 import terminodiff.ui.TabItem
 import terminodiff.ui.Tabs
 import terminodiff.ui.TabsContent
+import java.util.*
 
 @OptIn(ExperimentalMaterialApi::class, ExperimentalPagerApi::class)
 @Composable
@@ -47,7 +48,9 @@ fun ConceptMapDialog(
     val conceptMapState by remember { mutableStateOf(ConceptMapState(diffDataContainer)) }
     val pagerState = rememberPagerState()
     val allConceptCodes by derivedStateOf {
-        diffDataContainer.codeSystemDiff!!.combinedGraph!!.graph.vertexSet().map(CombinedVertex::code)
+        //diffDataContainer.codeSystemDiff!!.combinedGraph!!.graph.vertexSet().map(CombinedVertex::code)
+        diffDataContainer.codeSystemDiff!!.combinedGraph!!.graph.vertexSet().filter { it.side == GraphSide.BOTH }
+            .associate { it.code to "${it.code} (${it.getTooltip()})" }.toSortedMap()
     }
     Window(
         title = localizedStrings.conceptMap,
@@ -56,7 +59,8 @@ fun ConceptMapDialog(
     ) {
         Column(Modifier.fillMaxSize().background(colorScheme.background)) {
             Column(Modifier.padding(8.dp).clip(RoundedCornerShape(8.dp))) {
-                val tabs = listOf(ConceptMapTabItem.conceptMapping(allConceptCodes), ConceptMapTabItem.metadata())
+                val tabs = listOf(ConceptMapTabItem.conceptMapping(allConceptCodes, diffDataContainer),
+                    ConceptMapTabItem.metadata())
                 Tabs(tabs = tabs, pagerState = pagerState, localizedStrings = localizedStrings)
                 TabsContent(tabs = tabs,
                     pagerState = pagerState,
@@ -88,15 +92,16 @@ class ConceptMapTabItem(
             }
         )
 
-        fun conceptMapping(allConceptCodes: List<String>) = ConceptMapTabItem(
+        fun conceptMapping(allConceptCodes: SortedMap<String, String>, diffDataContainer: DiffDataContainer) = ConceptMapTabItem(
             icon = Icons.Default.AccountTree,
             title = { conceptMap },
             screen = { strings, _, data ->
                 ConceptMappingEditorContent(
                     localizedStrings = strings,
                     conceptMapState = data.conceptMapState,
+                    diffDataContainer = diffDataContainer,
                     useDarkTheme = data.isDarkTheme,
-                    allConceptCodes = allConceptCodes
+                    allConceptCodes = allConceptCodes,
                 )
             }
         )

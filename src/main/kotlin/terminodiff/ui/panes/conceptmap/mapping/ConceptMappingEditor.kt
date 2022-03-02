@@ -1,3 +1,5 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package terminodiff.terminodiff.ui.panes.conceptmap.mapping
 
 import androidx.compose.foundation.background
@@ -25,6 +27,7 @@ import androidx.compose.ui.unit.dp
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.java.ui.NeighborhoodJFrame
 import terminodiff.terminodiff.engine.conceptmap.ConceptMapElement
@@ -34,9 +37,11 @@ import terminodiff.terminodiff.ui.util.AutocompleteEditText
 import terminodiff.terminodiff.ui.util.Dropdown
 import terminodiff.terminodiff.ui.util.EditText
 import terminodiff.terminodiff.ui.util.EditTextSpec
+import terminodiff.ui.MouseOverPopup
 import terminodiff.ui.util.ColumnSpec
 import terminodiff.ui.util.LazyTable
 import terminodiff.ui.util.columnSpecForMultiRow
+import java.util.*
 
 private val logger: Logger = LoggerFactory.getLogger("ConceptMappingEditor")
 
@@ -44,13 +49,14 @@ private val logger: Logger = LoggerFactory.getLogger("ConceptMappingEditor")
 fun ConceptMappingEditorContent(
     localizedStrings: LocalizedStrings,
     conceptMapState: ConceptMapState,
+    diffDataContainer: DiffDataContainer,
     useDarkTheme: Boolean,
-    allConceptCodes: List<String>,
+    allConceptCodes: SortedMap<String, String>,
 ) {
     val lazyListState = rememberLazyListState()
     val dividerColor = colorScheme.onSecondaryContainer
     val columnSpecs by derivedStateOf {
-        getColumnSpecs(localizedStrings, useDarkTheme, dividerColor, allConceptCodes)
+        getColumnSpecs(diffDataContainer, localizedStrings, useDarkTheme, dividerColor, allConceptCodes)
     }
 
     val columnHeight: Dp by derivedStateOf {
@@ -70,19 +76,18 @@ fun ConceptMappingEditorContent(
 }
 
 private fun getColumnSpecs(
+    diffDataContainer: DiffDataContainer,
     localizedStrings: LocalizedStrings,
     useDarkTheme: Boolean,
     dividerColor: Color,
-    allConceptCodes: List<String>,
+    allConceptCodes: SortedMap<String, String>,
 ): List<ColumnSpec<ConceptMapElement>> = listOf(codeColumnSpec(localizedStrings),
     displayColumnSpec(localizedStrings),
-    actionsColumnSpec(
-        localizedStrings,
-        useDarkTheme,
-    ),
-    targetColumnSpec(localizedStrings, dividerColor, allConceptCodes),
+    actionsColumnSpec(diffDataContainer, localizedStrings, useDarkTheme),
     equivalenceColumnSpec(localizedStrings, dividerColor),
-    commentsColumnSpec(localizedStrings, dividerColor))
+    targetColumnSpec(localizedStrings, dividerColor, allConceptCodes),
+    commentsColumnSpec(localizedStrings, dividerColor),
+    targetStatusColumnSpec(localizedStrings, dividerColor))
 
 private fun codeColumnSpec(localizedStrings: LocalizedStrings) =
     ColumnSpec.StringSearchableColumnSpec<ConceptMapElement>(title = localizedStrings.code,
@@ -96,6 +101,7 @@ private fun displayColumnSpec(localizedStrings: LocalizedStrings) =
 
 @OptIn(ExperimentalMaterial3Api::class)
 private fun actionsColumnSpec(
+    diffDataContainer: DiffDataContainer,
     localizedStrings: LocalizedStrings,
     useDarkTheme: Boolean,
 ) = ColumnSpec<ConceptMapElement>(title = localizedStrings.actions, weight = 0.08f) { element ->
@@ -109,7 +115,9 @@ private fun actionsColumnSpec(
                 Icon(Icons.Default.Hub, localizedStrings.graph)
             }
             IconButton(onClick = {
-                element.targets.add(ConceptMapTarget())
+                element.targets.add(ConceptMapTarget(diffDataContainer).apply {
+                    isAutomaticallySet = false
+                })
                 logger.debug("Added target for $element")
             }, modifier = Modifier.size(24.dp)) {
                 Icon(Icons.Default.AddCircle, localizedStrings.addTarget)
@@ -118,8 +126,29 @@ private fun actionsColumnSpec(
     }
 }
 
+private fun equivalenceColumnSpec(
+    localizedStrings: LocalizedStrings,
+    dividerColor: Color,
+): ColumnSpec<ConceptMapElement> {
+    return columnSpecForMultiRow(title = localizedStrings.equivalence,
+        weight = 0.2f,
+        elementListGetter = { it.targets },
+        dividerColor = dividerColor) { _, target ->
+        Dropdown(
+            elements = ConceptMapEquivalenceDisplay.values().toList(),
+            elementDisplay = { it.displayIndent() },
+            textFieldDisplay = { it.display },
+            fontStyle = { if (it.recommendedUse) FontStyle.Normal else FontStyle.Italic },
+            selectedElement = ConceptMapEquivalenceDisplay.fromEquivalence(target.equivalence.value),
+        ) { newValue ->
+            target.equivalence.value = newValue.equivalence
+            target.isAutomaticallySet = false
+        }
+    }
+}
+
 @OptIn(ExperimentalMaterial3Api::class)
-private fun targetColumnSpec(localizedStrings: LocalizedStrings, dividerColor: Color, allConceptCodes: List<String>) =
+private fun targetColumnSpec(localizedStrings: LocalizedStrings, dividerColor: Color, allConceptCodes: SortedMap<String, String>) =
     columnSpecForMultiRow<ConceptMapElement, ConceptMapTarget>(localizedStrings.target,
         weight = 0.2f,
         elementListGetter = { it.targets },
@@ -147,18 +176,9 @@ private fun targetColumnSpec(localizedStrings: LocalizedStrings, dividerColor: C
                 }
             ) { newCode ->
                 target.code.value = newCode
+                target.isAutomaticallySet = false
             }
-//            EditText(data = target,
-//                weight = 0.9f,
-//                spec = EditTextSpec(title = null, valueState = { target.code }, validation = { s ->
-//                    when (s.trim().toLowerCase(Locale.current)) {
-//                        in td.suitableTargets.map { it.code.toLowerCase(Locale.current) } -> EditTextSpec.ValidationResult.VALID
-//                        in allConceptCodes.map { it.toLowerCase(Locale.current) } -> EditTextSpec.ValidationResult.WARN
-//                        else -> EditTextSpec.ValidationResult.INVALID
-//                    }
-//                }), localizedStrings = localizedStrings)
         }
-
     }
 
 private fun commentsColumnSpec(localizedStrings: LocalizedStrings, dividerColor: Color) =
@@ -171,25 +191,18 @@ private fun commentsColumnSpec(localizedStrings: LocalizedStrings, dividerColor:
             localizedStrings = localizedStrings)
     }
 
-private fun equivalenceColumnSpec(
-    localizedStrings: LocalizedStrings,
-    dividerColor: Color,
-): ColumnSpec<ConceptMapElement> {
-    return columnSpecForMultiRow(title = localizedStrings.equivalence,
-        weight = 0.2f,
+private fun targetStatusColumnSpec(localizedStrings: LocalizedStrings, dividerColor: Color) =
+    columnSpecForMultiRow<ConceptMapElement, ConceptMapTarget>(
+        title = localizedStrings.status,
+        weight = 0.05f,
         elementListGetter = { it.targets },
-        dividerColor = dividerColor) { _, target ->
-        Dropdown(
-            elements = ConceptMapEquivalenceDisplay.values().toList(),
-            elementDisplay = { it.displayIndent() },
-            textFieldDisplay = { it.display },
-            fontStyle = { if (it.recommendedUse) FontStyle.Normal else FontStyle.Italic },
-            selectedElement = ConceptMapEquivalenceDisplay.fromEquivalence(target.equivalence.value),
-        ) { newValue ->
-            target.equivalence.value = newValue.equivalence
+        dividerColor = dividerColor
+    ) { _, target ->
+        val description = target.state.description.invoke(localizedStrings)
+        MouseOverPopup(text = description) {
+            Icon(target.state.image, description)
         }
     }
-}
 
 private fun showElementNeighborhood(
     focusElement: ConceptMapElement,
