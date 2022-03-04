@@ -13,11 +13,14 @@ import terminodiff.terminodiff.engine.resources.InputResource
  * to recompose when the language changes.
  */
 abstract class LocalizedStrings(
+    val acceptAll: String,
     val actions: String,
     val addLayer: String,
     val addTarget: String,
     val anUnknownErrorOccurred: String,
+    val areYouSure: String,
     val automatic: String,
+    val automappedCount_: (Int) -> String,
     val boolean_: (Boolean?) -> String,
     val bothValuesAreNull: String,
     val calculateDiff: String,
@@ -74,11 +77,13 @@ abstract class LocalizedStrings(
     val loadLeft: String,
     val loadRight: String,
     val loadedResources: String,
+    val mappableCount_: (Int) -> String,
     val metaVersion: String,
     val metadata: String,
     val metadataDiff: String,
     val metadataDiffResults_: (MetadataComparisonResult) -> String,
     val name: String = "Name",
+    val no: String,
     val noDataLoaded: String,
     val notRecommended: String,
     val numberItems_: (Int) -> String = {
@@ -104,6 +109,7 @@ abstract class LocalizedStrings(
     val propertyType: String,
     val publisher: String,
     val purpose: String,
+    val reallyAcceptAll: String,
     val reload: String,
     val removeLayer: String,
     val rightValue: String,
@@ -132,15 +138,17 @@ abstract class LocalizedStrings(
     val uniLuebeck: String,
     val use: String,
     val useContext: String,
-    val vRead: String = "VRead",
+    val vread: String = "VRead",
     val vreadExplanationEnabled_: (Boolean) -> String,
     val vReadFor_: (InputResource) -> String,
     val valid: String,
+    val validAcceptedCount_: (Int) -> String,
     val value: String,
     val valueSet: String = "ValueSet",
     val version: String = "Version",
     val versionNeeded: String,
     val vreadFromUrlAndMetaVersion_: (String, String) -> String,
+    val yes: String,
 )
 
 enum class SupportedLocale {
@@ -152,11 +160,14 @@ enum class SupportedLocale {
 }
 
 class GermanStrings : LocalizedStrings(
+    acceptAll = "Alle akzeptieren",
     actions = "Aktionen",
     addLayer = "Ebene hinzufügen",
     addTarget = "Ziel hinzufügen",
-    anUnknownErrorOccurred = "Ein unbekannter Fehler ist aufgetrefen",
+    anUnknownErrorOccurred = "Ein unbekannter Fehler ist aufgetreten",
+    areYouSure = "Bist Du sicher?",
     automatic = "Automatik",
+    automappedCount_ = { "$it automatisch gemappt"},
     boolean_ = {
         when (it) {
             null -> "null"
@@ -242,6 +253,7 @@ class GermanStrings : LocalizedStrings(
     metadata = "Metadaten",
     metadataDiff = "Metadaten-Diff",
     rightValue = "Rechter Wert",
+    mappableCount_ = { "$it abbildbar" },
     metadataDiffResults_ = {
         when (it) {
             MetadataComparisonResult.IDENTICAL -> "Identisch"
@@ -249,6 +261,7 @@ class GermanStrings : LocalizedStrings(
         }
     },
     metaVersion = "Meta-Version",
+    no = "Nein",
     noDataLoaded = "Keine Daten geladen",
     notRecommended = "Nicht empfohlen",
     oneValueIsNull = "Ein Wert ist null",
@@ -273,6 +286,8 @@ class GermanStrings : LocalizedStrings(
     propertyDesignationForCode_ = { code -> "Eigenschaften und Designationen für Konzept '$code'" },
     propertyType = "Typ",
     purpose = "Zweck",
+    reallyAcceptAll = "Möchtest Du wirklich alle atomatisch gemappten Konzepte akzeptieren?\n" +
+            "Dies kann nicht rückgängig gemacht werden.",
     reload = "Neu laden",
     removeLayer = "Ebene entfernen",
     search = "Suchen",
@@ -303,6 +318,7 @@ class GermanStrings : LocalizedStrings(
     useContext = "Nutzungskontext",
     vReadFor_ = { "VRead für ${it.downloadableCodeSystem!!.canonicalUrl}" },
     valid = "Gültig",
+    validAcceptedCount_ = { "$it gültig/akzeptiert"},
     value = "Wert",
     versionNeeded = "Version erforderlich?",
     vreadExplanationEnabled_ = {
@@ -313,15 +329,19 @@ class GermanStrings : LocalizedStrings(
     },
     vreadFromUrlAndMetaVersion_ = { url, meta ->
         "VRead von $url (Meta-Version: $meta)"
-    }
+    },
+    yes = "Ja"
 )
 
 class EnglishStrings : LocalizedStrings(
+    acceptAll = "Accept all",
     actions = "Actions",
     addLayer = "Add layer",
     addTarget = "Add target",
     anUnknownErrorOccurred = "An unknown error occured.",
+    areYouSure = "Are you sure?",
     automatic = "Automatic",
+    automappedCount_ = { "$it automatically mapped" },
     boolean_ = {
         when (it) {
             null -> "null"
@@ -404,6 +424,7 @@ class EnglishStrings : LocalizedStrings(
     loadLeft = "Load left",
     loadRight = "Load right",
     loadedResources = "Loaded resources",
+    mappableCount_ = { "$it mappable" },
     metadata = "Metadata",
     metadataDiff = "Metadata Diff",
     metadataDiffResults_ = {
@@ -413,6 +434,7 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     metaVersion = "Meta Version",
+    no = "No",
     noDataLoaded = "No data loaded",
     notRecommended = "Not recommended",
     oneValueIsNull = "One value is null",
@@ -437,6 +459,8 @@ class EnglishStrings : LocalizedStrings(
     },
     propertyDesignationForCode_ = { code -> "Properties and designations for concept '$code'" },
     propertyType = "Type",
+    reallyAcceptAll = "Do you really want to accept all auto-mapped concepts?\n" +
+            "You can not undo this.",
     reload = "Reload",
     removeLayer = "Remove layers",
     rightValue = "Right value",
@@ -468,6 +492,7 @@ class EnglishStrings : LocalizedStrings(
     useContext = "Use context",
     vReadFor_ = { "VRead for ${it.downloadableCodeSystem!!.canonicalUrl}" },
     valid = "Valid",
+    validAcceptedCount_ = { "$it valid/accepted"},
     value = "Value",
     versionNeeded = "Version needed?",
     vreadExplanationEnabled_ = {
@@ -478,7 +503,9 @@ class EnglishStrings : LocalizedStrings(
     },
     vreadFromUrlAndMetaVersion_ = { url, meta ->
         "VRead from $url (Meta version: $meta)"
-    })
+    },
+    yes = "Yes"
+)
 
 fun getStrings(locale: SupportedLocale = SupportedLocale.defaultLocale): LocalizedStrings = when (locale) {
     SupportedLocale.DE -> GermanStrings()

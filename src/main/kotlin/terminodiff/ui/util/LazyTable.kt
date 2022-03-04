@@ -354,7 +354,10 @@ open class ColumnSpec<T>(
             mergeIf = mergeIf,
             tooltipText = { it.instanceGetter() },
             content = {
-                SelectableText(text = it.instanceGetter(), color = LocalContentColor.current)
+                SelectableText(modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = it.instanceGetter(),
+                    color = LocalContentColor.current)
             },
         )
     }
@@ -362,7 +365,7 @@ open class ColumnSpec<T>(
 
 class SearchState<T>(
     private val columnSpecs: List<ColumnSpec<T>>,
-    val tableData: List<T>
+    val tableData: List<T>,
 ) {
     private val searchableColumns: List<ColumnSpec<T>> by derivedStateOf {
         columnSpecs.filter { it.searchPredicate != null }
@@ -437,7 +440,7 @@ fun <T> ShowFilterDialog(
 ) {
     var inputText: String by remember { mutableStateOf(searchState.getSearchQueryFor(title)) }
     TerminodiffDialog(title = localizedStrings.search, onCloseRequest = onClose, size = DpSize(400.dp, 300.dp)) {
-        LabeledTextField(value = inputText, onValueChange = { inputText = it }, labelText = title, singleLine = true, )
+        LabeledTextField(value = inputText, onValueChange = { inputText = it }, labelText = title, singleLine = true)
         Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(modifier = Modifier.wrapContentSize(),

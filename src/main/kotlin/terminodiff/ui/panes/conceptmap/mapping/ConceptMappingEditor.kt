@@ -5,23 +5,26 @@ package terminodiff.terminodiff.ui.panes.conceptmap.mapping
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.material.Button
+import androidx.compose.material.ButtonDefaults
+import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
+import androidx.compose.material.icons.filled.DoneAll
 import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material.icons.filled.RemoveCircle
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
-import androidx.compose.material3.LocalMinimumTouchTargetEnforcement
+import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
+import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import org.hl7.fhir.r4.model.Enumerations.ConceptMapEquivalence
@@ -42,6 +45,7 @@ import terminodiff.ui.util.ColumnSpec
 import terminodiff.ui.util.LazyTable
 import terminodiff.ui.util.columnSpecForMultiRow
 import java.util.*
+import javax.swing.JOptionPane
 
 private val logger: Logger = LoggerFactory.getLogger("ConceptMappingEditor")
 
@@ -64,6 +68,7 @@ fun ConceptMappingEditorContent(
     }
     Column(Modifier.background(colorScheme.tertiaryContainer).fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        MappingStatus(conceptMapState, localizedStrings)
         LazyTable(columnSpecs = columnSpecs,
             cellHeight = columnHeight,
             tableData = conceptMapState.conceptMap.group.elements,
@@ -72,6 +77,58 @@ fun ConceptMappingEditorContent(
             zebraStripingColor = colorScheme.primaryContainer,
             lazyListState = lazyListState,
             keyFun = { it.code.value })
+    }
+}
+
+@Composable
+fun MappingStatus(conceptMapState: ConceptMapState, localizedStrings: LocalizedStrings) {
+    val elements by derivedStateOf { conceptMapState.conceptMap.group.elements }
+    val mappableCount by derivedStateOf { elements.size }
+    val automappedCount by derivedStateOf {
+        elements.sumOf { it.targets.count { t -> t.isAutomaticallySet } }
+    }
+    val validCount by derivedStateOf {
+        elements.sumOf { it.targets.count { t -> t.state == ConceptMapTarget.MappingState.VALID } }
+    }
+    Row(Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+        verticalAlignment = Alignment.CenterVertically) {
+        Text(buildAnnotatedString {
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(localizedStrings.mappableCount_(mappableCount))
+            }
+            append("; ")
+            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                append(localizedStrings.automappedCount_(automappedCount))
+            }
+            append("; ")
+            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                append(localizedStrings.validAcceptedCount_(validCount))
+            }
+        }, color = colorScheme.onTertiaryContainer, style = typography.titleLarge)
+
+        Button(onClick = {
+            askAcceptAll(conceptMapState, localizedStrings)
+        }, colors = ButtonDefaults.buttonColors(backgroundColor = colorScheme.primary), enabled = automappedCount > 0) {
+            Icon(Icons.Default.DoneAll, localizedStrings.acceptAll, tint = colorScheme.onPrimary)
+            Text(text = localizedStrings.acceptAll, color = colorScheme.onPrimary)
+        }
+    }
+}
+
+private fun askAcceptAll(conceptMapState: ConceptMapState, localizedStrings: LocalizedStrings) {
+    val options = listOf(localizedStrings.no, localizedStrings.yes).toTypedArray()
+    when (JOptionPane.showOptionDialog(/* parentComponent = */ null,
+        /* message = */ localizedStrings.reallyAcceptAll,
+        /* title = */ localizedStrings.areYouSure,
+        /* optionType = */ JOptionPane.YES_NO_OPTION,
+        /* messageType = */ JOptionPane.QUESTION_MESSAGE,
+        /* icon = */ null,
+        /* options = */ options,
+        /* initialValue = */ options[0])) {
+        options.indexOf(localizedStrings.yes) -> {
+            conceptMapState.acceptAll()
+        }
     }
 }
 
@@ -148,38 +205,39 @@ private fun equivalenceColumnSpec(
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
-private fun targetColumnSpec(localizedStrings: LocalizedStrings, dividerColor: Color, allConceptCodes: SortedMap<String, String>) =
-    columnSpecForMultiRow<ConceptMapElement, ConceptMapTarget>(localizedStrings.target,
-        weight = 0.2f,
-        elementListGetter = { it.targets },
-        dividerColor = dividerColor) { td, target ->
-        Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalAlignment = Alignment.CenterVertically) {
-            CompositionLocalProvider(LocalMinimumTouchTargetEnforcement provides false) {
-                IconButton(onClick = {
-                    td.targets.remove(target)
-                    logger.debug("Removed target $target for $td")
-                }, modifier = Modifier.size(24.dp)) {
-                    Icon(Icons.Default.RemoveCircle, localizedStrings.addTarget)
-                }
-            }
-            AutocompleteEditText(
-                autocompleteSuggestions = allConceptCodes,
-                value = target.code.value,
-                localizedStrings = localizedStrings,
-                validateInput = { input ->
-                    when (input) {
-                        !in allConceptCodes -> EditTextSpec.ValidationResult.INVALID
-                        else -> EditTextSpec.ValidationResult.VALID
-                    }
-                }
-            ) { newCode ->
-                target.code.value = newCode
-                target.isAutomaticallySet = false
+private fun targetColumnSpec(
+    localizedStrings: LocalizedStrings,
+    dividerColor: Color,
+    allConceptCodes: SortedMap<String, String>,
+) = columnSpecForMultiRow<ConceptMapElement, ConceptMapTarget>(localizedStrings.target,
+    weight = 0.2f,
+    elementListGetter = { it.targets },
+    dividerColor = dividerColor) { td, target ->
+    Row(Modifier.fillMaxWidth().padding(horizontal = 8.dp),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        verticalAlignment = Alignment.CenterVertically) {
+        CompositionLocalProvider(LocalMinimumTouchTargetEnforcement provides false) {
+            IconButton(onClick = {
+                td.targets.remove(target)
+                logger.debug("Removed target $target for $td")
+            }, modifier = Modifier.size(24.dp)) {
+                Icon(Icons.Default.RemoveCircle, localizedStrings.addTarget)
             }
         }
+        AutocompleteEditText(autocompleteSuggestions = allConceptCodes,
+            value = target.code.value,
+            localizedStrings = localizedStrings,
+            validateInput = { input ->
+                when (input) {
+                    !in allConceptCodes -> EditTextSpec.ValidationResult.INVALID
+                    else -> EditTextSpec.ValidationResult.VALID
+                }
+            }) { newCode ->
+            target.code.value = newCode
+            target.isAutomaticallySet = false
+        }
     }
+}
 
 private fun commentsColumnSpec(localizedStrings: LocalizedStrings, dividerColor: Color) =
     columnSpecForMultiRow<ConceptMapElement, ConceptMapTarget>(title = localizedStrings.comments,
@@ -192,15 +250,28 @@ private fun commentsColumnSpec(localizedStrings: LocalizedStrings, dividerColor:
     }
 
 private fun targetStatusColumnSpec(localizedStrings: LocalizedStrings, dividerColor: Color) =
-    columnSpecForMultiRow<ConceptMapElement, ConceptMapTarget>(
-        title = localizedStrings.status,
-        weight = 0.05f,
+    columnSpecForMultiRow<ConceptMapElement, ConceptMapTarget>(title = localizedStrings.status,
+        weight = 0.08f,
         elementListGetter = { it.targets },
-        dividerColor = dividerColor
-    ) { _, target ->
+        dividerColor = dividerColor) { _, target ->
         val description = target.state.description.invoke(localizedStrings)
-        MouseOverPopup(text = description) {
-            Icon(target.state.image, description)
+        Column(Modifier.height(56.dp).fillMaxWidth(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally) {
+            MouseOverPopup(text = description) {
+                val icon: @Composable (Color?) -> Unit =
+                    { Icon(target.state.image, description, tint = it ?: LocalContentColor.current) }
+                if (target.state == ConceptMapTarget.MappingState.AUTO) {
+                    FloatingActionButton(modifier = Modifier.size(48.dp),
+                        onClick = { target.isAutomaticallySet = false },
+                        backgroundColor = colorScheme.tertiary) {
+                        icon(colorScheme.onTertiary)
+                    }
+                } else {
+                    icon(null)
+                }
+
+            }
         }
     }
 

@@ -40,12 +40,12 @@ import java.util.*
 @Composable
 fun ConceptMapDialog(
     diffDataContainer: DiffDataContainer,
+    conceptMapState: ConceptMapState,
     localizedStrings: LocalizedStrings,
     fhirContext: FhirContext,
     isDarkTheme: Boolean,
     onCloseRequest: () -> Unit,
 ) {
-    val conceptMapState by remember { mutableStateOf(ConceptMapState(diffDataContainer)) }
     val pagerState = rememberPagerState()
     val allConceptCodes by derivedStateOf {
         //diffDataContainer.codeSystemDiff!!.combinedGraph!!.graph.vertexSet().map(CombinedVertex::code)

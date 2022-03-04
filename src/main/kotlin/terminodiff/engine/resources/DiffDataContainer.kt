@@ -1,9 +1,6 @@
 package terminodiff.engine.resources
 
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.DataFormatException
 import org.hl7.fhir.r4.model.CodeSystem
@@ -13,6 +10,7 @@ import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.graph.CodeSystemDiffBuilder
 import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.terminodiff.engine.conceptmap.ConceptMapState
 import terminodiff.terminodiff.engine.graph.CombinedGraphBuilder
 import terminodiff.terminodiff.engine.resources.InputResource
 import java.util.*
@@ -41,6 +39,11 @@ class DiffDataContainer(private val fhirContext: FhirContext, strings: Localized
         buildCsGraph(rightCodeSystem)?.also {
             logger.info("Right graph: ${it.graph.vertexSet().count()} vertices, ${it.graph.edgeSet().count()} edges")
         }
+    }
+
+    val allCodes: Set<String> by derivedStateOf {
+        setOf<String>().plus(leftGraphBuilder?.nodeTree?.map { it.key } ?: emptySet())
+            .plus(rightGraphBuilder?.nodeTree?.map { it.key } ?: emptySet())
     }
 
     val codeSystemDiff: CodeSystemDiffBuilder? by derivedStateOf {

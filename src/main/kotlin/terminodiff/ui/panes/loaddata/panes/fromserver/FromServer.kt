@@ -273,7 +273,7 @@ fun ListOfResources(
             onLoadFile = onLoadLeftFile)
 
         val vReadDisabled = (selectedItem?.metaVersion?.equals("1")) ?: true
-        LoadButton(text = localizedStrings.vRead,
+        LoadButton(text = localizedStrings.vread,
             selectedItem = selectedItem,
             baseServerUrl = baseServerUrl,
             iconImageVector = Icons.Default.Compare,

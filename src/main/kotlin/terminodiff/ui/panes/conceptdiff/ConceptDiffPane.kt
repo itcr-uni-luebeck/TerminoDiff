@@ -24,6 +24,7 @@ import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.terminodiff.engine.conceptmap.ConceptMapState
 import terminodiff.terminodiff.ui.panes.conceptdiff.display.DisplayDetailsDialog
 import terminodiff.terminodiff.ui.panes.conceptdiff.propertydesignation.PropertyDesignationDialog
 import terminodiff.terminodiff.ui.panes.conceptmap.ConceptMapDialog
@@ -67,6 +68,7 @@ fun ConceptDiffPanel(
     }
 
     var dialogData: Pair<ConceptTableData, DetailsDialogKind>? by remember { mutableStateOf(null) }
+    val conceptMapState by remember { mutableStateOf(ConceptMapState(diffDataContainer)) }
     var showConceptMapDialog: Boolean by remember { mutableStateOf(false) }
 
     dialogData?.let { (data, kind) ->
@@ -90,7 +92,11 @@ fun ConceptDiffPanel(
     }
 
     if (showConceptMapDialog) {
-        ConceptMapDialog(diffDataContainer, localizedStrings, fhirContext, useDarkTheme) {
+        ConceptMapDialog(diffDataContainer = diffDataContainer,
+            conceptMapState = conceptMapState,
+            localizedStrings = localizedStrings,
+            fhirContext = fhirContext,
+            isDarkTheme = useDarkTheme) {
             showConceptMapDialog = false
         }
     }

@@ -42,18 +42,6 @@ fun TerminodiffAppContent(
         diffDataContainer.rightResource = it
     }
 
-    val coroutineScope = rememberCoroutineScope()
-    when (InetAddress.getLocalHost().hostName.lowercase(Locale.getDefault())) {
-        // STOPSHIP: 23/02/22
-        "joshua-athena-windows" -> coroutineScope.launch {
-            diffDataContainer.rightResource = InputResource(InputResource.Kind.FILE,
-                File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2020_10_01.json"))
-            diffDataContainer.leftResource = InputResource(InputResource.Kind.FILE,
-                File("C:\\Users\\jpwie\\repos\\TerminoDiff\\src\\main\\resources\\testresources\\oncotree_2021_11_02.json"))
-            showDiff = true
-        }
-    }
-
     TerminodiffContentWindow(localizedStrings = localizedStrings,
         scrollState = scrollState,
         useDarkTheme = useDarkTheme,
