@@ -48,7 +48,6 @@ fun ConceptMapDialog(
 ) {
     val pagerState = rememberPagerState()
     val allConceptCodes by derivedStateOf {
-        //diffDataContainer.codeSystemDiff!!.combinedGraph!!.graph.vertexSet().map(CombinedVertex::code)
         diffDataContainer.codeSystemDiff!!.combinedGraph!!.graph.vertexSet().filter { it.side == GraphSide.BOTH }
             .associate { it.code to "${it.code} (${it.getTooltip()})" }.toSortedMap()
     }
@@ -57,7 +56,7 @@ fun ConceptMapDialog(
         onCloseRequest = onCloseRequest,
         state = rememberWindowState(position = WindowPosition(Alignment.TopCenter), size = DpSize(1280.dp, 960.dp))
     ) {
-        Column(Modifier.fillMaxSize().background(colorScheme.background)) {
+        Column(Modifier.fillMaxSize().background(colorScheme.surfaceVariant)) {
             Column(Modifier.padding(8.dp).clip(RoundedCornerShape(8.dp))) {
                 val tabs = listOf(ConceptMapTabItem.conceptMapping(allConceptCodes, diffDataContainer),
                     ConceptMapTabItem.metadata())

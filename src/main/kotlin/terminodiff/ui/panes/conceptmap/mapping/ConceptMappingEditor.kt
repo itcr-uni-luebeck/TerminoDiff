@@ -2,7 +2,6 @@
 
 package terminodiff.terminodiff.ui.panes.conceptmap.mapping
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.icons.Icons
@@ -13,7 +12,10 @@ import androidx.compose.material.icons.filled.RemoveCircle
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -43,6 +45,17 @@ import terminodiff.ui.util.LazyTable
 import terminodiff.ui.util.columnSpecForMultiRow
 import java.util.*
 import javax.swing.JOptionPane
+import kotlin.collections.List
+import kotlin.collections.contains
+import kotlin.collections.count
+import kotlin.collections.indexOf
+import kotlin.collections.listOf
+import kotlin.collections.map
+import kotlin.collections.maxOf
+import kotlin.collections.plus
+import kotlin.collections.sumOf
+import kotlin.collections.toList
+import kotlin.collections.toTypedArray
 
 private val logger: Logger = LoggerFactory.getLogger("ConceptMappingEditor")
 
@@ -55,7 +68,7 @@ fun ConceptMappingEditorContent(
     allConceptCodes: SortedMap<String, String>,
 ) {
     val lazyListState = rememberLazyListState()
-    val dividerColor = colorScheme.onSecondaryContainer
+    val dividerColor = colorScheme.primary
     val columnSpecs by derivedStateOf {
         getColumnSpecs(diffDataContainer, localizedStrings, useDarkTheme, dividerColor, allConceptCodes)
     }
@@ -63,15 +76,15 @@ fun ConceptMappingEditorContent(
     val columnHeight: Dp by derivedStateOf {
         conceptMapState.conceptMap.group.elements.map { it.targets.size + 1 }.plus(1).maxOf { it }.times(60).dp
     }
-    Column(Modifier.background(colorScheme.tertiaryContainer).fillMaxSize().padding(16.dp),
+    Column(Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)) {
         MappingStatus(conceptMapState, localizedStrings)
         LazyTable(columnSpecs = columnSpecs,
             cellHeight = columnHeight,
             tableData = conceptMapState.conceptMap.group.elements,
             localizedStrings = localizedStrings,
-            backgroundColor = colorScheme.tertiaryContainer,
-            zebraStripingColor = colorScheme.primaryContainer,
+            backgroundColor = colorScheme.surfaceVariant,
+            zebraStripingColor = colorScheme.secondaryContainer,
             lazyListState = lazyListState,
             keyFun = { it.code.value })
     }
@@ -102,7 +115,7 @@ fun MappingStatus(conceptMapState: ConceptMapState, localizedStrings: LocalizedS
             withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                 append(localizedStrings.validAcceptedCount_(validCount))
             }
-        }, color = colorScheme.onTertiaryContainer, style = typography.titleLarge)
+        }, style = typography.titleLarge)
 
         Button(onClick = {
             askAcceptAll(conceptMapState, localizedStrings)
@@ -194,6 +207,7 @@ private fun equivalenceColumnSpec(
             textFieldDisplay = { it.display },
             fontStyle = { if (it.recommendedUse) FontStyle.Normal else FontStyle.Italic },
             selectedElement = ConceptMapEquivalenceDisplay.fromEquivalence(target.equivalence.value),
+            dropdownColor = colorScheme.tertiaryContainer
         ) { newValue ->
             target.equivalence.value = newValue.equivalence
             target.isAutomaticallySet = false
@@ -224,6 +238,7 @@ private fun targetColumnSpec(
         AutocompleteEditText(autocompleteSuggestions = allConceptCodes,
             value = target.code.value,
             localizedStrings = localizedStrings,
+            backgroundColor = colorScheme.tertiaryContainer,
             validateInput = { input ->
                 when (input) {
                     !in allConceptCodes -> EditTextSpec.ValidationResult.INVALID
@@ -243,6 +258,7 @@ private fun commentsColumnSpec(localizedStrings: LocalizedStrings, dividerColor:
         dividerColor = dividerColor) { _, target ->
         EditText(data = target,
             spec = EditTextSpec(title = null, valueState = { comment }, validation = null),
+            backgroundColor = colorScheme.tertiary,
             localizedStrings = localizedStrings)
     }
 

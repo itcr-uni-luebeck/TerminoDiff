@@ -24,10 +24,8 @@ fun TerminodiffDialog(
 ) = Dialog(onCloseRequest = onCloseRequest,
     title = title,
     state = rememberDialogState(position = windowPosition, size = size)) {
-    //CompositionLocalProvider(LocalContentColor provides colorScheme.onPrimaryContainer) {
-        Column(modifier = Modifier.background(colorScheme.primaryContainer).fillMaxSize().padding(contentPadding),
-            verticalArrangement = Arrangement.SpaceEvenly,
-            horizontalAlignment = Alignment.CenterHorizontally,
-            content = content)
-    //}
+    Column(modifier = Modifier.background(colorScheme.surfaceVariant).fillMaxSize().padding(contentPadding),
+        verticalArrangement = Arrangement.SpaceEvenly,
+        horizontalAlignment = Alignment.CenterHorizontally,
+        content = content)
 }

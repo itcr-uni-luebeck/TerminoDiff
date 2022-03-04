@@ -86,13 +86,11 @@ fun ConceptDiffPanel(
     Card(
         modifier = Modifier.padding(8.dp).fillMaxSize(),
         elevation = 8.dp,
-        backgroundColor = colorScheme.tertiaryContainer,
-        contentColor = colorScheme.onTertiaryContainer,
+        backgroundColor = colorScheme.surfaceVariant,
+        contentColor = colorScheme.onSurfaceVariant,
     ) {
         Column(Modifier.padding(4.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(localizedStrings.conceptDiff,
-                style = MaterialTheme.typography.headlineSmall,
-                color = colorScheme.onTertiaryContainer)
+            Text(localizedStrings.conceptDiff, style = MaterialTheme.typography.headlineSmall)
             Row {
                 FilterGroup(filterSpecs = filterSpecs, filterCounts = counts, activeFilter = activeFilter) {
                     logger.info("changed filter to $it")
@@ -235,9 +233,9 @@ fun TableScreen(
         }
     }
     LazyTable(columnSpecs = columnSpecs,
-        backgroundColor = colorScheme.tertiaryContainer,
+        backgroundColor = colorScheme.surfaceVariant,
         lazyListState = lazyListState,
-        zebraStripingColor = colorScheme.primaryContainer,
+        zebraStripingColor = colorScheme.secondaryContainer,
         tableData = containedData,
         localizedStrings = localizedStrings,
         countLabel = localizedStrings.concepts_) { it.code }

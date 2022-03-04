@@ -216,7 +216,7 @@ class GermanStrings : LocalizedStrings(
     },
     elements_ = {
         when (it) {
-            0 -> "Element"
+            1 -> "Elemente"
             else -> "Elemente"
         }
     },
@@ -304,7 +304,7 @@ class GermanStrings : LocalizedStrings(
     showAll = "Alle",
     showDifferent = "Unterschiedliche",
     showIdentical = "Identische",
-    showLeftGraphButton = "Linke Graph",
+    showLeftGraphButton = "Linker Graph",
     showRightGraphButton = "Rechter Graph",
     supplements = "Ergänzt",
     target = "Ziel",
@@ -390,7 +390,7 @@ class EnglishStrings : LocalizedStrings(
     },
     elements_ = {
         when (it) {
-            0 -> "element"
+            1 -> "element"
             else -> "elements"
         }
     },
