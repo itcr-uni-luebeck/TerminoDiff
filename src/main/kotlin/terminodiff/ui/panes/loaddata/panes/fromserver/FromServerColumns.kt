@@ -1,6 +1,6 @@
 package terminodiff.terminodiff.ui.panes.loaddata.panes.fromserver
 
-import androidx.compose.material.RadioButton
+import androidx.compose.material3.RadioButton
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.ui.panes.loaddata.panes.fromserver.DownloadableCodeSystem
 import terminodiff.ui.util.ColumnSpec

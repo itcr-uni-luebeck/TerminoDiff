@@ -1,10 +1,10 @@
 package terminodiff.terminodiff.ui.panes.loaddata.panes
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Plagiarism
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
@@ -54,7 +54,7 @@ private fun FromFileScreen(
     selectedPath: String,
 ) = Column(modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)) {
     val buttonColors =
-        ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary,
+        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary,
             contentColor = MaterialTheme.colorScheme.onPrimary)
     val isValidPath by derivedStateOf {
         when {
@@ -83,8 +83,7 @@ private fun FromFileScreen(
         Button(modifier = Modifier.padding(4.dp),
             colors = buttonColors,
             enabled = isValidPath,
-            onClick = { onLoadLeftFile(InputResource(InputResource.Kind.FILE, selectedFile)) },
-            elevation = ButtonDefaults.elevation(defaultElevation = 8.dp)) {
+            onClick = { onLoadLeftFile(InputResource(InputResource.Kind.FILE, selectedFile)) }) {
             AppImageIcon(relativePath = AppIconResource.icLoadLeftFile,
                 label = localizedStrings.loadLeft,
                 tint = buttonColors.contentColor(enabled = isValidPath).value)
@@ -93,8 +92,7 @@ private fun FromFileScreen(
         Button(modifier = Modifier.padding(4.dp),
             colors = buttonColors,
             enabled = isValidPath,
-            onClick = { onLoadRightFile(InputResource(InputResource.Kind.FILE, selectedFile)) },
-            elevation = ButtonDefaults.elevation(defaultElevation = 8.dp)) {
+            onClick = { onLoadRightFile(InputResource(InputResource.Kind.FILE, selectedFile)) }) {
             AppImageIcon(relativePath = AppIconResource.icLoadRightFile,
                 label = localizedStrings.loadRight,
                 tint = buttonColors.contentColor(enabled = isValidPath).value)

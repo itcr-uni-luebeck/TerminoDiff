@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Backspace
 import androidx.compose.material.icons.filled.Search
@@ -53,7 +50,7 @@ fun <T> LazyTable(
     keyFun: (T) -> String?,
 ) = Column(modifier = modifier.fillMaxWidth().padding(4.dp)) {
     val sortedData by derivedStateOf { tableData.sortedBy(keyFun) }
-    val searchState by produceState<SearchState<T>?>(null, columnSpecs, tableData, localizedStrings) {
+    val searchState by produceState<SearchState<T>?>(null, tableData, localizedStrings) {
         // using produceState enforces that the state resets if any of the parameters above ^ change. This is important for
         // table data (e.g. in the concept diff pane) and LocalizesStrings.
         value = SearchState(columnSpecs, sortedData)

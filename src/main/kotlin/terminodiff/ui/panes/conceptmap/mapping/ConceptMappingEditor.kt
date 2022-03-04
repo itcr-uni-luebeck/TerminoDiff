@@ -5,9 +5,6 @@ package terminodiff.terminodiff.ui.panes.conceptmap.mapping
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.FloatingActionButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.AddCircle
 import androidx.compose.material.icons.filled.DoneAll
@@ -109,7 +106,7 @@ fun MappingStatus(conceptMapState: ConceptMapState, localizedStrings: LocalizedS
 
         Button(onClick = {
             askAcceptAll(conceptMapState, localizedStrings)
-        }, colors = ButtonDefaults.buttonColors(backgroundColor = colorScheme.primary), enabled = automappedCount > 0) {
+        }, colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary), enabled = automappedCount > 0) {
             Icon(Icons.Default.DoneAll, localizedStrings.acceptAll, tint = colorScheme.onPrimary)
             Text(text = localizedStrings.acceptAll, color = colorScheme.onPrimary)
         }
@@ -264,7 +261,7 @@ private fun targetStatusColumnSpec(localizedStrings: LocalizedStrings, dividerCo
                 if (target.state == ConceptMapTarget.MappingState.AUTO) {
                     FloatingActionButton(modifier = Modifier.size(48.dp),
                         onClick = { target.isAutomaticallySet = false },
-                        backgroundColor = colorScheme.tertiary) {
+                        containerColor = colorScheme.tertiary) {
                         icon(colorScheme.onTertiary)
                     }
                 } else {

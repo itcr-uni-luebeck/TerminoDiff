@@ -3,14 +3,14 @@ package terminodiff.ui.panes.loaddata.panes.fromserver
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Compare
 import androidx.compose.material.icons.filled.Pending
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
@@ -206,7 +206,7 @@ fun FromServerScreen(
             onSelectLeft = onLoadLeftFile,
             onSelectRight = onLoadRightFile)
     }
-    LabeledTextField(modifier = Modifier.fillMaxWidth().padding(12.dp),
+    LabeledTextField(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
         value = baseServerUrl,
         onValueChange = onChangeBaseServerUrl,
         labelText = localizedStrings.fhirTerminologyServer,
@@ -286,7 +286,7 @@ fun ListOfResources(
             onLoadFile = onLoadRightFile)
     }
     LazyTable(
-        modifier = Modifier.padding(4.dp),
+        //modifier = Modifier.padding(4.dp),
         columnSpecs = columnSpecs,
         backgroundColor = colorScheme.tertiaryContainer,
         foregroundColor = colorScheme.onTertiaryContainer,
@@ -309,21 +309,17 @@ private fun LoadButton(
     onClick: (InputResource) -> Unit,
 ) {
     val buttonColors =
-        ButtonDefaults.buttonColors(backgroundColor = colorScheme.primary, contentColor = colorScheme.onPrimary)
+        ButtonDefaults.buttonColors(containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary)
     MouseOverPopup(text = tooltip ?: text) {
-        Button(modifier = Modifier.padding(4.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 8.dp),
-            colors = buttonColors,
-            onClick = {
-                selectedItem?.let { item ->
-                    val resource = InputResource(kind = InputResource.Kind.FHIR_SERVER,
-                        resourceUrl = item.physicalUrl,
-                        sourceFhirServerUrl = baseServerUrl,
-                        downloadableCodeSystem = item)
-                    onClick.invoke(resource)
-                }
-            },
-            enabled = enabled) {
+        Button(colors = buttonColors, onClick = {
+            selectedItem?.let { item ->
+                val resource = InputResource(kind = InputResource.Kind.FHIR_SERVER,
+                    resourceUrl = item.physicalUrl,
+                    sourceFhirServerUrl = baseServerUrl,
+                    downloadableCodeSystem = item)
+                onClick.invoke(resource)
+            }
+        }, enabled = enabled) {
             Icon(imageVector = iconImageVector,
                 contentDescription = text,
                 tint = buttonColors.contentColor(enabled).value)

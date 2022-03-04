@@ -19,7 +19,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.dp
 import terminodiff.i18n.LocalizedStrings
@@ -27,7 +26,6 @@ import terminodiff.ui.MouseOverPopup
 import java.net.MalformedURLException
 import java.net.URL
 import java.util.*
-import javax.swing.Icon
 
 fun isError(validationResult: EditTextSpec.ValidationResult?) = when (validationResult) {
     EditTextSpec.ValidationResult.INVALID -> true

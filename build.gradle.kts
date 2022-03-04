@@ -3,8 +3,8 @@ import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 plugins {
-    kotlin("jvm") version "1.5.31"
-    id("org.jetbrains.compose") version "1.0.0"
+    kotlin("jvm") version "1.6.10"
+    id("org.jetbrains.compose") version "1.1.0"
     id("org.openjfx.javafxplugin") version "0.0.11"
 }
 val projectVersion: String by project
@@ -21,9 +21,9 @@ val hapiVersion = "5.6.2"
 val slf4jVersion = "1.7.36"
 val graphStreamVersion = "2.0"
 val jGraphTVersion = "1.5.1"
-val material3DesktopVersion = "1.0.0"
+val material3DesktopVersion = "1.1.0"
 val jungraphtVersion = "1.3"
-val composeDesktopVersion = "1.0.1"
+val composeDesktopVersion = "1.1.0"
 val ktorVersion = "2.0.0-beta-1"
 
 dependencies {
