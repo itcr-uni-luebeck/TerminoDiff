@@ -40,10 +40,10 @@ fun DiffChip(
         modifier = modifier.padding(4.dp),
         color = backgroundColor,
         tonalElevation = 4.dp,
-        shape = RoundedCornerShape(16.dp)
+        shape = RoundedCornerShape(8.dp)
     ) {
         Row(
-            Modifier.fillMaxHeight(),
+            Modifier.fillMaxHeight().padding(8.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.CenterVertically
         ) {
@@ -59,7 +59,6 @@ fun DiffChip(
                 text = text,
                 style = textStyle,
                 color = textColor,
-                modifier = Modifier.padding(8.dp),
                 fontStyle = fontStyle
             )
         }

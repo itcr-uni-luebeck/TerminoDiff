@@ -2,11 +2,13 @@ package terminodiff.terminodiff.ui.panes.conceptmap.meta
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalFireDepartment
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.MaterialTheme.typography
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -36,7 +38,7 @@ fun ConceptMapMetaEditorContent(
             Button(onClick = {
                 showJsonViewer(fhirJson, isDarkTheme)
             },
-                colors = ButtonDefaults.buttonColors(backgroundColor = colorScheme.primary,
+                colors = ButtonDefaults.buttonColors(containerColor = colorScheme.primary,
                     contentColor = colorScheme.onPrimary)) {
                 Icon(Icons.Default.LocalFireDepartment, "JSON", tint = colorScheme.onPrimary)
                 Text("JSON")

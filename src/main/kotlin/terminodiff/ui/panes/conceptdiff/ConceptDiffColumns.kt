@@ -4,12 +4,10 @@ package terminodiff.ui.panes.conceptdiff
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.OutlinedButton
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Hub
 import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -96,9 +94,7 @@ private fun propertyDesignationColumnSpec(
                 when {
                     propertyDifferenceCount == 0 && designationDifferenceCount == 0 -> Button(onClick = {
                         showPropertyDialog(data)
-                    },
-                        elevation = ButtonDefaults.elevation(4.dp),
-                        colors = ButtonDefaults.buttonColors(diffColors.greenPair.first, diffColors.greenPair.second)) {
+                    }, colors = ButtonDefaults.buttonColors(diffColors.greenPair.first, diffColors.greenPair.second)) {
                         Text(text = localizedStrings.propertiesDesignationsCount(data.diff.propertyComparison.count(),
                             data.diff.designationComparison.count()), color = diffColors.yellowPair.second)
                     }
@@ -107,7 +103,6 @@ private fun propertyDesignationColumnSpec(
                             Button(onClick = {
                                 showPropertyDialog(data)
                             },
-                                elevation = ButtonDefaults.elevation(4.dp),
                                 colors = ButtonDefaults.buttonColors(diffColors.yellowPair.first,
                                     diffColors.yellowPair.second)) {
                                 Text(text = localizedStrings.propertiesDesignationsCountDelta.invoke(data.diff.propertyComparison.count() to propertyDifferenceCount,
@@ -122,10 +117,10 @@ private fun propertyDesignationColumnSpec(
                 OutlinedButton(onClick = {
                     showPropertyDialog(data)
                 },
-                    elevation = ButtonDefaults.elevation(4.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onTertiaryContainer)) {
+
+                    colors = ButtonDefaults.outlinedButtonColors(containerColor = colorScheme.tertiaryContainer,
+                        contentColor = colorScheme.onTertiaryContainer),
+                    border = BorderStroke(1.dp, colorScheme.onTertiaryContainer)) {
                     val text = when (data.isOnlyInLeft()) {
                         true -> data.leftDetails!!
                         else -> data.rightDetails!!
@@ -133,7 +128,7 @@ private fun propertyDesignationColumnSpec(
                         localizedStrings.propertiesDesignationsCount.invoke(details.property.count(),
                             details.designation.count())
                     }
-                    Text(text = text, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                    Text(text = text, color = colorScheme.onTertiaryContainer)
                 }
             }
         }
@@ -212,13 +207,12 @@ private fun columnSpecForProperty(
                 }
                 when (text != null) {
                     true -> Row(Modifier.padding(2.dp)) {
-                        OutlinedButton(modifier = Modifier.padding(2.dp),
+                        OutlinedButton(modifier = Modifier.padding(4.dp),
                             onClick = { onDetailClick?.invoke(data) },
-                            elevation = ButtonDefaults.elevation(4.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onTertiaryContainer)) {
-                            textDisplay.invoke(MaterialTheme.colorScheme.onTertiaryContainer)
+//                            colors = ButtonDefaults.outlinedButtonColors(containerColor = colorScheme.tertiaryContainer,
+//                                contentColor = colorScheme.onTertiaryContainer),
+                            border = BorderStroke(1.dp, colorScheme.onTertiaryContainer)) {
+                            textDisplay.invoke(colorScheme.onTertiaryContainer)
                         }
                     }
                     else -> Row(modifier = Modifier.padding(2.dp).fillMaxSize(),
@@ -289,8 +283,7 @@ private fun ChipForConceptDiffResult(
         else -> Button(onClick = {
             onDetailClick(conceptData)
         },
-            elevation = ButtonDefaults.elevation(4.dp),
-            contentPadding = PaddingValues(1.dp),
+            contentPadding = PaddingValues(vertical = 1.dp, horizontal = 4.dp),
             colors = ButtonDefaults.buttonColors(background, foreground)) {
             Text(text = localizedStrings.conceptDiffResults_.invoke(result.result),
                 style = typography.bodyMedium,

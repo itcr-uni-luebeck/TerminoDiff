@@ -3,17 +3,14 @@ package terminodiff.ui.panes.conceptdiff
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.*
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Mediation
-import androidx.compose.material3.Icon
+import androidx.compose.material.Card
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import ca.uhn.fhir.context.FhirContext
 import kotlinx.coroutines.launch
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
@@ -24,10 +21,8 @@ import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.engine.graph.FhirConceptDetails
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.terminodiff.engine.conceptmap.ConceptMapState
 import terminodiff.terminodiff.ui.panes.conceptdiff.display.DisplayDetailsDialog
 import terminodiff.terminodiff.ui.panes.conceptdiff.propertydesignation.PropertyDesignationDialog
-import terminodiff.terminodiff.ui.panes.conceptmap.ConceptMapDialog
 import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.theme.getDiffColors
 import terminodiff.ui.util.ColumnSpec
@@ -47,7 +42,6 @@ fun ConceptDiffPanel(
     diffDataContainer: DiffDataContainer,
     localizedStrings: LocalizedStrings,
     useDarkTheme: Boolean,
-    fhirContext: FhirContext,
     onShowGraph: (String) -> Unit,
 ) {
     val diffColors by remember { mutableStateOf(getDiffColors(useDarkTheme = useDarkTheme)) }
@@ -68,8 +62,6 @@ fun ConceptDiffPanel(
     }
 
     var dialogData: Pair<ConceptTableData, DetailsDialogKind>? by remember { mutableStateOf(null) }
-    val conceptMapState by remember { mutableStateOf(ConceptMapState(diffDataContainer)) }
-    var showConceptMapDialog: Boolean by remember { mutableStateOf(false) }
 
     dialogData?.let { (data, kind) ->
         val onClose: () -> Unit = { dialogData = null }
@@ -91,16 +83,6 @@ fun ConceptDiffPanel(
         }
     }
 
-    if (showConceptMapDialog) {
-        ConceptMapDialog(diffDataContainer = diffDataContainer,
-            conceptMapState = conceptMapState,
-            localizedStrings = localizedStrings,
-            fhirContext = fhirContext,
-            isDarkTheme = useDarkTheme) {
-            showConceptMapDialog = false
-        }
-    }
-
     Card(
         modifier = Modifier.padding(8.dp).fillMaxSize(),
         elevation = 8.dp,
@@ -119,17 +101,6 @@ fun ConceptDiffPanel(
                         // scroll has to be invoked from a coroutine
                         lazyListState.scrollToItem(0)
                     }
-                }
-                Button(onClick = {
-                    showConceptMapDialog = true
-                },
-                    elevation = ButtonDefaults.elevation(8.dp),
-                    colors = ButtonDefaults.buttonColors(backgroundColor = colorScheme.secondaryContainer,
-                        contentColor = colorScheme.onPrimaryContainer)) {
-                    Icon(imageVector = Icons.Default.Mediation,
-                        contentDescription = localizedStrings.conceptMap,
-                        tint = colorScheme.onPrimaryContainer)
-                    Text(localizedStrings.conceptMap)
                 }
             }
 

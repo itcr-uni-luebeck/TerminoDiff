@@ -4,13 +4,13 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Fireplace
 import androidx.compose.material.icons.filled.Save
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -23,6 +23,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
 import libraries.accompanist.pager.ExperimentalPagerApi
@@ -31,8 +32,11 @@ import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.resources.InputResource
 import terminodiff.terminodiff.engine.resources.InputResource.Kind
-import terminodiff.terminodiff.ui.panes.loaddata.panes.*
-import terminodiff.ui.*
+import terminodiff.terminodiff.ui.panes.loaddata.panes.FromFileScreenWrapper
+import terminodiff.ui.LoadListener
+import terminodiff.ui.TabItem
+import terminodiff.ui.Tabs
+import terminodiff.ui.TabsContent
 import terminodiff.ui.panes.loaddata.panes.fromserver.FromServerScreenWrapper
 
 @Composable
@@ -59,28 +63,27 @@ fun ColumnScope.LoadedResourcesCard(
     leftResource: InputResource?,
     rightResource: InputResource?,
     onGoButtonClick: () -> Unit,
-) = Card(modifier = Modifier.padding(8.dp).fillMaxWidth().weight(0.15f),
+) = Card(modifier = Modifier.padding(8.dp).fillMaxWidth().weight(0.25f),
     elevation = 8.dp,
     backgroundColor = colorScheme.secondaryContainer,
     contentColor = colorScheme.onSecondaryContainer) {
     Column(Modifier.padding(4.dp).fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top) {
-        when {
-            leftResource != null && rightResource != null -> {
-                Button(
-                    modifier = Modifier.weight(0.3f),
-                    onClick = onGoButtonClick,
-                    elevation = ButtonDefaults.elevation(8.dp),
-                    colors = ButtonDefaults.buttonColors(colorScheme.primary,
-                        colorScheme.onPrimary)) {
-                    Text(localizedStrings.calculateDiff, color = colorScheme.onPrimary)
+        Row(Modifier.height(IntrinsicSize.Min)) {
+            when {
+                leftResource != null && rightResource != null -> {
+                    ElevatedButton(modifier = Modifier.weight(0.3f),
+                        onClick = onGoButtonClick,
+                        colors = ButtonDefaults.buttonColors(colorScheme.primary, colorScheme.onPrimary)) {
+                        Text(localizedStrings.calculateDiff, color = colorScheme.onPrimary)
+                    }
                 }
-            }
-            else -> {
-                Text(text = localizedStrings.loadedResources,
-                    style = typography.titleLarge,
-                    color = colorScheme.onSecondaryContainer)
+                else -> {
+                    Text(text = localizedStrings.loadedResources,
+                        style = typography.titleLarge,
+                        color = colorScheme.onSecondaryContainer)
+                }
             }
         }
 
@@ -110,8 +113,10 @@ fun ResourceDescription(
             text = text,
             textAlign = TextAlign.Center,
             color = colorScheme.onSecondaryContainer,
+            style = typography.bodyMedium,
             maxLines = 3,
             softWrap = true,
+            overflow = TextOverflow.Clip
         )
     }
 }
@@ -144,7 +149,7 @@ fun ColumnScope.LoadResourcesCards(
     onLoadRight: LoadListener,
     localizedStrings: LocalizedStrings,
     fhirContext: FhirContext,
-) = Card(modifier = Modifier.padding(8.dp).fillMaxWidth().weight(0.66f, true),
+) = Card(modifier = Modifier.padding(8.dp).fillMaxWidth().weight(0.75f, true),
     elevation = 8.dp,
     backgroundColor = colorScheme.tertiaryContainer,
     contentColor = colorScheme.onTertiaryContainer) {
@@ -155,8 +160,7 @@ fun ColumnScope.LoadResourcesCards(
         TabsContent(tabs = tabs,
             pagerState = pagerState,
             localizedStrings = localizedStrings,
-            fhirContext = fhirContext
-        ) { LoadFilesTabItem.LoadFilesScreenData(onLoadLeft, onLoadRight) }
+            fhirContext = fhirContext) { LoadFilesTabItem.LoadFilesScreenData(onLoadLeft, onLoadRight) }
     }
 }
 
@@ -166,11 +170,9 @@ sealed class LoadFilesTabItem(
     screen: @Composable (LocalizedStrings, FhirContext, LoadFilesScreenData) -> Unit,
 ) : TabItem<LoadFilesTabItem.LoadFilesScreenData>(TabItemSpec(icon, title, screen)) {
 
-    object FromFile : LoadFilesTabItem(icon = Icons.Default.Save,
-        title = { fileSystem },
-        screen = { strings, _, data ->
-            FromFileScreenWrapper(strings, data.onLoadLeft, data.onLoadRight)
-        })
+    object FromFile : LoadFilesTabItem(icon = Icons.Default.Save, title = { fileSystem }, screen = { strings, _, data ->
+        FromFileScreenWrapper(strings, data.onLoadLeft, data.onLoadRight)
+    })
 
     object FromTerminologyServer : LoadFilesTabItem(icon = Icons.Default.Fireplace,
         title = { fhirTerminologyServer },

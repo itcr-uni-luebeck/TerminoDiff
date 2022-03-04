@@ -1,14 +1,13 @@
 package terminodiff.terminodiff.ui.panes.metadatadiff
 
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import org.hl7.fhir.r4.model.CodeSystem
 import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.engine.resources.DiffDataContainer
@@ -89,7 +88,6 @@ private fun resultColumnSpec(
                 onShowDetailsClick(comparison)
             }
         },
-            elevation = ButtonDefaults.elevation(4.dp),
             colors = ButtonDefaults.buttonColors(backgroundColor, foregroundColor)) {
             Text(text = resultText,
                 style = MaterialTheme.typography.bodyMedium,
