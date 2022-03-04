@@ -34,12 +34,12 @@ import org.slf4j.LoggerFactory
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
 import terminodiff.terminodiff.engine.resources.InputResource
-import terminodiff.terminodiff.ui.panes.loaddata.panes.LabeledTextField
-import terminodiff.terminodiff.ui.panes.loaddata.panes.LoadListener
 import terminodiff.terminodiff.ui.panes.loaddata.panes.fromserver.VReadDialog
 import terminodiff.terminodiff.ui.panes.loaddata.panes.fromserver.fromServerPaneColumnSpecs
+import terminodiff.terminodiff.ui.util.LabeledTextField
 import terminodiff.ui.AppIconResource
 import terminodiff.ui.ImageRelativePath
+import terminodiff.ui.LoadListener
 import terminodiff.ui.MouseOverPopup
 import terminodiff.ui.util.ColumnSpec
 import terminodiff.ui.util.LazyTable
@@ -206,9 +206,9 @@ fun FromServerScreen(
             onSelectLeft = onLoadLeftFile,
             onSelectRight = onLoadRightFile)
     }
-    LabeledTextField(value = baseServerUrl,
+    LabeledTextField(modifier = Modifier.fillMaxWidth().padding(12.dp),
+        value = baseServerUrl,
         onValueChange = onChangeBaseServerUrl,
-        modifier = Modifier.fillMaxWidth().padding(12.dp),
         labelText = localizedStrings.fhirTerminologyServer,
         trailingIconVector = trailingIcon,
         trailingIconDescription = trailingIconDescription)
@@ -273,12 +273,12 @@ fun ListOfResources(
             onLoadFile = onLoadLeftFile)
 
         val vReadDisabled = (selectedItem?.metaVersion?.equals("1")) ?: true
-        LoadButton(text = localizedStrings.vRead,
+        LoadButton(text = localizedStrings.vread,
             selectedItem = selectedItem,
             baseServerUrl = baseServerUrl,
             iconImageVector = Icons.Default.Compare,
             enabled = !vReadDisabled,
-            tooltip = localizedStrings.vReadExplanationEnabled_.invoke(!vReadDisabled),
+            tooltip = localizedStrings.vreadExplanationEnabled_.invoke(selectedItem != null && !vReadDisabled),
             onClick = onShowVReadDialog)
 
         leftRightButton(text = localizedStrings.loadRight,

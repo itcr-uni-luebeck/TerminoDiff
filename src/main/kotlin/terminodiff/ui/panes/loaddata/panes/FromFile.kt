@@ -16,8 +16,10 @@ import org.apache.commons.lang3.SystemUtils
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
 import terminodiff.terminodiff.engine.resources.InputResource
+import terminodiff.terminodiff.ui.util.LabeledTextField
 import terminodiff.ui.AppIconResource
 import terminodiff.ui.AppImageIcon
+import terminodiff.ui.LoadListener
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -63,9 +65,9 @@ private fun FromFileScreen(
     }
 
     LabeledTextField(
+        modifier = Modifier.fillMaxWidth().padding(12.dp),
         value = selectedPath,
         onValueChange = onChangeFilePath,
-        modifier = Modifier.fillMaxWidth().padding(12.dp),
         labelText = localizedStrings.fileSystem,
         trailingIconVector = Icons.Default.Plagiarism,
         trailingIconDescription = localizedStrings.fileSystem

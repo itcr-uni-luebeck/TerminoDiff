@@ -18,7 +18,7 @@ repositories {
 }
 
 val hapiVersion = "5.6.2"
-val slf4jVersion = "1.7.35"
+val slf4jVersion = "1.7.36"
 val graphStreamVersion = "2.0"
 val jGraphTVersion = "1.5.1"
 val material3DesktopVersion = "1.0.0"
@@ -51,6 +51,7 @@ dependencies {
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("me.xdrop:fuzzywuzzy:1.4.0")
+    implementation("com.fifesoft:rsyntaxtextarea:3.1.6")
 }
 
 tasks.test {
@@ -87,7 +88,7 @@ compose.desktop {
                 packageName = "TerminoDiff"
                 packageVersion = composeBuildVersion
                 description = "Visually compare HL7 FHIR Terminology"
-                vendor = "IT Center for Clinical Reserach, University of Lübeck"
+                vendor = "IT Center for Clinical Research, University of Lübeck"
                 copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
 
                 when (composeBuildOs) {

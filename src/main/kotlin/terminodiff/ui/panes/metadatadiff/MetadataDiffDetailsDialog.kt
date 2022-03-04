@@ -1,8 +1,5 @@
 package terminodiff.terminodiff.ui.panes.metadatadiff
 
-import androidx.compose.foundation.background
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -12,16 +9,12 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.WindowPosition
-import androidx.compose.ui.window.rememberDialogState
 import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.metadata.*
+import terminodiff.terminodiff.ui.util.TerminodiffDialog
 import terminodiff.ui.theme.DiffColors
 import terminodiff.ui.theme.getDiffColors
 import terminodiff.ui.util.ColumnSpec
@@ -38,14 +31,12 @@ fun MetadataDiffDetailsDialog(
     val listState = rememberLazyListState()
     val diffColors by derivedStateOf { getDiffColors(useDarkTheme = useDarkTheme) }
     val title by derivedStateOf { comparison.diffItem.label.invoke(localizedStrings) }
-    Dialog(onCloseRequest = onClose,
+    TerminodiffDialog(
         title = title,
-        state = rememberDialogState(position = WindowPosition(Alignment.Center), size = DpSize(1024.dp, 512.dp))) {
-        Column(Modifier.background(colorScheme.primaryContainer).padding(top = 4.dp).fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(text = title, style = typography.titleMedium, color = colorScheme.onPrimaryContainer)
-            DrawTable(comparison, localizedStrings, diffColors, listState)
-        }
+        onCloseRequest = onClose,
+    ) {
+        Text(text = title, style = typography.titleMedium, color = colorScheme.onPrimaryContainer)
+        DrawTable(comparison, localizedStrings, diffColors, listState)
     }
 }
 

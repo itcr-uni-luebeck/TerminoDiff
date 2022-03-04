@@ -1,6 +1,7 @@
 package terminodiff.terminodiff.engine.graph
 
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import org.jgrapht.Graph
 import org.jgrapht.graph.builder.GraphTypeBuilder
@@ -11,7 +12,7 @@ import terminodiff.i18n.LocalizedStrings
 import terminodiff.ui.graphs.ColorRegistry
 import terminodiff.ui.graphs.Registry
 
-val logger: Logger = LoggerFactory.getLogger(CombinedGraphBuilder::class.java)
+private val logger: Logger = LoggerFactory.getLogger(CombinedGraphBuilder::class.java)
 
 class CombinedGraphBuilder {
 
@@ -20,6 +21,21 @@ class CombinedGraphBuilder {
             graph.nodeByCode(focusCode) ?: throw IllegalStateException("The focus concept is not in the combined graph")
         val diffEdgeTraversal = DiffEdgeTraversal(graph, focusConcept, layers)
         return diffEdgeTraversal.traverse()
+    }
+
+    val affectedEdges = mutableStateListOf<CombinedEdge>()
+    val affectedVertices = mutableStateListOf<CombinedVertex>()
+
+    fun populateAffected() {
+        graph.edgeSet().filter { it.side != GraphSide.BOTH }.let {
+            affectedEdges.clear()
+            affectedEdges.addAll(it)
+        }
+        graph.vertexSet().filter { it.side != GraphSide.BOTH }.toSet().let { vertices ->
+            affectedVertices.clear()
+            val allVertices = vertices.plus(affectedEdges.mapNotNull { graph.nodeByCode(it.toCode) }).plus(affectedEdges.mapNotNull { graph.nodeByCode(it.fromCode) })
+            affectedVertices.addAll(allVertices)
+        }
     }
 
     val graph: CombinedGraph by mutableStateOf(emptyGraph())
@@ -52,11 +68,13 @@ data class CombinedVertex(
     val displayRight: String? = null,
     val side: GraphSide,
 ) {
-    fun getTooltip(localizedStrings: LocalizedStrings): String = localizedStrings.displayAndInWhich_(when (side) {
+    fun getTooltip(localizedStrings: LocalizedStrings): String = localizedStrings.displayAndInWhich_(getTooltip(), side)
+
+    fun getTooltip(): String? = when (side) {
         GraphSide.LEFT -> displayLeft
         GraphSide.RIGHT -> displayRight
-        GraphSide.BOTH -> if (displayLeft == displayRight) displayLeft else "$displayLeft vs. $displayRight"
-    }, side)
+        else -> if (displayLeft == displayRight) displayRight else "$displayLeft vs. $displayRight"
+    }
 
     fun getColor() = ColorRegistry.getColor(Registry.SIDES, side.name)
 }

@@ -22,4 +22,4 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
       - name: Test for STOPSHIP comments
-        run: grep -rnliq src/main/{kotlin,java,antlr} -e 'stopshipasdf' && echo exit 1 || echo exit 0
+        run: grep -rnliq src/main/{kotlin,java,antlr} -e 'stopship' && exit 1 || exit 0

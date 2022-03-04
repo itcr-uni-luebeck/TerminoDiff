@@ -8,6 +8,9 @@ import androidx.compose.material.Button
 import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Fireplace
+import androidx.compose.material.icons.filled.Save
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
@@ -16,6 +19,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
@@ -27,10 +31,9 @@ import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.resources.InputResource
 import terminodiff.terminodiff.engine.resources.InputResource.Kind
-import terminodiff.terminodiff.ui.panes.loaddata.panes.LoadFilesTabItem
-import terminodiff.terminodiff.ui.panes.loaddata.panes.LoadListener
-import terminodiff.terminodiff.ui.panes.loaddata.panes.Tabs
-import terminodiff.terminodiff.ui.panes.loaddata.panes.TabsContent
+import terminodiff.terminodiff.ui.panes.loaddata.panes.*
+import terminodiff.ui.*
+import terminodiff.ui.panes.loaddata.panes.fromserver.FromServerScreenWrapper
 
 @Composable
 fun LoadDataPaneContent(
@@ -140,7 +143,7 @@ fun ColumnScope.LoadResourcesCards(
     onLoadLeft: LoadListener,
     onLoadRight: LoadListener,
     localizedStrings: LocalizedStrings,
-    fhirContext : FhirContext,
+    fhirContext: FhirContext,
 ) = Card(modifier = Modifier.padding(8.dp).fillMaxWidth().weight(0.66f, true),
     elevation = 8.dp,
     backgroundColor = colorScheme.tertiaryContainer,
@@ -152,9 +155,31 @@ fun ColumnScope.LoadResourcesCards(
         TabsContent(tabs = tabs,
             pagerState = pagerState,
             localizedStrings = localizedStrings,
-            onLoadLeft = onLoadLeft,
-            onLoadRight = onLoadRight,
             fhirContext = fhirContext
-        )
+        ) { LoadFilesTabItem.LoadFilesScreenData(onLoadLeft, onLoadRight) }
     }
+}
+
+sealed class LoadFilesTabItem(
+    icon: ImageVector,
+    title: LocalizedStrings.() -> String,
+    screen: @Composable (LocalizedStrings, FhirContext, LoadFilesScreenData) -> Unit,
+) : TabItem<LoadFilesTabItem.LoadFilesScreenData>(TabItemSpec(icon, title, screen)) {
+
+    object FromFile : LoadFilesTabItem(icon = Icons.Default.Save,
+        title = { fileSystem },
+        screen = { strings, _, data ->
+            FromFileScreenWrapper(strings, data.onLoadLeft, data.onLoadRight)
+        })
+
+    object FromTerminologyServer : LoadFilesTabItem(icon = Icons.Default.Fireplace,
+        title = { fhirTerminologyServer },
+        screen = { strings, fhirContext, data ->
+            FromServerScreenWrapper(strings, data.onLoadLeft, data.onLoadRight, fhirContext)
+        })
+
+    class LoadFilesScreenData(
+        val onLoadLeft: LoadListener,
+        val onLoadRight: LoadListener,
+    ) : ScreenData
 }

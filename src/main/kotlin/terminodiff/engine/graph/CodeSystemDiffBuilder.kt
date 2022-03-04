@@ -102,7 +102,6 @@ class CodeSystemDiffBuilder(
         CombinedEdge(edge.from, edge.to, edge.propertyCode, GraphSide.BOTH)
     }
 
-
     private fun buildDiffGraph() {
         // add those vertices that are only in one of the graphs, this is easy
         differenceGraph.addAllVertices(onlyInLeftConcepts.map { code ->
@@ -160,6 +159,7 @@ class CodeSystemDiffBuilder(
         logger.info("Combined graph: ${
             combinedGraphBuilder.graph.vertexSet().count()
         } vertices, ${combinedGraphBuilder.graph.edgeSet().count()} edges")
+        combinedGraphBuilder.populateAffected()
         return combinedGraphBuilder
     }
 }

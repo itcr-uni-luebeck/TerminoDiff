@@ -8,6 +8,7 @@ import androidx.compose.ui.window.ApplicationScope
 import androidx.compose.ui.window.Window
 import androidx.compose.ui.window.application
 import ca.uhn.fhir.context.FhirContext
+import ca.uhn.fhir.narrative.DefaultThymeleafNarrativeGenerator
 import com.formdev.flatlaf.FlatDarkLaf
 import org.apache.commons.lang3.SystemUtils
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
@@ -61,13 +62,7 @@ fun AppWindow(
     useDarkTheme: Boolean,
     onChangeDarkTheme: () -> Unit,
 ) {
-
-    when (SystemUtils.IS_OS_WINDOWS) {
-        //when (useDarkTheme && SystemUtils.IS_OS_WINDOWS) {
-        //setting this does not make sense if not on Windows
-        true -> FlatDarkLaf.setup()
-        //else -> FlatLightLaf.setup()
-    }
+    FlatDarkLaf.setup()
     var locale by remember { mutableStateOf(SupportedLocale.valueOf(AppPreferences.language)) }
     val localizedStrings by derivedStateOf { getStrings(locale) }
     val scrollState = rememberScrollState()
@@ -83,19 +78,13 @@ fun AppWindow(
             this.window.iconImage = ImageIO.read(it.resolve("terminodiff@0.5x.png"))
         }
         UIManager.setLookAndFeel(FlatDarkLaf())
-        when (SystemUtils.IS_OS_WINDOWS) {
-            //when (useDarkTheme && SystemUtils.IS_OS_WINDOWS) {
-            /*false -> UIManager.setLookAndFeel(FlatLightLaf())
-            else -> UIManager.setLookAndFeel(FlatDarkLaf())*/
-            true -> UIManager.setLookAndFeel(FlatDarkLaf())
-        }
 
         if (!hasResizedWindow) {
             // app crashes if we use state for the window, when the locale is changed, with the error
             // that the window is already on screen.
             // this is because everything is recomposed when the locale changes, and that breaks AWT.
-            // using the mutable state, we change the window size exactly once, during the first (re-) composition,
-            // so that the user can then change the res as they require.
+            // using the mutable state, we programatically change the window size exactly once,
+            // during the first (re-) composition, so that the user can then change the res as they require.
             // A resolution of 1280x960 is 4:3.
             this.window.size = Dimension(1280, 960)
             hasResizedWindow = true
