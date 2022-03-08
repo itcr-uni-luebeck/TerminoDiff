@@ -3,7 +3,6 @@ package terminodiff.java.ui;
 import java.util.HashMap;
 import java.util.Map;
 
-import javolution.io.Struct;
 import org.jungrapht.visualization.layout.algorithms.*;
 import org.jungrapht.visualization.layout.algorithms.repulsion.BarnesHutFA2Repulsion;
 import org.jungrapht.visualization.layout.algorithms.repulsion.BarnesHutFRRepulsion;

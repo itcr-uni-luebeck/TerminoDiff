@@ -17,7 +17,7 @@ repositories {
     mavenCentral()
 }
 
-val hapiVersion = "5.6.2"
+val hapiVersion = "5.7.0"
 val slf4jVersion = "1.7.36"
 val graphStreamVersion = "2.0"
 val jGraphTVersion = "1.5.1"
@@ -29,6 +29,7 @@ val ktorVersion = "2.0.0-beta-1"
 dependencies {
     testImplementation(kotlin("test"))
     implementation(compose.desktop.currentOs)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation("org.jetbrains.compose.components:components-splitpane:$composeDesktopVersion")
     implementation("org.jetbrains.compose.material3:material3-desktop:$material3DesktopVersion")
     implementation("org.jetbrains.compose.material:material-icons-core-desktop:$composeDesktopVersion")
@@ -36,7 +37,6 @@ dependencies {
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:$hapiVersion")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:$hapiVersion")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-validation:$hapiVersion")
-    //implementation("ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:$hapiVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")
     implementation("org.jgrapht:jgrapht-core:$jGraphTVersion")
@@ -47,7 +47,7 @@ dependencies {
     implementation("li.flor:native-j-file-chooser:1.6.4")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359") // provides org.xml.sax
     implementation("org.apache.commons:commons-lang3:3.12.0")
-    implementation("com.formdev:flatlaf:2.0.1")
+    implementation("com.formdev:flatlaf:2.0.2")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("me.xdrop:fuzzywuzzy:1.4.0")

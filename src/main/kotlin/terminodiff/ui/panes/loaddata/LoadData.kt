@@ -14,9 +14,7 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -64,7 +62,8 @@ fun ColumnScope.LoadedResourcesCard(
     rightResource: InputResource?,
     onGoButtonClick: () -> Unit,
 ) = Card(modifier = Modifier.padding(8.dp).fillMaxWidth().weight(0.25f),
-    backgroundColor = colorScheme.surfaceVariant, contentColor = colorScheme.onSurfaceVariant) {
+    backgroundColor = colorScheme.surfaceVariant,
+    contentColor = colorScheme.onSurfaceVariant) {
     Column(Modifier.padding(4.dp).fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top) {
@@ -78,8 +77,7 @@ fun ColumnScope.LoadedResourcesCard(
                     }
                 }
                 else -> {
-                    Text(text = localizedStrings.loadedResources,
-                        style = typography.titleLarge)
+                    Text(text = localizedStrings.loadedResources, style = typography.titleLarge)
                 }
             }
         }
@@ -101,18 +99,14 @@ fun ResourceDescription(
     side: DiffDataContainer.Side,
 ) = Column(modifier = modifier.wrapContentHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
     val text by derivedStateOf { formatText(resource, localizedStrings) }
-    Text(text = localizedStrings.side_(side),
-        style = typography.titleMedium,
-        textDecoration = TextDecoration.Underline)
+    Text(text = localizedStrings.side_(side), style = typography.titleMedium, textDecoration = TextDecoration.Underline)
     Row(modifier = Modifier.align(Alignment.CenterHorizontally).height(IntrinsicSize.Min)) {
-        Text(
-            text = text,
+        Text(text = text,
             textAlign = TextAlign.Center,
             style = typography.bodyMedium,
             maxLines = 3,
             softWrap = true,
-            overflow = TextOverflow.Clip
-        )
+            overflow = TextOverflow.Clip)
     }
 }
 

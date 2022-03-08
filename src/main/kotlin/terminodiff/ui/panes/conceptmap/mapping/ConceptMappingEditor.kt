@@ -74,14 +74,14 @@ fun ConceptMappingEditorContent(
     }
 
     val columnHeight: Dp by derivedStateOf {
-        conceptMapState.conceptMap.group.elements.map { it.targets.size + 1 }.plus(1).maxOf { it }.times(60).dp
+        conceptMapState.conceptMap!!.group.elements.map { it.targets.size + 1 }.plus(1).maxOf { it }.times(60).dp
     }
     Column(Modifier.fillMaxSize().padding(16.dp),
         verticalArrangement = Arrangement.spacedBy(4.dp)) {
         MappingStatus(conceptMapState, localizedStrings)
         LazyTable(columnSpecs = columnSpecs,
             cellHeight = columnHeight,
-            tableData = conceptMapState.conceptMap.group.elements,
+            tableData = conceptMapState.conceptMap!!.group.elements,
             localizedStrings = localizedStrings,
             backgroundColor = colorScheme.surfaceVariant,
             zebraStripingColor = colorScheme.secondaryContainer,
@@ -92,7 +92,7 @@ fun ConceptMappingEditorContent(
 
 @Composable
 fun MappingStatus(conceptMapState: ConceptMapState, localizedStrings: LocalizedStrings) {
-    val elements by derivedStateOf { conceptMapState.conceptMap.group.elements }
+    val elements by derivedStateOf { conceptMapState.conceptMap!!.group.elements }
     val mappableCount by derivedStateOf { elements.size }
     val automappedCount by derivedStateOf {
         elements.sumOf { it.targets.count { t -> t.isAutomaticallySet } }

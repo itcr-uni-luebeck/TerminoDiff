@@ -6,6 +6,7 @@ import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Verified
 import androidx.compose.runtime.*
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.coroutines.coroutineScope
 import org.hl7.fhir.r4.model.ConceptMap
 import org.hl7.fhir.r4.model.ConceptMap.*
 import org.hl7.fhir.r4.model.DateTimeType
@@ -19,16 +20,25 @@ import terminodiff.terminodiff.engine.graph.CombinedVertex
 import terminodiff.terminodiff.engine.graph.GraphSide
 import terminodiff.terminodiff.ui.panes.diff.NeighborhoodDisplay
 
-class ConceptMapState(
-    diffDataContainer: DiffDataContainer,
-) {
-    fun acceptAll() = conceptMap.group.elements.forEach { element ->
+class ConceptMapState {
+
+    var conceptMap: TerminodiffConceptMap? by mutableStateOf(null)
+    val hasConceptMap: Boolean by derivedStateOf { conceptMap != null }
+
+    fun acceptAll() = conceptMap?.group?.elements?.forEach { element ->
         element.targets.forEach { target ->
             target.isAutomaticallySet = false
         }
     }
 
-    val conceptMap by mutableStateOf(TerminodiffConceptMap(diffDataContainer))
+    suspend fun createConceptMap(diffDataContainer: DiffDataContainer): TerminodiffConceptMap = coroutineScope {
+        return@coroutineScope when (conceptMap) {
+            null -> TerminodiffConceptMap(diffDataContainer).also {
+                conceptMap = it
+            }
+            else -> conceptMap!!
+        }
+    }
 }
 
 class TerminodiffConceptMap(diffDataContainer: DiffDataContainer) {
@@ -65,11 +75,22 @@ class TerminodiffConceptMap(diffDataContainer: DiffDataContainer) {
 }
 
 class ConceptMapGroup(diffDataContainer: DiffDataContainer) {
+
     val sourceUri = mutableStateOf(diffDataContainer.leftCodeSystem?.url)
     val sourceVersion = mutableStateOf(diffDataContainer.leftCodeSystem?.version)
     val targetUri = mutableStateOf(diffDataContainer.rightCodeSystem?.url)
     val targetVersion = mutableStateOf(diffDataContainer.rightCodeSystem?.version)
     val elements = mutableStateListOf<ConceptMapElement>()
+    val toFhir: ConceptMapGroupComponent by derivedStateOf {
+        ConceptMapGroupComponent().apply {
+            this.source = this@ConceptMapGroup.sourceUri.value
+            this.sourceVersion = this@ConceptMapGroup.sourceVersion.value
+            this.target = this@ConceptMapGroup.targetUri.value
+            this.targetVersion = this@ConceptMapGroup.targetVersion.value
+            this.element.addAll(this@ConceptMapGroup.elements.map { it.toFhir }
+                .filter(SourceElementComponent::hasTarget))
+        }
+    }
 
     init {
         populateElements(diffDataContainer)
@@ -83,17 +104,6 @@ class ConceptMapGroup(diffDataContainer: DiffDataContainer) {
 
     override fun toString(): String {
         return "ConceptMapGroup(sourceUri=${sourceUri.value}, sourceVersion=${sourceVersion.value}, targetUri=${targetUri.value}, targetVersion=${targetVersion.value})"
-    }
-
-    val toFhir: ConceptMapGroupComponent by derivedStateOf {
-        ConceptMapGroupComponent().apply {
-            this.source = this@ConceptMapGroup.sourceUri.value
-            this.sourceVersion = this@ConceptMapGroup.sourceVersion.value
-            this.target = this@ConceptMapGroup.targetUri.value
-            this.targetVersion = this@ConceptMapGroup.targetVersion.value
-            this.element.addAll(this@ConceptMapGroup.elements.map { it.toFhir }
-                .filter(SourceElementComponent::hasTarget))
-        }
     }
 }
 
@@ -190,13 +200,14 @@ class ConceptMapElement(private val diffDataContainer: DiffDataContainer, code: 
 }
 
 class ConceptMapTarget(diffDataContainer: DiffDataContainer) {
+
+
     val code: MutableState<String?> = mutableStateOf(null)
     val display: String? by derivedStateOf {
         code.value?.let { c -> diffDataContainer.rightGraphBuilder?.nodeTree?.get(c)?.display }
     }
     val equivalence: MutableState<ConceptMapEquivalence?> = mutableStateOf(null)
     val comment: MutableState<String?> = mutableStateOf(null)
-
     var isAutomaticallySet by mutableStateOf(true)
     private val valid by derivedStateOf {
         when {
@@ -207,7 +218,6 @@ class ConceptMapTarget(diffDataContainer: DiffDataContainer) {
             else -> true
         }
     }
-
     val state by derivedStateOf {
         when {
             !valid -> MappingState.INVALID
@@ -215,8 +225,6 @@ class ConceptMapTarget(diffDataContainer: DiffDataContainer) {
             else -> MappingState.VALID
         }
     }
-
-
     val toFhir: TargetElementComponent by derivedStateOf {
         TargetElementComponent().apply {
             this.code = this@ConceptMapTarget.code.value
@@ -226,13 +234,13 @@ class ConceptMapTarget(diffDataContainer: DiffDataContainer) {
         }
     }
 
+    override fun toString(): String {
+        return "ConceptMapTarget(code=${code.value}, display=${display}, equivalence=${equivalence.value}, comment=${comment.value}, state=${state})"
+    }
+
     enum class MappingState(val image: ImageVector, val description: LocalizedStrings.() -> String) {
         AUTO(Icons.Default.AutoAwesome, { automatic }), VALID(Icons.Default.Verified,
             { ok }),
         INVALID(Icons.Default.Error, { invalid })
-    }
-
-    override fun toString(): String {
-        return "ConceptMapTarget(code=${code.value}, display=${display}, equivalence=${equivalence.value}, comment=${comment.value}, state=${state})"
     }
 }
