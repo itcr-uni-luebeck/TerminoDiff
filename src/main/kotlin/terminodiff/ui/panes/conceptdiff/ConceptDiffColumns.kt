@@ -117,9 +117,8 @@ private fun propertyDesignationColumnSpec(
                 OutlinedButton(onClick = {
                     showPropertyDialog(data)
                 },
-
-                    colors = ButtonDefaults.outlinedButtonColors(containerColor = colorScheme.tertiaryContainer,
-                        contentColor = colorScheme.onTertiaryContainer),
+//                    colors = ButtonDefaults.outlinedButtonColors(containerColor = colorScheme.tertiaryContainer,
+//                        contentColor = colorScheme.onTertiaryContainer),
                     border = BorderStroke(1.dp, colorScheme.onTertiaryContainer)) {
                     val text = when (data.isOnlyInLeft()) {
                         true -> data.leftDetails!!

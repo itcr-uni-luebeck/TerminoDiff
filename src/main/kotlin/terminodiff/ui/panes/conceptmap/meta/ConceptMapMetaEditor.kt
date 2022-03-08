@@ -1,6 +1,5 @@
 package terminodiff.terminodiff.ui.panes.conceptmap.meta
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.LocalFireDepartment
@@ -9,7 +8,9 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
-import androidx.compose.runtime.*
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
@@ -18,7 +19,10 @@ import libraries.sahruday.carousel.*
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.conceptmap.ConceptMapState
 import terminodiff.terminodiff.engine.conceptmap.TerminodiffConceptMap
-import terminodiff.terminodiff.ui.util.*
+import terminodiff.terminodiff.ui.util.EditTextGroup
+import terminodiff.terminodiff.ui.util.EditTextGroupSpec
+import terminodiff.terminodiff.ui.util.EditTextSpec
+import terminodiff.terminodiff.ui.util.isUrl
 import terminodiff.ui.panes.conceptmap.showJsonViewer
 
 @Composable
@@ -29,10 +33,10 @@ fun ConceptMapMetaEditorContent(
     fhirContext: FhirContext,
 ) {
     val fhirJson by derivedStateOf {
-        fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMapState.conceptMap.toFhir)
+        fhirContext.newJsonParser().setPrettyPrint(true).encodeResourceToString(conceptMapState.conceptMap!!.toFhir)
     }
     val scrollState = rememberCarouselScrollState()
-    Row(modifier = Modifier.fillMaxWidth().background(colorScheme.tertiaryContainer),
+    Row(modifier = Modifier.fillMaxWidth(),
         horizontalArrangement = Arrangement.spacedBy(4.dp, Alignment.CenterHorizontally)) {
         Column(Modifier.weight(0.98f), horizontalAlignment = Alignment.CenterHorizontally) {
             Button(onClick = {
@@ -66,7 +70,7 @@ private fun ConceptMapMetaEditorForm(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Top)) {
     getEditTextGroups().forEach { group ->
-        EditTextGroup(group, localizedStrings, data = conceptMapState.conceptMap)
+        EditTextGroup(group, localizedStrings, data = conceptMapState.conceptMap!!)
     }
 }
 

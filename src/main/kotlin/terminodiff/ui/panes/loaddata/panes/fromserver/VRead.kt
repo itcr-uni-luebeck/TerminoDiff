@@ -4,13 +4,11 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.CircularProgressIndicator
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.RadioButton
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
@@ -66,21 +64,17 @@ fun VReadDialog(
         rightSelection?.let { invokeLoadListener(onSelectRight, it, resource, coroutineScope, ktorClient) }
         onCloseReject()
     }
-    TerminodiffDialog(
-        title = localizedStrings.vReadFor_(resource),
-        onCloseRequest = onCloseReject
-    ) {
+    TerminodiffDialog(title = localizedStrings.vReadFor_(resource), onCloseRequest = onCloseReject) {
         when {
             vReadVersions == null -> {
-                CircularProgressIndicator(Modifier.fillMaxSize(0.75f).padding(16.dp),
-                    colorScheme.onPrimaryContainer)
+                Box(Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
+                    CircularProgressIndicator(Modifier.fillMaxSize(0.75f), colorScheme.primary)
+                }
             }
             vReadVersions!!.isEmpty() -> Text(text = localizedStrings.anUnknownErrorOccurred,
-                color = colorScheme.onPrimaryContainer,
                 style = typography.titleMedium)
             else -> {
-                VReadTable(
-                    modifier = Modifier.weight(0.9f),
+                VReadTable(modifier = Modifier.weight(0.9f),
                     vReadVersions = vReadVersions!!,
                     lazyListState = lazyListState,
                     localizedStrings = localizedStrings,
@@ -90,14 +84,12 @@ fun VReadDialog(
                     onSelectRight = { rightSelection = it })
                 Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly) {
-                    Button(
-                        modifier = Modifier.wrapContentSize(),
+                    OutlinedButton(modifier = Modifier.wrapContentSize(),
                         onClick = onCloseReject,
-                        colors = ButtonDefaults.buttonColors(colorScheme.tertiary, colorScheme.onTertiary)) {
-                        Text(localizedStrings.closeReject, color = colorScheme.onTertiary)
+                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.onSurfaceVariant)) {
+                        Text(localizedStrings.closeReject)
                     }
-                    Button(
-                        modifier = Modifier.wrapContentSize(),
+                    Button(modifier = Modifier.wrapContentSize(),
                         onClick = onCloseAccept,
                         colors = ButtonDefaults.buttonColors(colorScheme.secondary, colorScheme.onSecondary),
                         enabled = listOf(leftSelection, rightSelection).any { it != null }) {
@@ -146,9 +138,9 @@ fun VReadTable(
     LazyTable(
         modifier = modifier.padding(8.dp),
         columnSpecs = columnSpecs(localizedStrings, leftSelection, rightSelection, onSelectLeft, onSelectRight),
-        backgroundColor = colorScheme.primaryContainer,
+        backgroundColor = colorScheme.surfaceVariant,
         lazyListState = lazyListState,
-        zebraStripingColor = colorScheme.tertiaryContainer,
+        zebraStripingColor = colorScheme.secondaryContainer,
         tableData = vReadVersions,
         localizedStrings = localizedStrings,
         keyFun = DownloadableCodeSystem::metaVersion,

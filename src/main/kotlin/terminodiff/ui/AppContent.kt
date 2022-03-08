@@ -75,7 +75,7 @@ fun TerminodiffContentWindow(
         diffDataContainer.loadState,
         diffDataContainer.codeSystemDiff) {
         if (diffDataContainer.codeSystemDiff != null) {
-            value = ConceptMapState(diffDataContainer)
+            value = ConceptMapState()
         }
     }
     val isReady by derivedStateOf {

@@ -8,6 +8,7 @@ import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Card
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -48,14 +49,13 @@ fun MetadataDiffPanel(
     Card(
         modifier = Modifier.padding(8.dp).fillMaxSize(),
         elevation = 8.dp,
-        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        backgroundColor = colorScheme.surfaceVariant,
+        contentColor = colorScheme.onSurfaceVariant
     ) {
         Column(Modifier.padding(8.dp).fillMaxSize(), horizontalAlignment = Alignment.CenterHorizontally) {
 
             Text(text = localizedStrings.metadataDiff,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onTertiaryContainer)
+                style = MaterialTheme.typography.headlineSmall)
 
             MetadataDiffTable(lazyListState = listState,
                 diffDataContainer = diffDataContainer,
@@ -86,9 +86,9 @@ fun MetadataDiffTable(
                 diffColors,
                 diffDataContainer,
                 onShowDetailsClick),
-            backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+            backgroundColor = colorScheme.surfaceVariant,
             lazyListState = lazyListState,
-            zebraStripingColor = MaterialTheme.colorScheme.primaryContainer,
+            zebraStripingColor = colorScheme.secondaryContainer,
             tableData = comparisons,
             localizedStrings = localizedStrings,
         ) { it.diffItem.label.invoke(localizedStrings) }

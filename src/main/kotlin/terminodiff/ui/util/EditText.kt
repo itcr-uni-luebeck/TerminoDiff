@@ -8,6 +8,7 @@ import androidx.compose.material.icons.filled.ArrowDropDown
 import androidx.compose.material.icons.filled.ArrowDropUp
 import androidx.compose.material.icons.filled.Error
 import androidx.compose.material.icons.filled.Warning
+import androidx.compose.material3.*
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,27 +47,31 @@ fun <T> EditText(
     modifier: Modifier = Modifier,
     data: T,
     spec: EditTextSpec<T>,
+    backgroundColor: Color = colorScheme.secondaryContainer,
+    foregroundColor: Color = colorScheme.contentColorFor(backgroundColor),
     localizedStrings: LocalizedStrings,
     weight: Float = 0.8f,
 ) {
     val valueState = spec.valueState.invoke(data)
     val validation = spec.validation?.invoke(valueState.value ?: "")
     LabeledTextField(modifier = modifier.fillMaxWidth(weight),
-        singleLine = spec.singleLine,
-        readOnly = spec.readOnly,
         value = valueState.value ?: "",
         onValueChange = { newValue ->
             if (valueState is MutableState) valueState.value = newValue
         },
         labelText = spec.title?.invoke(localizedStrings),
+        singleLine = spec.singleLine,
+        readOnly = spec.readOnly,
         isError = isError(validation),
-        trailingIcon = {
-            iconForValidationResult(validation, localizedStrings = localizedStrings)?.let { (icon, desc) ->
-                Icon(imageVector = icon,
-                    contentDescription = desc,
-                    tint = if (validation == EditTextSpec.ValidationResult.INVALID) colorScheme.error else colorScheme.onTertiaryContainer)
-            }
-        })
+        backgroundColor = backgroundColor,
+        foregroundColor = foregroundColor
+    ) {
+        iconForValidationResult(validation, localizedStrings = localizedStrings)?.let { (icon, desc) ->
+            Icon(imageVector = icon,
+                contentDescription = desc,
+                tint = if (validation == EditTextSpec.ValidationResult.INVALID) colorScheme.error else colorScheme.onTertiaryContainer)
+        }
+    }
 }
 
 @Composable
@@ -125,6 +130,8 @@ fun LabeledTextField(
     singleLine: Boolean = true,
     readOnly: Boolean = false,
     isError: Boolean = false,
+    backgroundColor: Color = colorScheme.secondaryContainer,
+    foregroundColor: Color = colorScheme.contentColorFor(backgroundColor),
     trailingIcon: @Composable () -> Unit,
 ) = TextField(value = value,
     onValueChange = onValueChange,
@@ -133,12 +140,12 @@ fun LabeledTextField(
     isError = isError,
     readOnly = readOnly,
     label = {
-        labelText?.let { Text(text = it, color = colorScheme.onSecondaryContainer.copy(0.75f)) }
+        labelText?.let { Text(text = it, color = foregroundColor.copy(0.75f)) }
     },
     trailingIcon = trailingIcon,
-    colors = TextFieldDefaults.textFieldColors(backgroundColor = colorScheme.secondaryContainer,
-        textColor = colorScheme.onSecondaryContainer,
-        focusedIndicatorColor = colorScheme.onSecondaryContainer.copy(0.75f)))
+    colors = TextFieldDefaults.textFieldColors(backgroundColor = backgroundColor,
+        textColor = foregroundColor,
+        focusedIndicatorColor = foregroundColor.copy(0.75f)))
 
 @Composable
 fun LabeledTextField(
@@ -149,6 +156,8 @@ fun LabeledTextField(
     singleLine: Boolean = true,
     readOnly: Boolean = false,
     isError: Boolean = false,
+    backgroundColor: Color = colorScheme.secondaryContainer,
+    foregroundColor: Color = colorScheme.contentColorFor(backgroundColor),
     trailingIconVector: ImageVector? = null,
     trailingIconDescription: String? = null,
     trailingIconTint: Color = colorScheme.onSecondaryContainer,
@@ -161,23 +170,25 @@ fun LabeledTextField(
         singleLine = singleLine,
         readOnly = readOnly,
         isError = isError,
-        trailingIcon = {
-            trailingIconVector?.let { imageVector ->
-                if (trailingIconDescription == null) throw IllegalArgumentException("a content description has to be specified if a trailing icon is provided")
-                MouseOverPopup(text = trailingIconDescription) {
-                    when (onTrailingIconClick) {
-                        null -> Icon(imageVector = imageVector,
+        backgroundColor = backgroundColor,
+        foregroundColor = foregroundColor
+    ) {
+        trailingIconVector?.let { imageVector ->
+            if (trailingIconDescription == null) throw IllegalArgumentException("a content description has to be specified if a trailing icon is provided")
+            MouseOverPopup(text = trailingIconDescription) {
+                when (onTrailingIconClick) {
+                    null -> Icon(imageVector = imageVector,
+                        contentDescription = trailingIconDescription,
+                        tint = trailingIconTint)
+                    else -> IconButton(onClick = onTrailingIconClick) {
+                        Icon(imageVector = imageVector,
                             contentDescription = trailingIconDescription,
                             tint = trailingIconTint)
-                        else -> IconButton(onClick = onTrailingIconClick) {
-                            Icon(imageVector = imageVector,
-                                contentDescription = trailingIconDescription,
-                                tint = trailingIconTint)
-                        }
                     }
                 }
             }
-        })
+        }
+    }
 }
 
 @Composable
@@ -187,6 +198,7 @@ fun <T> Dropdown(
     elementDisplay: (T) -> String,
     textFieldDisplay: (T) -> String = elementDisplay,
     fontStyle: (T) -> FontStyle = { FontStyle.Normal },
+    dropdownColor: Color,
     onSelect: (T) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -198,19 +210,20 @@ fun <T> Dropdown(
                 onValueChange = { },
                 readOnly = true,
                 labelText = null,
-                trailingIcon = {
-                    IconButton({
-                        expanded = !expanded
-                    }) {
-                        val icon = when (expanded) {
-                            true -> Icons.Filled.ArrowDropUp
-                            else -> Icons.Filled.ArrowDropDown
-                        }
-                        Icon(icon, null)
+                backgroundColor = dropdownColor
+            ) {
+                IconButton({
+                    expanded = !expanded
+                }) {
+                    val icon = when (expanded) {
+                        true -> Icons.Filled.ArrowDropUp
+                        else -> Icons.Filled.ArrowDropDown
                     }
-                })
+                    Icon(icon, null)
+                }
+            }
             DropdownMenu(expanded = expanded,
-                modifier = Modifier.background(colorScheme.secondaryContainer),
+                modifier = Modifier.background(dropdownColor),
                 onDismissRequest = { expanded = false }) {
                 elements.forEach { element ->
                     DropdownMenuItem(onClick = {
@@ -218,7 +231,6 @@ fun <T> Dropdown(
                         expanded = false
                     }) {
                         Text(text = elementDisplay(element),
-                            color = colorScheme.onSecondaryContainer,
                             fontStyle = fontStyle(element))
                     }
                 }
@@ -232,6 +244,8 @@ fun AutocompleteEditText(
     autocompleteSuggestions: SortedMap<String, String>,
     value: String?,
     limitSuggestions: Int = 5,
+    backgroundColor: Color = colorScheme.secondaryContainer,
+    foregroundColor: Color = colorScheme.contentColorFor(backgroundColor),
     filterSuggestions: (String?, String) -> Boolean = { input, suggestion -> suggestion.startsWith(input ?: "") },
     validateInput: ((String) -> EditTextSpec.ValidationResult)? = null,
     localizedStrings: LocalizedStrings,
@@ -247,15 +261,21 @@ fun AutocompleteEditText(
         val validation = validateInput?.invoke(value ?: "")
         LabeledTextField(modifier = Modifier.onFocusChanged {
             hasFocus = it.isFocused
-        }, onValueChange = {
-            onValueChange(it)
-        }, labelText = null, value = value ?: "", isError = isError(validation), trailingIcon = {
+        },
+            value = value ?: "",
+            onValueChange = {
+                onValueChange(it)
+            },
+            labelText = null,
+            isError = isError(validation),
+            backgroundColor = backgroundColor,
+            foregroundColor = foregroundColor) {
             iconForValidationResult(validation, localizedStrings = localizedStrings)?.let { (icon, desc) ->
                 Icon(imageVector = icon,
                     contentDescription = desc,
                     tint = if (validation == EditTextSpec.ValidationResult.INVALID) colorScheme.error else colorScheme.onTertiaryContainer)
             }
-        })
+        }
         DropdownMenu(expanded = when {
             !hasFocus -> false
             currentSuggestions.isEmpty() -> false

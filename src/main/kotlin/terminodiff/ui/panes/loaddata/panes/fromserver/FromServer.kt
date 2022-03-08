@@ -9,11 +9,8 @@ import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Compare
 import androidx.compose.material.icons.filled.Pending
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.Icon
+import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -286,12 +283,10 @@ fun ListOfResources(
             onLoadFile = onLoadRightFile)
     }
     LazyTable(
-        //modifier = Modifier.padding(4.dp),
         columnSpecs = columnSpecs,
-        backgroundColor = colorScheme.tertiaryContainer,
-        foregroundColor = colorScheme.onTertiaryContainer,
+        backgroundColor = colorScheme.surfaceVariant,
         lazyListState = lazyListState,
-        zebraStripingColor = colorScheme.primaryContainer,
+        zebraStripingColor = colorScheme.secondaryContainer,
         tableData = resourceList,
         localizedStrings = localizedStrings,
         keyFun = DownloadableCodeSystem::id,
@@ -309,9 +304,9 @@ private fun LoadButton(
     onClick: (InputResource) -> Unit,
 ) {
     val buttonColors =
-        ButtonDefaults.buttonColors(containerColor = colorScheme.primary, contentColor = colorScheme.onPrimary)
+        ButtonDefaults.filledTonalButtonColors(containerColor = colorScheme.secondary, contentColor = colorScheme.onSecondary)
     MouseOverPopup(text = tooltip ?: text) {
-        Button(colors = buttonColors, onClick = {
+        FilledTonalButton(colors = buttonColors, onClick = {
             selectedItem?.let { item ->
                 val resource = InputResource(kind = InputResource.Kind.FHIR_SERVER,
                     resourceUrl = item.physicalUrl,

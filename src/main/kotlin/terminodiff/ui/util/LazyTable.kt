@@ -115,7 +115,7 @@ private fun <T> SeachStateDisplay(
                 foregroundColor = foregroundColor,
                 localizedStrings = localizedStrings)
         }
-        Text(text = searchState.searchStateLabel!!, color = foregroundColor)
+        Text(text = searchState.searchStateLabel!!)
     }
 }
 
@@ -394,7 +394,7 @@ class SearchState<T>(
         }
     }
 
-    fun isFilteringFor(columnTitle: String) = searchQueries.entries.firstOrNull() { it.key == columnTitle }?.let {
+    fun isFilteringFor(columnTitle: String) = searchQueries.entries.firstOrNull { it.key == columnTitle }?.let {
         it.value != null
     } ?: false
 

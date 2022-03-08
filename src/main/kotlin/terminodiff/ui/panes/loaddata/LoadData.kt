@@ -14,9 +14,7 @@ import androidx.compose.material3.ElevatedButton
 import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -64,9 +62,8 @@ fun ColumnScope.LoadedResourcesCard(
     rightResource: InputResource?,
     onGoButtonClick: () -> Unit,
 ) = Card(modifier = Modifier.padding(8.dp).fillMaxWidth().weight(0.25f),
-    elevation = 8.dp,
-    backgroundColor = colorScheme.secondaryContainer,
-    contentColor = colorScheme.onSecondaryContainer) {
+    backgroundColor = colorScheme.surfaceVariant,
+    contentColor = colorScheme.onSurfaceVariant) {
     Column(Modifier.padding(4.dp).fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top) {
@@ -76,13 +73,11 @@ fun ColumnScope.LoadedResourcesCard(
                     ElevatedButton(modifier = Modifier.weight(0.3f),
                         onClick = onGoButtonClick,
                         colors = ButtonDefaults.buttonColors(colorScheme.primary, colorScheme.onPrimary)) {
-                        Text(localizedStrings.calculateDiff, color = colorScheme.onPrimary)
+                        Text(localizedStrings.calculateDiff)
                     }
                 }
                 else -> {
-                    Text(text = localizedStrings.loadedResources,
-                        style = typography.titleLarge,
-                        color = colorScheme.onSecondaryContainer)
+                    Text(text = localizedStrings.loadedResources, style = typography.titleLarge)
                 }
             }
         }
@@ -90,7 +85,7 @@ fun ColumnScope.LoadedResourcesCard(
         Row(modifier = Modifier.padding(4.dp).fillMaxWidth().weight(0.7f),
             horizontalArrangement = Arrangement.SpaceAround) {
             ResourceDescription(Modifier.weight(0.45f), localizedStrings, leftResource, DiffDataContainer.Side.LEFT)
-            Divider(color = colorScheme.onSecondaryContainer, modifier = Modifier.width(2.dp).fillMaxHeight())
+            Divider(color = colorScheme.secondary, modifier = Modifier.width(2.dp).fillMaxHeight())
             ResourceDescription(Modifier.weight(0.45f), localizedStrings, rightResource, DiffDataContainer.Side.RIGHT)
         }
     }
@@ -104,20 +99,14 @@ fun ResourceDescription(
     side: DiffDataContainer.Side,
 ) = Column(modifier = modifier.wrapContentHeight(), horizontalAlignment = Alignment.CenterHorizontally) {
     val text by derivedStateOf { formatText(resource, localizedStrings) }
-    Text(text = localizedStrings.side_(side),
-        style = typography.titleMedium,
-        textDecoration = TextDecoration.Underline,
-        color = colorScheme.onSecondaryContainer)
+    Text(text = localizedStrings.side_(side), style = typography.titleMedium, textDecoration = TextDecoration.Underline)
     Row(modifier = Modifier.align(Alignment.CenterHorizontally).height(IntrinsicSize.Min)) {
-        Text(
-            text = text,
+        Text(text = text,
             textAlign = TextAlign.Center,
-            color = colorScheme.onSecondaryContainer,
             style = typography.bodyMedium,
             maxLines = 3,
             softWrap = true,
-            overflow = TextOverflow.Clip
-        )
+            overflow = TextOverflow.Clip)
     }
 }
 
@@ -150,12 +139,10 @@ fun ColumnScope.LoadResourcesCards(
     localizedStrings: LocalizedStrings,
     fhirContext: FhirContext,
 ) = Card(modifier = Modifier.padding(8.dp).fillMaxWidth().weight(0.75f, true),
-    elevation = 8.dp,
-    backgroundColor = colorScheme.tertiaryContainer,
-    contentColor = colorScheme.onTertiaryContainer) {
+    backgroundColor = colorScheme.surfaceVariant) {
     val tabs = listOf(LoadFilesTabItem.FromFile, LoadFilesTabItem.FromTerminologyServer)
     val pagerState = rememberPagerState()
-    Column(modifier = Modifier.padding(4.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
         Tabs(tabs = tabs, pagerState = pagerState, localizedStrings = localizedStrings)
         TabsContent(tabs = tabs,
             pagerState = pagerState,

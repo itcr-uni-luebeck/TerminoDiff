@@ -1,7 +1,8 @@
 package terminodiff.ui
 
-import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.padding
 import androidx.compose.material.LeadingIconTab
 import androidx.compose.material.TabRow
 import androidx.compose.material.TabRowDefaults
@@ -11,8 +12,8 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.unit.dp
 import ca.uhn.fhir.context.FhirContext
 import kotlinx.coroutines.launch
 import libraries.accompanist.pager.ExperimentalPagerApi
@@ -35,10 +36,10 @@ fun <T : TabItem.ScreenData> Tabs(tabs: List<TabItem<T>>, pagerState: PagerState
         tabs.forEachIndexed { index, tabItem ->
             LeadingIconTab(
                 icon = {
-                    Icon(tabItem.spec.icon, contentDescription = null, tint = colorScheme.onTertiaryContainer)
+                    Icon(tabItem.spec.icon, contentDescription = null)
                 },
                 text = {
-                    Text(tabItem.spec.title.invoke(localizedStrings), color = colorScheme.onTertiaryContainer)
+                    Text(tabItem.spec.title.invoke(localizedStrings))
                 },
                 selected = pagerState.currentPage == index,
                 onClick = {
@@ -58,12 +59,12 @@ fun <T : TabItem.ScreenData> TabsContent(
     pagerState: PagerState,
     localizedStrings: LocalizedStrings,
     fhirContext: FhirContext,
-    backgroundColor: Color = colorScheme.surface,
     provideData: () -> T,
 ) {
     HorizontalPager(state = pagerState, count = tabs.size) { page ->
-        Column(Modifier.background(backgroundColor)) { }
-        tabs[page].spec.screen(localizedStrings, fhirContext, provideData.invoke())
+        Column(Modifier.padding(8.dp).fillMaxSize()) {
+            tabs[page].spec.screen(localizedStrings, fhirContext, provideData.invoke())
+        }
     }
 }
 
