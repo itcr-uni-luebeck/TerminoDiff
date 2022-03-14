@@ -1,6 +1,6 @@
 ## TerminoDiff
 
-TerminoDiff is a tool to explorere the differences between versions of HL7 FHIR `CodeSystem` resources. The repository is available at: https://github.com/itcr-uni-luebeck/TerminoDiff and the tool is available under the terms of the GPL-3.0 license.
+TerminoDiff is a tool to explorere the differences between versions of HL7 FHIR `CodeSystem` resources. Detailed documentation is available on [GitHub in the README](https://github.com/itcr-uni-luebeck/TerminoDiff#readme).
 
 ### Scoping Review
 
@@ -49,7 +49,7 @@ After screening, we selected the following six works as applicable:
 - Noy, Natalya Fridman, and Mark A. Musen. “PROMPTDIFF: A Fixed-Point Algorithm for Comparing Ontology Versions.” In Proceedings of the Eighteenth National Conference on Artificial Intelligence and Fourteenth Conference on Innovative Applications of Artificial Intelligence, July 28 - August 1, 2002, Edmonton, Alberta, Canada, edited by Rina Dechter, Michael J. Kearns, and Richard S. Sutton, 744–50. AAAI Press / The MIT Press, 2002. http://www.aaai.org/Library/AAAI/2002/aaai02-112.php.
 - Ochs, Christopher, Yehoshua Perl, James Geller, Melissa Haendel, Matthew Brush, Sivaram Arabandi, and Samson Tu. “Summarizing and Visualizing Structural Changes during the Evolution of Biomedical Ontologies Using a Diff Abstraction Network.” Journal of Biomedical Informatics 56 (August 2015): 127–44. https://doi.org/10.1016/j.jbi.2015.05.018.
 - Pernisch, Romana, Mirko Serbak, Daniele Dell’Aglio, and Abraham Bernstein. “ChImp: Visualizing Ontology Changes and TheirImpact in Protégé.” Visualization and Interaction for Ontologies and Linked Data (VOILA), 2020. http://ceur-ws.org/Vol-2778/paper5.pdf.
-- Swoboda, Oliver. “Realisierung Des COnto-Diff Algorithmus Innerhalb Eines Protégé-Plugins.” Bachelor’s Thesis, Universität Leipzig, Institut für Informatik, Abteilung Datenbanken, 2015. [https://nbn-resolving.org/urn:nbn:de:bsz:15-qucosa2-171988](https://nbn-resolving.org/urn:nbn:de:bsz:15-qucosa2-171988).
+- Swoboda, Oliver. “Realisierung Des COnto-Diff Algorithmus Innerhalb Eines Protégé-Plugins.” Bachelor’s Thesis, Universität Leipzig, Institut für Informatik, Abteilung Datenbanken, 2015. https://nbn-resolving.org/urn:nbn:de:bsz:15-qucosa2-171988.
 
 We then extracted the following data from the referenced literature:
 
