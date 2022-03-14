@@ -86,7 +86,7 @@ private fun Content(
     isDarkTheme: Boolean,
 ) {
     val allConceptCodes by derivedStateOf {
-        diffDataContainer.codeSystemDiff!!.combinedGraph!!.graph.vertexSet().filter { it.side == GraphSide.BOTH }
+        diffDataContainer.codeSystemDiff!!.combinedGraph!!.graph.vertexSet()//.filter { it.side == GraphSide.BOTH }
             .associate { it.code to "${it.code} (${it.getTooltip()})" }.toSortedMap()
     }
     Column(Modifier.padding(8.dp).clip(RoundedCornerShape(8.dp))) {

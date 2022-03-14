@@ -76,8 +76,7 @@ fun ConceptMappingEditorContent(
     val columnHeight: Dp by derivedStateOf {
         conceptMapState.conceptMap!!.group.elements.map { it.targets.size + 1 }.plus(1).maxOf { it }.times(60).dp
     }
-    Column(Modifier.fillMaxSize().padding(16.dp),
-        verticalArrangement = Arrangement.spacedBy(4.dp)) {
+    Column(Modifier.fillMaxSize().padding(16.dp), verticalArrangement = Arrangement.spacedBy(4.dp)) {
         MappingStatus(conceptMapState, localizedStrings)
         LazyTable(columnSpecs = columnSpecs,
             cellHeight = columnHeight,
@@ -113,7 +112,7 @@ fun MappingStatus(conceptMapState: ConceptMapState, localizedStrings: LocalizedS
             }
             append("; ")
             withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
-                append(localizedStrings.validAcceptedCount_(validCount))
+                append(localizedStrings.acceptedCount_(validCount))
             }
         }, style = typography.titleLarge)
 
@@ -201,14 +200,11 @@ private fun equivalenceColumnSpec(
         weight = 0.2f,
         elementListGetter = { it.targets },
         dividerColor = dividerColor) { _, target ->
-        Dropdown(
-            elements = ConceptMapEquivalenceDisplay.values().toList(),
+        Dropdown(elements = ConceptMapEquivalenceDisplay.values().toList(),
             elementDisplay = { it.displayIndent() },
             textFieldDisplay = { it.display },
-            fontStyle = { if (it.recommendedUse) FontStyle.Normal else FontStyle.Italic },
             selectedElement = ConceptMapEquivalenceDisplay.fromEquivalence(target.equivalence.value),
-            dropdownColor = colorScheme.tertiaryContainer
-        ) { newValue ->
+            dropdownColor = colorScheme.tertiaryContainer) { newValue ->
             target.equivalence.value = newValue.equivalence
             target.isAutomaticallySet = false
         }
@@ -258,7 +254,7 @@ private fun commentsColumnSpec(localizedStrings: LocalizedStrings, dividerColor:
         dividerColor = dividerColor) { _, target ->
         EditText(data = target,
             spec = EditTextSpec(title = null, valueState = { comment }, validation = null),
-            backgroundColor = colorScheme.tertiary,
+            backgroundColor = colorScheme.tertiaryContainer,
             localizedStrings = localizedStrings)
     }
 
@@ -312,22 +308,13 @@ enum class ConceptMapEquivalenceDisplay(
     val level: Int,
     val display: String,
     val equivalence: ConceptMapEquivalence,
-    val recommendedUse: Boolean = false,
 ) {
-    RELATEDTO(0, "Related To", ConceptMapEquivalence.RELATEDTO, true), EQUIVALENT(1,
+    RELATEDTO(0, "Related To", ConceptMapEquivalence.RELATEDTO), EQUIVALENT(1,
         "Equivalent",
-        ConceptMapEquivalence.EQUIVALENT,
-        true),
-    EQUAL(2, "Equal", ConceptMapEquivalence.EQUAL), WIDER(1, "Wider", ConceptMapEquivalence.WIDER, true), SUBSUMES(1,
-        "Subsumes",
-        ConceptMapEquivalence.SUBSUMES),
-    NARROWER(1, "Narrower", ConceptMapEquivalence.NARROWER, true), SPECIALIZES(1,
-        "Specializes",
-        ConceptMapEquivalence.SPECIALIZES),
-    INEXACT(1, "Inexact", ConceptMapEquivalence.INEXACT), UNMATCHED(0,
-        "Unmatched",
-        ConceptMapEquivalence.UNMATCHED),
-    DISJOINT(1, "Disjoint", ConceptMapEquivalence.DISJOINT, true);
+        ConceptMapEquivalence.EQUIVALENT),
+    WIDER(1, "Wider", ConceptMapEquivalence.WIDER), NARROWER(1, "Narrower", ConceptMapEquivalence.NARROWER), DISJOINT(0,
+        "Disjoint",
+        ConceptMapEquivalence.DISJOINT);
 
     fun displayIndent(): String = "${" ".repeat(this.level * 4)}${this.display}"
 

@@ -75,7 +75,7 @@ fun <T> EditText(
 }
 
 @Composable
-fun <T> EditTextGroup(group: EditTextGroupSpec<T>, localizedStrings: LocalizedStrings, data: T) {
+fun <T> EditTextGroup(group: EditTextGroupSpec<T>, localizedStrings: LocalizedStrings, backgroundColor: Color, data: T) {
     Card(Modifier.fillMaxWidth(0.9f).padding(4.dp),
         backgroundColor = colorScheme.secondaryContainer,
         elevation = 8.dp) {
@@ -86,7 +86,7 @@ fun <T> EditTextGroup(group: EditTextGroupSpec<T>, localizedStrings: LocalizedSt
                 style = MaterialTheme.typography.titleSmall,
                 color = colorScheme.onTertiaryContainer)
             group.specs.forEach { spec ->
-                EditText(spec = spec, localizedStrings = localizedStrings, data = data)
+                EditText(spec = spec, localizedStrings = localizedStrings, data = data, backgroundColor = backgroundColor)
             }
         }
     }

@@ -23,7 +23,7 @@ class CombinedGraphBuilder {
         return diffEdgeTraversal.traverse()
     }
 
-    val affectedEdges = mutableStateListOf<CombinedEdge>()
+    private val affectedEdges = mutableStateListOf<CombinedEdge>()
     val affectedVertices = mutableStateListOf<CombinedVertex>()
 
     fun populateAffected() {
@@ -33,7 +33,8 @@ class CombinedGraphBuilder {
         }
         graph.vertexSet().filter { it.side != GraphSide.BOTH }.toSet().let { vertices ->
             affectedVertices.clear()
-            val allVertices = vertices.plus(affectedEdges.mapNotNull { graph.nodeByCode(it.toCode) }).plus(affectedEdges.mapNotNull { graph.nodeByCode(it.fromCode) })
+            val allVertices = vertices.plus(affectedEdges.mapNotNull { graph.nodeByCode(it.toCode) })
+                .plus(affectedEdges.mapNotNull { graph.nodeByCode(it.fromCode) })
             affectedVertices.addAll(allVertices)
         }
     }
@@ -59,7 +60,7 @@ data class CombinedEdge(
 
     fun getTooltip() = "'$fromCode' -> '$toCode' [$property]"
 
-    fun getColor() = ColorRegistry.getColor(Registry.SIDES, side.name)
+    fun getColor() = ColorRegistry.getDiffGraphColor(side)
 }
 
 data class CombinedVertex(
@@ -76,7 +77,7 @@ data class CombinedVertex(
         else -> if (displayLeft == displayRight) displayRight else "$displayLeft vs. $displayRight"
     }
 
-    fun getColor() = ColorRegistry.getColor(Registry.SIDES, side.name)
+    fun getColor() = ColorRegistry.getDiffGraphColor(side)
 }
 
 fun CombinedGraph.addCombinedEdge(edge: CombinedEdge) {
@@ -95,8 +96,8 @@ typealias CombinedGraph = Graph<CombinedVertex, CombinedEdge>
 
 class DiffEdgeTraversal(
     graph: CombinedGraph,
-    val startingVertex: CombinedVertex,
-    val radius: Int,
+    private val startingVertex: CombinedVertex,
+    private val radius: Int,
 ) : AbstractGraphIterator<CombinedVertex, CombinedEdge>(graph) {
     private val logger: Logger = LoggerFactory.getLogger(DiffEdgeTraversal::class.java)
     private val subgraph: CombinedGraph = emptyGraph()

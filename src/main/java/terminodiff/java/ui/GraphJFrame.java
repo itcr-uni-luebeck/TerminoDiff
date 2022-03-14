@@ -9,12 +9,16 @@ import org.jungrapht.visualization.control.DefaultGraphMouse;
 import org.jungrapht.visualization.control.DefaultSatelliteGraphMouse;
 import org.jungrapht.visualization.layout.algorithms.LayoutAlgorithm;
 import terminodiff.i18n.LocalizedStrings;
+import terminodiff.terminodiff.engine.graph.GraphSide;
+import terminodiff.ui.graphs.ColorRegistry;
+import terminodiff.ui.graphs.Registry;
 
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.util.List;
+import java.util.Map;
 
 /**
  * combined implementation from the samples in jungraph-visualization: SatelliteViewRefactoredMouseDemo and
@@ -127,5 +131,39 @@ public abstract class GraphJFrame<V, E> extends JFrame {
 
     public void setGraph(@Nullable Graph<V, E> newGraph) {
         visualizationModel.setGraph(newGraph);
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    protected JComponent getSidesLegend(String labelText) {
+        JPanel legendPanel = new JPanel();
+        for (GraphSide side : GraphSide.values()) {
+            Color color = ColorRegistry.Companion.getDiffGraphColor(side);
+            JPanel panel = new JPanel(new FlowLayout());
+            JPanel colorRectangle = new JPanel();
+            colorRectangle.setBackground(color);
+            colorRectangle.setSize(10, 10);
+            JLabel label = new JLabel(side.name());
+            panel.add(colorRectangle);
+            panel.add(label);
+            legendPanel.add(panel);
+        }
+        return ControlHelpers.getContainer(Box.createHorizontalBox(), ControlHelpers.getCenteredContainer(labelText, legendPanel));
+    }
+
+    @SuppressWarnings("DuplicatedCode")
+    protected JComponent getEdgeColorLegend(String labelText) {
+        Map<String, Color> reg = ColorRegistry.Companion.getRegistry(Registry.EDGES);
+        JPanel legendPanel = new JPanel();
+        for (Map.Entry<String, Color> stringColorEntry : reg.entrySet()) {
+            JPanel panel = new JPanel(new FlowLayout());
+            JPanel colorRectangle = new JPanel();
+            colorRectangle.setBackground(stringColorEntry.getValue());
+            colorRectangle.setSize(10, 10);
+            JLabel label = new JLabel(stringColorEntry.getKey());
+            panel.add(colorRectangle);
+            panel.add(label);
+            legendPanel.add(panel);
+        }
+        return ControlHelpers.getContainer(Box.createHorizontalBox(), ControlHelpers.getCenteredContainer(labelText, legendPanel));
     }
 }

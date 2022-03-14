@@ -2,11 +2,10 @@ package terminodiff.terminodiff.ui.panes.loaddata.panes
 
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Plagiarism
-import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -40,8 +39,14 @@ fun FromFileScreenWrapper(
         onChangeFilePath = {
             selectedPath = it ?: ""
         },
-        onLoadLeftFile = onLoadLeft,
-        onLoadRightFile = onLoadRight)
+        onLoadLeftFile = {
+            onLoadLeft(it)
+            selectedPath = ""
+        },
+        onLoadRightFile = {
+            onLoadRight(it)
+            selectedPath = ""
+        })
 }
 
 @Composable
@@ -53,9 +58,8 @@ private fun FromFileScreen(
     onLoadRightFile: (InputResource) -> Unit,
     selectedPath: String,
 ) = Column(modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)) {
-    val buttonColors =
-        ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary)
+    val buttonColors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary)
     val isValidPath by derivedStateOf {
         when {
             selectedFile == null -> false
@@ -63,21 +67,25 @@ private fun FromFileScreen(
             else -> false
         }
     }
-
-    LabeledTextField(
-        modifier = Modifier.fillMaxWidth().padding(12.dp),
-        value = selectedPath,
-        onValueChange = onChangeFilePath,
-        labelText = localizedStrings.fileSystem,
-        trailingIconVector = Icons.Default.Plagiarism,
-        trailingIconDescription = localizedStrings.fileSystem
-    ) {
-        val newFile = showLoadFileDialog(localizedStrings.loadFromFile)
-        newFile?.let {
-            onChangeFilePath.invoke(it.absolutePath)
-            AppPreferences.fileBrowserDirectory = it.toPath().parent.invariantSeparatorsPathString
+    Row(Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+        LabeledTextField(modifier = Modifier.weight(0.6f),
+            value = selectedPath,
+            onValueChange = onChangeFilePath,
+            labelText = localizedStrings.fileSystem)
+        Button(modifier = Modifier.weight(0.15f), onClick = {
+            val newFile = showLoadFileDialog(localizedStrings.loadFromFile)
+            newFile?.let {
+                onChangeFilePath.invoke(it.absolutePath)
+                AppPreferences.fileBrowserDirectory = it.toPath().parent.invariantSeparatorsPathString
+            }
+        }) {
+            Icon(Icons.Default.FolderOpen, localizedStrings.open)
+            Text(localizedStrings.open)
         }
     }
+
 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
         Button(modifier = Modifier.padding(4.dp),

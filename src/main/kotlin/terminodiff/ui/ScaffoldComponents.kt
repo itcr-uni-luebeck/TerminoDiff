@@ -11,7 +11,9 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.TopAppBar
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.DarkMode
 import androidx.compose.material.icons.filled.FolderOpen
+import androidx.compose.material.icons.filled.LightMode
 import androidx.compose.material.icons.filled.Mediation
 import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
@@ -146,7 +148,7 @@ fun TerminoDiffTopAppBar(
 
         MouseOverPopup(localizedStrings.toggleDarkTheme) {
             IconActionButton(onClick = onChangeDarkTheme,
-                imageRelativePath = AppIconResource.icDarkMode,
+                imageVector = if (useDarkTheme) Icons.Default.LightMode else Icons.Default.DarkMode,
                 label = localizedStrings.toggleDarkTheme)
         }
 

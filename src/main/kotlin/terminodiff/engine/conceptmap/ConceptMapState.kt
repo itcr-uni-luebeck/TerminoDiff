@@ -97,9 +97,10 @@ class ConceptMapGroup(diffDataContainer: DiffDataContainer) {
     }
 
     private fun populateElements(diff: DiffDataContainer) {
-        diff.codeSystemDiff!!.combinedGraph!!.affectedVertices.forEach { vertex ->
-            elements.add(ConceptMapElement(diff, vertex.code, vertex.getTooltip()))
-        }
+        diff.codeSystemDiff!!.combinedGraph!!.affectedVertices
+            .forEach { vertex ->
+                elements.add(ConceptMapElement(diff, vertex.code, vertex.getTooltip()))
+            }
     }
 
     override fun toString(): String {
@@ -163,7 +164,7 @@ class ConceptMapElement(private val diffDataContainer: DiffDataContainer, code: 
         return when {
             allPaths.isEmpty() -> null
             allPaths.size == 1 -> inferEquivalenceFromPath(allPaths.first(), originalOrder)
-            else -> allPaths.maxByOrNull { it.length }?.let { shortestPath ->
+            else -> allPaths.minByOrNull { it.length }?.let { shortestPath ->
                 inferEquivalenceFromPath(shortestPath, originalOrder)
             }
         }

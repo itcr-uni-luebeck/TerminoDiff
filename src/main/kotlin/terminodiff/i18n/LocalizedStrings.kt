@@ -14,6 +14,7 @@ import terminodiff.terminodiff.engine.resources.InputResource
  */
 abstract class LocalizedStrings(
     val acceptAll: String,
+    val acceptedCount_: (Int) -> String,
     val actions: String,
     val addLayer: String,
     val addTarget: String,
@@ -73,6 +74,7 @@ abstract class LocalizedStrings(
     val language: String,
     val layers: String,
     val leftValue: String,
+    val legend: String,
     val loadFromFile: String,
     val loadLeft: String,
     val loadRight: String,
@@ -97,6 +99,7 @@ abstract class LocalizedStrings(
     val onlyConceptDifferences: String,
     val onlyInLeft: String,
     val onlyInRight: String,
+    val open: String,
     val openResources: String,
     val overallComparison: String,
     val pending: String,
@@ -112,6 +115,8 @@ abstract class LocalizedStrings(
     val reallyAcceptAll: String,
     val reload: String,
     val removeLayer: String,
+    val resourcesIdentical: String,
+    val resourcesIdenticalMessage: String,
     val rightValue: String,
     val search: String,
     val select: String,
@@ -142,7 +147,6 @@ abstract class LocalizedStrings(
     val vreadExplanationEnabled_: (Boolean) -> String,
     val vReadFor_: (InputResource) -> String,
     val valid: String,
-    val validAcceptedCount_: (Int) -> String,
     val value: String,
     val valueSet: String = "ValueSet",
     val version: String = "Version",
@@ -161,6 +165,7 @@ enum class SupportedLocale {
 
 class GermanStrings : LocalizedStrings(
     acceptAll = "Alle akzeptieren",
+    acceptedCount_ = { "$it akzeptiert"},
     actions = "Aktionen",
     addLayer = "Ebene hinzufügen",
     addTarget = "Ziel hinzufügen",
@@ -246,6 +251,7 @@ class GermanStrings : LocalizedStrings(
     language = "Sprache",
     layers = "Ebenen",
     leftValue = "Linker Wert",
+    legend = "Legende",
     loadFromFile = "Vom Dateisystem laden",
     loadLeft = "Links laden",
     loadRight = "Rechts laden",
@@ -268,6 +274,7 @@ class GermanStrings : LocalizedStrings(
     onlyConceptDifferences = "Konzeptunterschiede",
     onlyInLeft = "Nur links",
     onlyInRight = "Nur rechts",
+    open = "Öffnen",
     openResources = "Ressourcen öffnen",
     overallComparison = "Gesamt",
     pending = "Ausstehend...",
@@ -290,6 +297,8 @@ class GermanStrings : LocalizedStrings(
             "Dies kann nicht rückgängig gemacht werden.",
     reload = "Neu laden",
     removeLayer = "Ebene entfernen",
+    resourcesIdentical = "Identische Ressourcen",
+    resourcesIdenticalMessage = "Die Ressourcen sind identisch.",
     search = "Suchen",
     select = "Auswahl",
     sourceUri = "Quell-URI",
@@ -318,7 +327,6 @@ class GermanStrings : LocalizedStrings(
     useContext = "Nutzungskontext",
     vReadFor_ = { "VRead für ${it.downloadableCodeSystem!!.canonicalUrl}" },
     valid = "Gültig",
-    validAcceptedCount_ = { "$it gültig/akzeptiert"},
     value = "Wert",
     versionNeeded = "Version erforderlich?",
     vreadExplanationEnabled_ = {
@@ -335,6 +343,7 @@ class GermanStrings : LocalizedStrings(
 
 class EnglishStrings : LocalizedStrings(
     acceptAll = "Accept all",
+    acceptedCount_ = { "$it accepted"},
     actions = "Actions",
     addLayer = "Add layer",
     addTarget = "Add target",
@@ -405,7 +414,7 @@ class EnglishStrings : LocalizedStrings(
     hierarchyMeaning = "Hierarchy Meaning",
     identical = "Identical",
     identifiers = "Identifiers",
-    invalid = "Ungültig",
+    invalid = "Invalid",
     jurisdiction = "Jurisdiction",
     keyedListResult_ = { results ->
         results.map { it.result }.groupingBy { it }.eachCount().let { eachCount ->
@@ -420,6 +429,7 @@ class EnglishStrings : LocalizedStrings(
     language = "Language",
     layers = "Layers",
     leftValue = "Left value",
+    legend = "Legende",
     loadFromFile = "Load from file",
     loadLeft = "Load left",
     loadRight = "Load right",
@@ -441,6 +451,7 @@ class EnglishStrings : LocalizedStrings(
     onlyConceptDifferences = "Concept differences",
     onlyInLeft = "Only left",
     onlyInRight = "Only right",
+    open = "Open",
     openResources = "Open Resources",
     overallComparison = "Overall",
     pending = "Pending...",
@@ -463,6 +474,8 @@ class EnglishStrings : LocalizedStrings(
             "You can not undo this.",
     reload = "Reload",
     removeLayer = "Remove layers",
+    resourcesIdentical = "Identical resources",
+    resourcesIdenticalMessage = "The resources provided are identical.",
     rightValue = "Right value",
     search = "Search",
     select = "Select",
@@ -492,7 +505,6 @@ class EnglishStrings : LocalizedStrings(
     useContext = "Use context",
     vReadFor_ = { "VRead for ${it.downloadableCodeSystem!!.canonicalUrl}" },
     valid = "Valid",
-    validAcceptedCount_ = { "$it valid/accepted"},
     value = "Value",
     versionNeeded = "Version needed?",
     vreadExplanationEnabled_ = {
