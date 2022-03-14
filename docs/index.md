@@ -1,6 +1,6 @@
 ## TerminoDiff
 
-TerminoDiff is a tool to explorere the differences between versions of HL7 FHIR `CodeSystem` resources.
+TerminoDiff is a tool to explorere the differences between versions of HL7 FHIR `CodeSystem` resources. The repository is available at: https://github.com/itcr-uni-luebeck/TerminoDiff and the tool is available under the terms of the GPL-3.0 license.
 
 ### Scoping Review
 
