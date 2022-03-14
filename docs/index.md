@@ -6,6 +6,8 @@ TerminoDiff is a tool to explorere the differences between versions of HL7 FHIR 
 
 To get an overview of the literature, we performed a scoping review.
 
+![PRISMA flowchart](./prisma-terminodiff.png)
+
 Our PICOC are:
 - Population = Terminology Tooling
 - Intervention = Differences in resource versions
