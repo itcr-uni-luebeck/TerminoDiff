@@ -81,7 +81,6 @@ fun TerminoDiffTopAppBar(
 ) {
 
     var showConceptMapDialog by remember { mutableStateOf(false) }
-
     if (showConceptMapDialog && conceptMapState != null && diffDataContainer != null) {
         ConceptMapDialog(diffDataContainer = diffDataContainer,
             conceptMapState = conceptMapState,

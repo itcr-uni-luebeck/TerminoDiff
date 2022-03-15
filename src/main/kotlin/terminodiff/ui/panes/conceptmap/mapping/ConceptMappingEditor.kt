@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -65,7 +66,7 @@ fun ConceptMappingEditorContent(
     conceptMapState: ConceptMapState,
     diffDataContainer: DiffDataContainer,
     useDarkTheme: Boolean,
-    allConceptCodes: SortedMap<String, String>,
+    allConceptCodes: SortedMap<String, AnnotatedString>,
 ) {
     val lazyListState = rememberLazyListState()
     val dividerColor = colorScheme.primary
@@ -146,7 +147,7 @@ private fun getColumnSpecs(
     localizedStrings: LocalizedStrings,
     useDarkTheme: Boolean,
     dividerColor: Color,
-    allConceptCodes: SortedMap<String, String>,
+    allConceptCodes: SortedMap<String, AnnotatedString>,
 ): List<ColumnSpec<ConceptMapElement>> = listOf(codeColumnSpec(localizedStrings),
     displayColumnSpec(localizedStrings),
     actionsColumnSpec(diffDataContainer, localizedStrings, useDarkTheme),
@@ -215,7 +216,7 @@ private fun equivalenceColumnSpec(
 private fun targetColumnSpec(
     localizedStrings: LocalizedStrings,
     dividerColor: Color,
-    allConceptCodes: SortedMap<String, String>,
+    allConceptCodes: SortedMap<String, AnnotatedString>,
 ) = columnSpecForMultiRow<ConceptMapElement, ConceptMapTarget>(localizedStrings.target,
     weight = 0.2f,
     elementListGetter = { it.targets },
@@ -232,7 +233,7 @@ private fun targetColumnSpec(
             }
         }
         AutocompleteEditText(autocompleteSuggestions = allConceptCodes,
-            value = target.code.value,
+            inputValue = target.code.value,
             localizedStrings = localizedStrings,
             backgroundColor = colorScheme.tertiaryContainer,
             validateInput = { input ->

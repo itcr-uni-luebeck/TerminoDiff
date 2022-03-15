@@ -45,14 +45,20 @@ fun <T> LazyTable(
     lazyListState: LazyListState,
     zebraStripingColor: Color? = backgroundColor.copy(0.5f),
     tableData: List<T>,
+    dataAlreadySorted: Boolean = false,
     localizedStrings: LocalizedStrings,
     countLabel: (Int) -> String = localizedStrings.elements_,
     keyFun: (T) -> String?,
 ) = Column(modifier = modifier.fillMaxWidth().padding(4.dp)) {
-    val sortedData by derivedStateOf { tableData.sortedBy(keyFun) }
+    val sortedData by derivedStateOf {
+        when (dataAlreadySorted) {
+            true -> tableData
+            else -> tableData.sortedBy(keyFun)
+        }
+    }
     val searchState by produceState<SearchState<T>?>(null, tableData, localizedStrings) {
         // using produceState enforces that the state resets if any of the parameters above ^ change. This is important for
-        // table data (e.g. in the concept diff pane) and LocalizesStrings.
+        // table data (e.g. in the concept diff pane) and LocalizedStrings.
         value = SearchState(columnSpecs, sortedData)
     }
     var showFilterDialogFor: String? by remember { mutableStateOf(null) }
@@ -440,16 +446,14 @@ fun <T> ShowFilterDialog(
         LabeledTextField(value = inputText, onValueChange = { inputText = it }, labelText = title, singleLine = true)
         Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly) {
-            Button(modifier = Modifier.wrapContentSize(),
-                onClick = onClose,
-                colors = ButtonDefaults.buttonColors(colorScheme.tertiary, colorScheme.onTertiary)) {
-                Text(localizedStrings.closeReject, color = colorScheme.onTertiary)
+            OutlinedButton(modifier = Modifier.wrapContentSize(), onClick = onClose) {
+                Text(localizedStrings.closeCancel)
             }
-            Button(modifier = Modifier.wrapContentSize(), onClick = {
+            ElevatedButton(modifier = Modifier.wrapContentSize(), onClick = {
                 searchState.setSearchQueryFor(title, inputText)
                 onClose()
-            }, colors = ButtonDefaults.buttonColors(colorScheme.secondary, colorScheme.onSecondary)) {
-                Text(localizedStrings.closeAccept, color = colorScheme.onSecondary)
+            }, colors = ButtonDefaults.elevatedButtonColors(containerColor = colorScheme.primaryContainer)) {
+                Text(localizedStrings.closeSearch)
             }
         }
     }

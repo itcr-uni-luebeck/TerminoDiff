@@ -1,5 +1,11 @@
 package terminodiff.i18n
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.engine.concepts.KeyedListDiffResultKind
@@ -30,8 +36,9 @@ abstract class LocalizedStrings(
     val changeLanguage: String,
     val clearSearch: String,
     val clickForDetails: String,
-    val closeAccept: String,
-    val closeReject: String,
+    val closeLoad: String,
+    val closeSearch: String,
+    val closeCancel: String,
     val code: String = "Code",
     val comments: String,
     val comparison: String,
@@ -57,12 +64,12 @@ abstract class LocalizedStrings(
     val equivalence: String,
     val experimental: String,
     val fhirTerminologyServer: String,
-    val fileFromPath_: (String) -> String,
-    val fileFromUrl_: (String) -> String,
+    val fileFromPath_: (String) -> AnnotatedString,
+    val fileFromUrl_: (String) -> AnnotatedString,
     val fileSystem: String,
     val filtered: String,
     val graph: String = "Graph",
-    val graphFor_: (String) -> String = { c -> "Graph ($c)"},
+    val graphFor_: (String) -> String = { c -> "Graph ($c)" },
     val group: String,
     val hierarchyMeaning: String,
     val id: String = "ID",
@@ -151,7 +158,7 @@ abstract class LocalizedStrings(
     val valueSet: String = "ValueSet",
     val version: String = "Version",
     val versionNeeded: String,
-    val vreadFromUrlAndMetaVersion_: (String, String) -> String,
+    val vreadFromUrlAndMetaVersion_: (String, String) -> AnnotatedString,
     val yes: String,
 )
 
@@ -163,16 +170,15 @@ enum class SupportedLocale {
     }
 }
 
-class GermanStrings : LocalizedStrings(
-    acceptAll = "Alle akzeptieren",
-    acceptedCount_ = { "$it akzeptiert"},
+class GermanStrings : LocalizedStrings(acceptAll = "Alle akzeptieren",
+    acceptedCount_ = { "$it akzeptiert" },
     actions = "Aktionen",
     addLayer = "Ebene hinzufügen",
     addTarget = "Ziel hinzufügen",
     anUnknownErrorOccurred = "Ein unbekannter Fehler ist aufgetreten",
     areYouSure = "Bist Du sicher?",
     automatic = "Automatik",
-    automappedCount_ = { "$it automatisch gemappt"},
+    automappedCount_ = { "$it automatisch gemappt" },
     boolean_ = {
         when (it) {
             null -> "null"
@@ -186,8 +192,9 @@ class GermanStrings : LocalizedStrings(
     changeLanguage = "Sprache wechseln",
     clearSearch = "Suche zurücksetzen",
     clickForDetails = "Für Details klicken",
-    closeAccept = "Akzeptieren",
-    closeReject = "Verwerfen",
+    closeLoad = "Laden",
+    closeSearch = "Suchen",
+    closeCancel = "Abbrechen",
     comments = "Kommentare",
     comparison = "Vergleich",
     compositional = "Kompositionell?",
@@ -228,8 +235,22 @@ class GermanStrings : LocalizedStrings(
     equivalence = "Äquivalenz",
     experimental = "Experimentell?",
     fhirTerminologyServer = "FHIR-Terminologieserver",
-    fileFromPath_ = { "Datei von: $it" },
-    fileFromUrl_ = { "FHIR-Server von: $it" },
+    fileFromPath_ = {
+        buildAnnotatedString {
+            append("Datei von: ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(it)
+            }
+        }
+    },
+    fileFromUrl_ = {
+        buildAnnotatedString {
+            append("FHIR-Server von: ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(it)
+            }
+        }
+    },
     fileSystem = "Dateisystem",
     filtered = "gefiltert",
     group = "Gruppe",
@@ -271,7 +292,7 @@ class GermanStrings : LocalizedStrings(
     noDataLoaded = "Keine Daten geladen",
     notRecommended = "Nicht empfohlen",
     oneValueIsNull = "Ein Wert ist null",
-    onlyConceptDifferences = "Konzeptunterschiede",
+    onlyConceptDifferences = "Nur Konzeptunterschiede",
     onlyInLeft = "Nur links",
     onlyInRight = "Nur rechts",
     open = "Öffnen",
@@ -293,8 +314,7 @@ class GermanStrings : LocalizedStrings(
     propertyDesignationForCode_ = { code -> "Eigenschaften und Designationen für Konzept '$code'" },
     propertyType = "Typ",
     purpose = "Zweck",
-    reallyAcceptAll = "Möchtest Du wirklich alle atomatisch gemappten Konzepte akzeptieren?\n" +
-            "Dies kann nicht rückgängig gemacht werden.",
+    reallyAcceptAll = "Möchtest Du wirklich alle atomatisch gemappten Konzepte akzeptieren?\n" + "Dies kann nicht rückgängig gemacht werden.",
     reload = "Neu laden",
     removeLayer = "Ebene entfernen",
     resourcesIdentical = "Identische Ressourcen",
@@ -311,8 +331,8 @@ class GermanStrings : LocalizedStrings(
         }
     },
     showAll = "Alle",
-    showDifferent = "Unterschiedliche",
-    showIdentical = "Identische",
+    showDifferent = "Alle unterschiedlichen",
+    showIdentical = "Nur identische",
     showLeftGraphButton = "Linker Graph",
     showRightGraphButton = "Rechter Graph",
     supplements = "Ergänzt",
@@ -336,14 +356,20 @@ class GermanStrings : LocalizedStrings(
         }
     },
     vreadFromUrlAndMetaVersion_ = { url, meta ->
-        "VRead von $url (Meta-Version: $meta)"
+        buildAnnotatedString {
+            append("VRead von ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(url)
+            }
+            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                append(" (Meta-Version: $meta)")
+            }
+        }
     },
-    yes = "Ja"
-)
+    yes = "Ja")
 
-class EnglishStrings : LocalizedStrings(
-    acceptAll = "Accept all",
-    acceptedCount_ = { "$it accepted"},
+class EnglishStrings : LocalizedStrings(acceptAll = "Accept all",
+    acceptedCount_ = { "$it accepted" },
     actions = "Actions",
     addLayer = "Add layer",
     addTarget = "Add target",
@@ -364,8 +390,9 @@ class EnglishStrings : LocalizedStrings(
     changeLanguage = "Change Language",
     clearSearch = "Clear search",
     clickForDetails = "Click for details",
-    closeAccept = "Accept",
-    closeReject = "Reject",
+    closeLoad = "Load",
+    closeSearch = "Search",
+    closeCancel = "Cancel",
     comments = "Comments",
     comparison = "Comparison",
     compositional = "Compositional?",
@@ -406,8 +433,22 @@ class EnglishStrings : LocalizedStrings(
     equivalence = "Equivalence",
     experimental = "Experimental?",
     fhirTerminologyServer = "FHIR Terminology Server",
-    fileFromPath_ = { "File from: $it" },
-    fileFromUrl_ = { "FHIR Server from: $it" },
+    fileFromPath_ = {
+        buildAnnotatedString {
+            append("File from ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(it)
+            }
+        }
+    },
+    fileFromUrl_ = {
+        buildAnnotatedString {
+            append("FHIR Server from: ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(it)
+            }
+        }
+    },
     fileSystem = "Filesystem",
     filtered = "filtered",
     group = "Group",
@@ -448,7 +489,7 @@ class EnglishStrings : LocalizedStrings(
     noDataLoaded = "No data loaded",
     notRecommended = "Not recommended",
     oneValueIsNull = "One value is null",
-    onlyConceptDifferences = "Concept differences",
+    onlyConceptDifferences = "Only concept differences",
     onlyInLeft = "Only left",
     onlyInRight = "Only right",
     open = "Open",
@@ -470,8 +511,7 @@ class EnglishStrings : LocalizedStrings(
     },
     propertyDesignationForCode_ = { code -> "Properties and designations for concept '$code'" },
     propertyType = "Type",
-    reallyAcceptAll = "Do you really want to accept all auto-mapped concepts?\n" +
-            "You can not undo this.",
+    reallyAcceptAll = "Do you really want to accept all auto-mapped concepts?\n" + "You can not undo this.",
     reload = "Reload",
     removeLayer = "Remove layers",
     resourcesIdentical = "Identical resources",
@@ -489,8 +529,8 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     showAll = "All",
-    showDifferent = "Different",
-    showIdentical = "Identical",
+    showDifferent = "Only different",
+    showIdentical = "Only identical",
     showLeftGraphButton = "Left graph",
     showRightGraphButton = "Right graph",
     supplements = "Supplements",
@@ -514,10 +554,17 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     vreadFromUrlAndMetaVersion_ = { url, meta ->
-        "VRead from $url (Meta version: $meta)"
+        buildAnnotatedString {
+            append("VRead from ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(url)
+            }
+            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                append(" (Meta version: $meta)")
+            }
+        }
     },
-    yes = "Yes"
-)
+    yes = "Yes")
 
 fun getStrings(locale: SupportedLocale = SupportedLocale.defaultLocale): LocalizedStrings = when (locale) {
     SupportedLocale.DE -> GermanStrings()

@@ -23,7 +23,7 @@ abstract class MetadataDiffItem(
 }
 
 enum class MetadataComparisonResult {
-    IDENTICAL, DIFFERENT
+    DIFFERENT, IDENTICAL
 }
 
 open class StringComparisonItem(

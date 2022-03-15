@@ -81,6 +81,7 @@ fun MetadataDiffTable(
     onShowDetailsClick: (MetadataComparison) -> Unit,
 ) =
     diffDataContainer.codeSystemDiff?.metadataDifferences?.comparisons?.let { comparisons ->
+        val sortedData = comparisons.sortedWith(compareBy<MetadataComparison> { it.result.ordinal }.thenBy { it.diffItem.label.invoke(localizedStrings) })
         LazyTable(
             columnSpecs = metadataColumnSpecs(localizedStrings,
                 diffColors,
@@ -89,7 +90,8 @@ fun MetadataDiffTable(
             backgroundColor = colorScheme.surfaceVariant,
             lazyListState = lazyListState,
             zebraStripingColor = colorScheme.secondaryContainer,
-            tableData = comparisons,
+            tableData = sortedData,
+            dataAlreadySorted = true,
             localizedStrings = localizedStrings,
         ) { it.diffItem.label.invoke(localizedStrings) }
     }

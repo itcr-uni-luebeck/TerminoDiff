@@ -63,6 +63,7 @@ private fun DrawTable(
         keyFun: (KeyType) -> String? = { it.key.toString() },
     ) = LazyTable(
         modifier = Modifier.padding(8.dp),
+        cellHeight = 100.dp,
         columnSpecs = columnSpecs,
         backgroundColor = colorScheme.primaryContainer,
         lazyListState = listState,
