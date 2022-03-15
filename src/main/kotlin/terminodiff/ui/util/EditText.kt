@@ -20,8 +20,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
+import me.xdrop.fuzzywuzzy.FuzzySearch
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.ui.MouseOverPopup
 import java.net.MalformedURLException
@@ -64,8 +69,7 @@ fun <T> EditText(
         readOnly = spec.readOnly,
         isError = isError(validation),
         backgroundColor = backgroundColor,
-        foregroundColor = foregroundColor
-    ) {
+        foregroundColor = foregroundColor) {
         iconForValidationResult(validation, localizedStrings = localizedStrings)?.let { (icon, desc) ->
             Icon(imageVector = icon,
                 contentDescription = desc,
@@ -75,7 +79,12 @@ fun <T> EditText(
 }
 
 @Composable
-fun <T> EditTextGroup(group: EditTextGroupSpec<T>, localizedStrings: LocalizedStrings, data: T) {
+fun <T> EditTextGroup(
+    group: EditTextGroupSpec<T>,
+    localizedStrings: LocalizedStrings,
+    backgroundColor: Color,
+    data: T,
+) {
     Card(Modifier.fillMaxWidth(0.9f).padding(4.dp),
         backgroundColor = colorScheme.secondaryContainer,
         elevation = 8.dp) {
@@ -86,7 +95,10 @@ fun <T> EditTextGroup(group: EditTextGroupSpec<T>, localizedStrings: LocalizedSt
                 style = MaterialTheme.typography.titleSmall,
                 color = colorScheme.onTertiaryContainer)
             group.specs.forEach { spec ->
-                EditText(spec = spec, localizedStrings = localizedStrings, data = data)
+                EditText(spec = spec,
+                    localizedStrings = localizedStrings,
+                    data = data,
+                    backgroundColor = backgroundColor)
             }
         }
     }
@@ -171,8 +183,7 @@ fun LabeledTextField(
         readOnly = readOnly,
         isError = isError,
         backgroundColor = backgroundColor,
-        foregroundColor = foregroundColor
-    ) {
+        foregroundColor = foregroundColor) {
         trailingIconVector?.let { imageVector ->
             if (trailingIconDescription == null) throw IllegalArgumentException("a content description has to be specified if a trailing icon is provided")
             MouseOverPopup(text = trailingIconDescription) {
@@ -210,8 +221,7 @@ fun <T> Dropdown(
                 onValueChange = { },
                 readOnly = true,
                 labelText = null,
-                backgroundColor = dropdownColor
-            ) {
+                backgroundColor = dropdownColor) {
                 IconButton({
                     expanded = !expanded
                 }) {
@@ -230,8 +240,7 @@ fun <T> Dropdown(
                         onSelect(element)
                         expanded = false
                     }) {
-                        Text(text = elementDisplay(element),
-                            fontStyle = fontStyle(element))
+                        Text(text = elementDisplay(element), fontStyle = fontStyle(element))
                     }
                 }
             }
@@ -239,30 +248,36 @@ fun <T> Dropdown(
     }
 }
 
+fun filterSuggestions(search: String?, testValue: String, fuzzyMatcher: Boolean): Double = when (fuzzyMatcher) {
+    true -> FuzzySearch.ratio(search?.lowercase() ?: "", testValue.lowercase()).toDouble()
+    else -> if (testValue.lowercase().startsWith(search?.lowercase() ?: "")) 1.0 else 0.0
+}
+
 @Composable
 fun AutocompleteEditText(
-    autocompleteSuggestions: SortedMap<String, String>,
-    value: String?,
+    autocompleteSuggestions: SortedMap<String, AnnotatedString>,
+    inputValue: String?,
     limitSuggestions: Int = 5,
     backgroundColor: Color = colorScheme.secondaryContainer,
     foregroundColor: Color = colorScheme.contentColorFor(backgroundColor),
-    filterSuggestions: (String?, String) -> Boolean = { input, suggestion -> suggestion.startsWith(input ?: "") },
+    fuzzyMatcher: Boolean = true,
     validateInput: ((String) -> EditTextSpec.ValidationResult)? = null,
     localizedStrings: LocalizedStrings,
     onValueChange: (String) -> Unit,
 ) {
     var hasFocus by remember { mutableStateOf(false) }
     val currentSuggestions by derivedStateOf {
-        autocompleteSuggestions.filterKeys { suggestion ->
-            filterSuggestions(value, suggestion)
-        }.entries.take(limitSuggestions)
+        autocompleteSuggestions.map { it.key to it.value }
+            .associateWith { filterSuggestions(inputValue, it.first, fuzzyMatcher) }.entries.sortedWith(
+                compareByDescending<Map.Entry<Pair<String, AnnotatedString>, Double>> { it.value }.thenBy { it.key.first })
+            .take(limitSuggestions)
     }
     Box(Modifier.fillMaxWidth()) {
-        val validation = validateInput?.invoke(value ?: "")
+        val validation = validateInput?.invoke(inputValue ?: "")
         LabeledTextField(modifier = Modifier.onFocusChanged {
             hasFocus = it.isFocused
         },
-            value = value ?: "",
+            value = inputValue ?: "",
             onValueChange = {
                 onValueChange(it)
             },
@@ -279,18 +294,18 @@ fun AutocompleteEditText(
         DropdownMenu(expanded = when {
             !hasFocus -> false
             currentSuggestions.isEmpty() -> false
-            currentSuggestions.size == 1 && currentSuggestions[0].key == value -> false // the value is entered into the text field verbatim
+            currentSuggestions.size == 1 && currentSuggestions[0].key.first == inputValue -> false // the value is entered into the text field verbatim
             else -> true
         }, modifier = Modifier.background(colorScheme.secondaryContainer), onDismissRequest = {
             hasFocus = false
         }, focusable = false) {
             currentSuggestions.forEach { entry ->
                 DropdownMenuItem(onClick = {
-                    onValueChange(entry.key)
+                    onValueChange(entry.key.first)
                     hasFocus = false
                 }) {
                     Text(
-                        text = entry.value,
+                        text = entry.key.second,
                         color = colorScheme.onSecondaryContainer,
                     )
                 }

@@ -3,6 +3,7 @@ package terminodiff.terminodiff.ui
 import androidx.compose.animation.Crossfade
 import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.rememberScrollState
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -11,6 +12,7 @@ import androidx.compose.ui.Modifier
 import ca.uhn.fhir.context.FhirContext
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
 import org.jetbrains.compose.splitpane.SplitPaneState
+import org.jetbrains.compose.splitpane.rememberSplitPaneState
 import terminodiff.engine.resources.DiffDataContainer
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.terminodiff.engine.conceptmap.ConceptMapState
@@ -26,11 +28,9 @@ fun TerminodiffAppContent(
     localizedStrings: LocalizedStrings,
     diffDataContainer: DiffDataContainer,
     fhirContext: FhirContext,
-    scrollState: ScrollState,
     useDarkTheme: Boolean,
     onLocaleChange: () -> Unit,
-    onChangeDarkTheme: () -> Unit,
-    splitPaneState: SplitPaneState,
+    onChangeDarkTheme: () -> Unit
 ) {
     var showDiff by remember { mutableStateOf(false) }
     val onLoadLeftFile: (InputResource) -> Unit = {
@@ -39,6 +39,9 @@ fun TerminodiffAppContent(
     val onLoadRightFile: (InputResource) -> Unit = {
         diffDataContainer.rightResource = it
     }
+
+    val splitPaneState = rememberSplitPaneState(initialPositionPercentage = 0.7f)
+    val scrollState = rememberScrollState()
 
     TerminodiffContentWindow(localizedStrings = localizedStrings,
         scrollState = scrollState,

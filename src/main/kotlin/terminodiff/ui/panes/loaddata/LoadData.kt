@@ -4,6 +4,7 @@ import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.Card
 import androidx.compose.material.Divider
 import androidx.compose.material.icons.Icons
@@ -19,6 +20,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
@@ -101,35 +103,37 @@ fun ResourceDescription(
     val text by derivedStateOf { formatText(resource, localizedStrings) }
     Text(text = localizedStrings.side_(side), style = typography.titleMedium, textDecoration = TextDecoration.Underline)
     Row(modifier = Modifier.align(Alignment.CenterHorizontally).height(IntrinsicSize.Min)) {
-        Text(text = text,
-            textAlign = TextAlign.Center,
-            style = typography.bodyMedium,
-            maxLines = 3,
-            softWrap = true,
-            overflow = TextOverflow.Clip)
+        SelectionContainer {
+            Text(text = text,
+                textAlign = TextAlign.Center,
+                style = typography.bodyMedium,
+                maxLines = 3,
+                softWrap = true,
+                overflow = TextOverflow.Clip)
+        }
     }
 }
 
-private fun formatText(resource: InputResource?, localizedStrings: LocalizedStrings): AnnotatedString {
-    val stringDescription = when {
-        resource == null -> localizedStrings.noDataLoaded
-        resource.kind == Kind.FILE -> {
-            val path = resource.localFile!!.canonicalFile.invariantSeparatorsPath
-            localizedStrings.fileFromPath_.invoke(path)
-        }
-        resource.kind == Kind.FHIR_SERVER -> {
-            val url = resource.resourceUrl!!
-            localizedStrings.fileFromUrl_.invoke(url)
-        }
-        resource.kind == Kind.VREAD -> {
-            val url = resource.resourceUrl!!
-            val metaVersion = resource.downloadableCodeSystem!!.metaVersion
-            localizedStrings.vreadFromUrlAndMetaVersion_.invoke(url, metaVersion!!)
-        }
-        else -> ""
+private fun formatText(resource: InputResource?, localizedStrings: LocalizedStrings) =
+    buildAnnotatedString {
+        append(when {
+            resource == null -> AnnotatedString(localizedStrings.noDataLoaded)
+            resource.kind == Kind.FILE -> {
+                val path = resource.localFile!!.canonicalFile.invariantSeparatorsPath
+                localizedStrings.fileFromPath_.invoke(path)
+            }
+            resource.kind == Kind.FHIR_SERVER -> {
+                val url = resource.resourceUrl!!
+                localizedStrings.fileFromUrl_.invoke(url)
+            }
+            resource.kind == Kind.VREAD -> {
+                val url = resource.resourceUrl!!
+                val metaVersion = resource.downloadableCodeSystem!!.metaVersion
+                localizedStrings.vreadFromUrlAndMetaVersion_.invoke(url, metaVersion!!)
+            }
+            else -> AnnotatedString("")
+        })
     }
-    return AnnotatedString(stringDescription)
-}
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable

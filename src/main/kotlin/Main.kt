@@ -1,7 +1,6 @@
 // Copyright 2000-2021 JetBrains s.r.o. and contributors. Use of this source code is governed by the Apache 2.0 license that can be found in the LICENSE file.
 package terminodiff
 
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
@@ -11,7 +10,6 @@ import androidx.compose.ui.window.*
 import ca.uhn.fhir.context.FhirContext
 import com.formdev.flatlaf.FlatDarkLaf
 import org.jetbrains.compose.splitpane.ExperimentalSplitPaneApi
-import org.jetbrains.compose.splitpane.rememberSplitPaneState
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.engine.resources.DiffDataContainer
@@ -67,14 +65,11 @@ fun LocalizedContent() {
     var useDarkTheme by remember { mutableStateOf(AppPreferences.darkModeEnabled) }
     var locale by remember { mutableStateOf(SupportedLocale.valueOf(AppPreferences.language)) }
     val localizedStrings by derivedStateOf { getStrings(locale) }
-    val scrollState = rememberScrollState()
     val fhirContext = remember { FhirContext.forR4() }
     val diffDataContainer = remember { DiffDataContainer(fhirContext, localizedStrings) }
-    val splitPaneState = rememberSplitPaneState(initialPositionPercentage = 0.5f)
     TerminodiffAppContent(
         localizedStrings = localizedStrings,
         diffDataContainer = diffDataContainer,
-        scrollState = scrollState,
         fhirContext = fhirContext,
         useDarkTheme = useDarkTheme,
         onLocaleChange = {
@@ -90,7 +85,6 @@ fun LocalizedContent() {
             useDarkTheme = !useDarkTheme
             AppPreferences.darkModeEnabled = useDarkTheme
         },
-        splitPaneState = splitPaneState,
     )
 }
 

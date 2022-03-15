@@ -70,7 +70,7 @@ private fun ConceptMapMetaEditorForm(
     horizontalAlignment = Alignment.CenterHorizontally,
     verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.Top)) {
     getEditTextGroups().forEach { group ->
-        EditTextGroup(group, localizedStrings, data = conceptMapState.conceptMap!!)
+        EditTextGroup(group, localizedStrings, data = conceptMapState.conceptMap!!, backgroundColor = colorScheme.tertiaryContainer)
     }
 }
 

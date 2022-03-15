@@ -12,27 +12,35 @@ class ColorRegistry {
     companion object {
 
         private val tab10 = Colormaps.Qualitative.Tab10()
+        private val accent = Colormaps.Qualitative.Accent()
         private val edgeColorRegistry = mutableMapOf<String, Color>()
         private val vertexColorRegistry = mutableMapOf<String, Color>()
-        private val sideColorRegistry = mutableMapOf<String, Color>()
+
+        fun getRegistry(registry: Registry) = when (registry) {
+            Registry.EDGES -> edgeColorRegistry.toSortedMap()
+            Registry.VERTICES -> vertexColorRegistry.toSortedMap()
+        }
 
         fun getDiffGraphColor(inWhich: GraphSide): Color {
-            return tab10.get((inWhich.ordinal).toFloat() * 0.1f)
+            return when (inWhich) {
+                GraphSide.BOTH -> tab10.get(0f)
+                GraphSide.LEFT -> tab10.get(0.1)
+                GraphSide.RIGHT -> tab10.get(0.2)
+            }
         }
 
         fun getColor(registry: Registry, property: String): Color {
             val map = when (registry) {
                 Registry.EDGES -> edgeColorRegistry
                 Registry.VERTICES -> vertexColorRegistry
-                Registry.SIDES -> sideColorRegistry
             }
             return when (val color = map[property]) {
                 null -> {
-                    val colorKey = (map.size + 1) * 0.1f - 0.01f
+                    val colorKey = (map.size + 1) * 0.125f - 0.01f
                     // scale to [~0.1, ~1.0] (as long as there are less
-                    // than 10 properties with a code target, which should generally hold.
+                    // than 8 properties with a code target, which should generally hold.
                     // especially since child and concept relationships are both resolved to parent.
-                    val newColor = tab10.get(colorKey)
+                    val newColor = accent.get(colorKey)
                     map[property] = newColor
                     logger.info("generated color $newColor for code $property in $registry")
                     newColor
@@ -49,6 +57,5 @@ class ColorRegistry {
 
 enum class Registry {
     EDGES,
-    VERTICES,
-    SIDES
+    VERTICES
 }

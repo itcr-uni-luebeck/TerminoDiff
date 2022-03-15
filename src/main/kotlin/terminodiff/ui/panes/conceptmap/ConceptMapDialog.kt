@@ -19,6 +19,11 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Window
@@ -86,8 +91,16 @@ private fun Content(
     isDarkTheme: Boolean,
 ) {
     val allConceptCodes by derivedStateOf {
-        diffDataContainer.codeSystemDiff!!.combinedGraph!!.graph.vertexSet().filter { it.side == GraphSide.BOTH }
-            .associate { it.code to "${it.code} (${it.getTooltip()})" }.toSortedMap()
+        diffDataContainer.codeSystemDiff!!.combinedGraph!!.graph.vertexSet()//.filter { it.side == GraphSide.BOTH }
+            .associate {
+                it.code to buildAnnotatedString {
+                    append(it.code)
+                    append(" ")
+                    withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                        append("(${it.getTooltip(localizedStrings)})")
+                    }
+                }
+            }.toSortedMap()
     }
     Column(Modifier.padding(8.dp).clip(RoundedCornerShape(8.dp))) {
         val tabs =
@@ -118,7 +131,7 @@ class ConceptMapTabItem(
                     fhirContext = fhirContext)
             })
 
-        fun conceptMapping(allConceptCodes: SortedMap<String, String>, diffDataContainer: DiffDataContainer) =
+        fun conceptMapping(allConceptCodes: SortedMap<String, AnnotatedString>, diffDataContainer: DiffDataContainer) =
             ConceptMapTabItem(icon = Icons.Default.AccountTree, title = { conceptMap }, screen = { strings, _, data ->
                 ConceptMappingEditorContent(
                     localizedStrings = strings,

@@ -199,7 +199,7 @@ fun FromServerScreen(
             fhirContext = fhirContext,
             coroutineScope = coroutineScope,
             localizedStrings = localizedStrings,
-            onCloseReject = { vReadResource = null },
+            onCloseCancel = { vReadResource = null },
             onSelectLeft = onLoadLeftFile,
             onSelectRight = onLoadRightFile)
     }

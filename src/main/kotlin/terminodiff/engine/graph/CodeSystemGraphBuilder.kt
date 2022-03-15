@@ -118,7 +118,7 @@ data class FhirConceptEdge(
 ) {
     fun getLabel(): String = "'$from' -> '$to' [$propertyCode]"
 
-    fun getColor(): Color = ColorRegistry.getColor(Registry.EDGES, propertyCode)
+    val color = ColorRegistry.getColor(Registry.EDGES, propertyCode)
 }
 
 data class FhirConceptDetails(

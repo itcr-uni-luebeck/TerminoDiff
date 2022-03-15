@@ -140,16 +140,13 @@ private fun overallComparisonColumnSpec(
     weight = 0.25f,
     tooltipText = null,
 ) { data ->
-    when (data.isInBoth()) {
-        true -> {
-            val anyDifferent = data.diff!!.conceptComparison.any {
-                it.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT
-            } || data.diff.propertyComparison.any { it.result != KeyedListDiffResultKind.IDENTICAL } || data.diff.designationComparison.any { it.result != KeyedListDiffResultKind.IDENTICAL }
+    when (val result = data.overallComparison()) {
+        ConceptTableData.OverallComparison.IDENTICAL, ConceptTableData.OverallComparison.DIFFERENT -> {
+            val anyDifferent = result == ConceptTableData.OverallComparison.DIFFERENT
             val colors: Pair<Color, Color> = if (anyDifferent) diffColors.yellowPair else diffColors.greenPair
             val chipLabel: String =
                 if (anyDifferent) localizedStrings.conceptDiffResults_.invoke(ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT)
                 else localizedStrings.identical
-
             DiffChip(colorPair = colors, text = chipLabel, modifier = Modifier.fillMaxWidth(0.8f))
         }
         else -> {

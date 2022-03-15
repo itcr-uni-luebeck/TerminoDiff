@@ -18,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import org.jetbrains.skia.impl.Stats.enabled
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.i18n.LocalizedStrings
@@ -39,7 +40,7 @@ fun VReadDialog(
     coroutineScope: CoroutineScope,
     fhirContext: FhirContext,
     localizedStrings: LocalizedStrings,
-    onCloseReject: () -> Unit,
+    onCloseCancel: () -> Unit,
     onSelectLeft: (InputResource) -> Unit,
     onSelectRight: (InputResource) -> Unit,
 ) {
@@ -59,12 +60,12 @@ fun VReadDialog(
     val lazyListState = rememberLazyListState()
     var leftSelection: DownloadableCodeSystem? by remember { mutableStateOf(null) }
     var rightSelection: DownloadableCodeSystem? by remember { mutableStateOf(null) }
-    val onCloseAccept: () -> Unit = {
+    val onCloseLoad: () -> Unit = {
         leftSelection?.let { invokeLoadListener(onSelectLeft, it, resource, coroutineScope, ktorClient) }
         rightSelection?.let { invokeLoadListener(onSelectRight, it, resource, coroutineScope, ktorClient) }
-        onCloseReject()
+        onCloseCancel()
     }
-    TerminodiffDialog(title = localizedStrings.vReadFor_(resource), onCloseRequest = onCloseReject) {
+    TerminodiffDialog(title = localizedStrings.vReadFor_(resource), onCloseRequest = onCloseCancel) {
         when {
             vReadVersions == null -> {
                 Box(Modifier.fillMaxHeight(), contentAlignment = Alignment.Center) {
@@ -84,16 +85,14 @@ fun VReadDialog(
                     onSelectRight = { rightSelection = it })
                 Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
                     horizontalArrangement = Arrangement.SpaceEvenly) {
-                    OutlinedButton(modifier = Modifier.wrapContentSize(),
-                        onClick = onCloseReject,
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = colorScheme.onSurfaceVariant)) {
-                        Text(localizedStrings.closeReject)
+                    OutlinedButton(modifier = Modifier.wrapContentSize(), onClick = onCloseCancel) {
+                        Text(localizedStrings.closeCancel)
                     }
-                    Button(modifier = Modifier.wrapContentSize(),
-                        onClick = onCloseAccept,
-                        colors = ButtonDefaults.buttonColors(colorScheme.secondary, colorScheme.onSecondary),
+                    ElevatedButton(modifier = Modifier.wrapContentSize(),
+                        onClick = onCloseLoad,
+                        colors = ButtonDefaults.outlinedButtonColors(containerColor = colorScheme.primaryContainer),
                         enabled = listOf(leftSelection, rightSelection).any { it != null }) {
-                        Text(localizedStrings.closeAccept, color = colorScheme.onSecondary)
+                        Text(localizedStrings.closeLoad)
                     }
                 }
 

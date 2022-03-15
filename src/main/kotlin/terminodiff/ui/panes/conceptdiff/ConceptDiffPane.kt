@@ -215,6 +215,30 @@ data class ConceptTableData(
     fun isOnlyInLeft() = leftDetails != null && rightDetails == null
     fun isOnlyInRight() = leftDetails == null && rightDetails != null
     fun isInBoth() = diff != null
+
+    fun overallComparison(): OverallComparison {
+        return when (isInBoth()) {
+            true -> when {
+                diff!!.conceptComparison.any {
+                    it.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT
+                } -> OverallComparison.DIFFERENT
+                diff.propertyComparison.any { it.result != KeyedListDiffResultKind.IDENTICAL } -> OverallComparison.DIFFERENT
+                diff.designationComparison.any { it.result != KeyedListDiffResultKind.IDENTICAL } -> OverallComparison.DIFFERENT
+                else -> OverallComparison.IDENTICAL
+            }
+            else -> when (isOnlyInLeft()) {
+                true -> OverallComparison.ONLY_LEFT
+                else -> OverallComparison.ONLY_RIGHT
+            }
+        }
+    }
+
+    enum class OverallComparison {
+        ONLY_LEFT,
+        ONLY_RIGHT,
+        DIFFERENT,
+        IDENTICAL
+    }
 }
 
 @Composable
@@ -230,13 +254,14 @@ fun TableScreen(
                 leftDetails = tableData.leftGraphBuilder.nodeTree[code],
                 rightDetails = tableData.rightGraphBuilder.nodeTree[code],
                 diff = tableData.conceptDiff[code])
-        }
+        }.toSortedSet(compareBy<ConceptTableData> { it.overallComparison().ordinal }.thenBy { it.code }).toList()
     }
     LazyTable(columnSpecs = columnSpecs,
         backgroundColor = colorScheme.surfaceVariant,
         lazyListState = lazyListState,
         zebraStripingColor = colorScheme.secondaryContainer,
         tableData = containedData,
+        dataAlreadySorted = true,
         localizedStrings = localizedStrings,
         countLabel = localizedStrings.concepts_) { it.code }
 }
