@@ -158,6 +158,7 @@ We utilize the following libraries alongside *Compose*:
 - [JavaWuzzy](https://github.com/xdrop/fuzzywuzzy) for fuzzy string matching, a port
   of [FuzzyWuzzy](https://pypi.org/project/fuzzywuzzy/) in Python
 - [RSyntaxTextArea](https://github.com/bobbylight/RSyntaxTextArea) for the JSON editor in the `ConceptMap` panel
+- [CommonMark](https://github.com/commonmark/commonmark-java) for rendering of Markdown
 
 ### Localization
 

@@ -52,6 +52,7 @@ dependencies {
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("me.xdrop:fuzzywuzzy:1.4.0")
     implementation("com.fifesoft:rsyntaxtextarea:3.1.6")
+    implementation("org.commonmark:commonmark:0.18.2")
 }
 
 tasks.test {
