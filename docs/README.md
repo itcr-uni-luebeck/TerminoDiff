@@ -30,9 +30,9 @@ resources are stored as JSON or XML files, the HAPI FHIR library will take care 
 
 You will be able to load data from the file system, but also from a FHIR Terminology Server:
 
-![Loading screen for files](images/load-file.png)
+![Loading screen for files](assets/load-file.png)
 
-![Loading screen for FHIR Servers](images/load-ts.png)
+![Loading screen for FHIR Servers](assets/load-ts.png)
 
 If you do not have a FHIR server on your own, you can use the following URLs:
 
@@ -41,11 +41,11 @@ If you do not have a FHIR server on your own, you can use the following URLs:
 
 Once loaded, you will be presented with the view of differences over the two loaded CodeSystems:
 
-![TerminoDiff Main Screen for OncoTree](images/main-oncotree.png)
+![TerminoDiff Main Screen for OncoTree](assets/main-oncotree.png)
 
 The app is also translated into German; and a dark theme is implemented as well:
 
-![TerminoDiff Main Screen for OncoTree, dark theme, German localization](images/main-oncotree-dark-de.png)
+![TerminoDiff Main Screen for OncoTree, dark theme, German localization](assets/main-oncotree-dark-de.png)
 
 Many columns are searchable (using a fuzzy search function, so that near matches can be found as well). This is
 indicated by looking glass icons. Searches can be combined as well, by specifying multiple filters.
@@ -61,7 +61,7 @@ those that are only in one of the two CodeSystems. Differences are highlighted u
 
 The *Properties / Designations* buttons are clickable to reveal a more detailed comparison:
 
-![Properties and designations for a concept in OncoTree](images/properties-oncotree.png)
+![Properties and designations for a concept in OncoTree](assets/properties-oncotree.png)
 
 If the concept is unilateral (only in left / only in right), the dialog is accessible regardless.
 
@@ -75,7 +75,7 @@ If the value is identical, the columns are merged, otherwise there will be a lef
 are lists of values in FHIR, such as `Identifier`, the colored chip will be a clickable button (as long as there is data
 in that property):
 
-![Identifiers for a fictitious test CodeSystem](images/identifiers-testcs.png)
+![Identifiers for a fictitious test CodeSystem](assets/identifiers-testcs.png)
 
 ### Difference Graph
 
@@ -84,7 +84,7 @@ as the computed difference graph. To illustrate, consider these two CodeSystems:
 
 | Left CS                                       | Right CS                                        |
 |-----------------------------------------------|-------------------------------------------------|
-| ![Left CS for diff graph](images/left-cs.png) | ![Right CS for diff graph](images/right-cs.png) |
+| ![Left CS for diff graph](assets/left-cs.png) | ![Right CS for diff graph](images/right-cs.png) |
 
 
 Going from "left" to "right", the concept `C` was removed, leading to changes in the edge going from `D` to `A`. Also, a
@@ -104,13 +104,13 @@ does not).
 
 The difference graph for these two fictitious CodeSystem resources could look like this:
 
-![Difference graph for example CodeSystems](images/diff.png)
+![Difference graph for example CodeSystems](assets/diff.png)
 
 Red and dotted edges refer to deletions (going from left to right), while green solid edges refer to insertions.
 
 The difference graph implemented in the application looks very similar:
 
-![Difference graph for example CodeSystems in the app](images/diff-app.png)
+![Difference graph for example CodeSystems in the app](assets/diff-app.png)
 
 At the top of the dialog, you can choose from any of the available layout algorithms. Since CodeSystems generally have
 directed edges, and are often hierarchical, we find that the *Sugiyama* and *Eiglsperger* algorithms do a fine job at
