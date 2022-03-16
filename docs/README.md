@@ -5,6 +5,10 @@
 TerminoDiff is a graphical application to quickly
 compare [HL7 FHIR CodeSystem resources](https://www.hl7.org/fhir/codesystem.html).
 
+## Scoping Review
+
+For more details on the scoping review we carried out, visit [this page](/slr.md).
+
 ## Why this app?
 
 Determining how HL7 FHIR CodeSystem resources differ proves to be a very difficult task without specialized tooling,
