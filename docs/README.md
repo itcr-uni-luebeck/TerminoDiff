@@ -7,7 +7,7 @@ compare [HL7 FHIR CodeSystem resources](https://www.hl7.org/fhir/codesystem.html
 
 ## Scoping Review
 
-For more details on the scoping review we carried out, visit [this page](/SLR.md).
+For more details on the scoping review we carried out, visit [this page](https://itcr-uni-luebeck.github.io/TerminoDiff/SLR.html).
 
 ## Why this app?
 
