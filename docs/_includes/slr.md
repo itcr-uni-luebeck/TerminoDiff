@@ -1,6 +1,6 @@
 To get an overview of the literature, we performed a scoping review.
 
-![PRISMA flowchart](./prisma-terminodiff.png)
+![PRISMA flowchart](/assets/images/prisma-terminodiff.png)
 
 Our PICOC are:
 - Population = Terminology Tooling
