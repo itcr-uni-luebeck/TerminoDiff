@@ -1,8 +1,3 @@
----
-title: Scoping Review
-permalink: slr
----
-
 To get an overview of the literature, we performed a scoping review.
 
 ![PRISMA flowchart](./prisma-terminodiff.png)
