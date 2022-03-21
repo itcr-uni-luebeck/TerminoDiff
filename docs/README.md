@@ -4,6 +4,8 @@
 
 TerminoDiff is a graphical application to quickly
 compare [HL7 FHIR CodeSystem resources](https://www.hl7.org/fhir/codesystem.html).
+
+[View this documentation on GitHub Pages](itcr-uni-luebeck.github.io/TerminoDiff/).
  
 ## Table of Contents
 
