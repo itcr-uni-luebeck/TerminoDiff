@@ -1,10 +1,11 @@
 import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
 
 plugins {
-    kotlin("jvm") version "1.5.31"
-    id("org.jetbrains.compose") version "1.0.0"
+    kotlin("jvm") version "1.6.10"
+    id("org.jetbrains.compose") version "1.1.0"
     id("org.openjfx.javafxplugin") version "0.0.11"
 }
 val projectVersion: String by project
@@ -17,18 +18,19 @@ repositories {
     mavenCentral()
 }
 
-val hapiVersion = "5.6.2"
-val slf4jVersion = "1.7.35"
+val hapiVersion = "5.7.0"
+val slf4jVersion = "1.7.36"
 val graphStreamVersion = "2.0"
 val jGraphTVersion = "1.5.1"
-val material3DesktopVersion = "1.0.0"
+val material3DesktopVersion = "1.1.0"
 val jungraphtVersion = "1.3"
-val composeDesktopVersion = "1.0.1"
+val composeDesktopVersion = "1.1.0"
 val ktorVersion = "2.0.0-beta-1"
 
 dependencies {
     testImplementation(kotlin("test"))
     implementation(compose.desktop.currentOs)
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.0")
     implementation("org.jetbrains.compose.components:components-splitpane:$composeDesktopVersion")
     implementation("org.jetbrains.compose.material3:material3-desktop:$material3DesktopVersion")
     implementation("org.jetbrains.compose.material:material-icons-core-desktop:$composeDesktopVersion")
@@ -36,7 +38,6 @@ dependencies {
     implementation("ca.uhn.hapi.fhir:hapi-fhir-base:$hapiVersion")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-structures-r4:$hapiVersion")
     implementation("ca.uhn.hapi.fhir:hapi-fhir-validation:$hapiVersion")
-    //implementation("ca.uhn.hapi.fhir:hapi-fhir-validation-resources-r4:$hapiVersion")
     implementation("org.slf4j:slf4j-api:$slf4jVersion")
     implementation("org.slf4j:slf4j-simple:$slf4jVersion")
     implementation("org.jgrapht:jgrapht-core:$jGraphTVersion")
@@ -47,10 +48,11 @@ dependencies {
     implementation("li.flor:native-j-file-chooser:1.6.4")
     implementation("javax.xml.bind:jaxb-api:2.4.0-b180830.0359") // provides org.xml.sax
     implementation("org.apache.commons:commons-lang3:3.12.0")
-    implementation("com.formdev:flatlaf:2.0.1")
+    implementation("com.formdev:flatlaf:2.0.2")
     implementation("io.ktor:ktor-client-core:$ktorVersion")
     implementation("io.ktor:ktor-client-cio:$ktorVersion")
     implementation("me.xdrop:fuzzywuzzy:1.4.0")
+    implementation("com.fifesoft:rsyntaxtextarea:3.1.6")
 }
 
 tasks.test {
@@ -87,25 +89,25 @@ compose.desktop {
                 packageName = "TerminoDiff"
                 packageVersion = composeBuildVersion
                 description = "Visually compare HL7 FHIR Terminology"
-                vendor = "IT Center for Clinical Reserach, University of Lübeck"
+                vendor = "IT Center for Clinical Research, University of Lübeck"
                 copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
 
-                when (composeBuildOs) {
-                    "ubuntu", "redhat" -> linux {
+                when (composeBuildOs?.toLowerCaseAsciiOnly()) {
+                    "ubuntu", "redhat", "debian", "rpm", "deb" -> linux {
                         iconFile.set(resourceDir.file("common/terminodiff.png"))
                         rpmLicenseType = "GPL-3.0"
                         debMaintainer = "j.wiedekopf@uni-luebeck.de"
                         appCategory = "Development"
                         when (composeBuildOs) {
-                            "ubuntu" -> targetFormats(
+                            "ubuntu", "debian", "deb" -> targetFormats(
                                 TargetFormat.Deb,
                             )
-                            "redhat" -> targetFormats(
+                            "redhat", "rpm" -> targetFormats(
                                 TargetFormat.Rpm
                             )
                         }
                     }
-                    "mac" -> macOS {
+                    "mac", "macos" -> macOS {
                         jvmArgs += listOf("-Dskiko.renderApi=SOFTWARE")
                         bundleID = "de.uzl.itcr.terminodiff"
                         signing {
@@ -116,7 +118,7 @@ compose.desktop {
                             TargetFormat.Dmg
                         )
                     }
-                    "windows" -> windows {
+                    "windows", "win" -> windows {
                         iconFile.set(resourceDir.file("windows/terminodiff.ico"))
                         perUserInstall = true
                         dirChooser = true

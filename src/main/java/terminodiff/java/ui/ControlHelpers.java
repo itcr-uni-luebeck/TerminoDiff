@@ -19,7 +19,7 @@ import org.jungrapht.visualization.control.ScalingControl;
  *
  * @author Tom Nelson
  */
-@SuppressWarnings({"rawtypes", "unchecked"})
+@SuppressWarnings({"rawtypes", "unchecked", "unused"})
 public class ControlHelpers {
 
     public static JComponent getZoomControls(String title, VisualizationServer vv) {

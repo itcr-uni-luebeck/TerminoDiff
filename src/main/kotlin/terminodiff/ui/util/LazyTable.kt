@@ -6,10 +6,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.itemsIndexed
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.Divider
-import androidx.compose.material.Text
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Backspace
 import androidx.compose.material.icons.filled.Search
@@ -19,15 +16,21 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.window.Dialog
+import libraries.sahruday.carousel.Carousel
+import libraries.sahruday.carousel.CarouselDefaults
 import me.xdrop.fuzzywuzzy.FuzzySearch
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.terminodiff.ui.panes.loaddata.panes.LabeledTextField
+import terminodiff.terminodiff.ui.util.LabeledTextField
+import terminodiff.terminodiff.ui.util.TerminodiffDialog
 import terminodiff.ui.MouseOverPopup
 import java.util.*
 
@@ -42,74 +45,180 @@ fun <T> LazyTable(
     lazyListState: LazyListState,
     zebraStripingColor: Color? = backgroundColor.copy(0.5f),
     tableData: List<T>,
+    dataAlreadySorted: Boolean = false,
     localizedStrings: LocalizedStrings,
+    countLabel: (Int) -> String = localizedStrings.elements_,
     keyFun: (T) -> String?,
 ) = Column(modifier = modifier.fillMaxWidth().padding(4.dp)) {
-    val searchState by remember { mutableStateOf(SearchState(columnSpecs, tableData)) }
+    val sortedData by derivedStateOf {
+        when (dataAlreadySorted) {
+            true -> tableData
+            else -> tableData.sortedBy(keyFun)
+        }
+    }
+    val searchState by produceState<SearchState<T>?>(null, tableData, localizedStrings) {
+        // using produceState enforces that the state resets if any of the parameters above ^ change. This is important for
+        // table data (e.g. in the concept diff pane) and LocalizedStrings.
+        value = SearchState(columnSpecs, sortedData)
+    }
     var showFilterDialogFor: String? by remember { mutableStateOf(null) }
 
-    if (showFilterDialogFor != null) {
-        ShowFilterDialog(title = showFilterDialogFor!!,
-            searchState = searchState,
-            localizedStrings = localizedStrings) {
-            showFilterDialogFor = null
-        }
-    }
-
-    // draw the header row
-    Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
-        columnSpecs.forEach { columnSpec ->
-            HeaderCell(columnSpec = columnSpec,
-                cellBorderColor = cellBorderColor,
-                contentColor = foregroundColor,
-                localizedStrings = localizedStrings,
-                searchState = searchState,
-                onSearchClick = { showFilterDialogFor = it },
-                onSearchClearClick = searchState::clearSearchFor)
-        }
-    }
-    Divider(color = cellBorderColor, thickness = 1.dp)
-
-// the actual cells, contained by LazyColumn
-    Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
-        LazyColumn(state = lazyListState) {
-            itemsIndexed(items = searchState.filteredData, key = { index, _ ->
-                "$keyFun-$index"
-            }) { index, data ->
-                val rowBackground = when (zebraStripingColor) {
-                    null -> backgroundColor
-                    else -> if (index % 2 == 0) zebraStripingColor else backgroundColor
-                }
-                val rowForeground = colorScheme.contentColorFor(rowBackground)
-                val skipped = mutableListOf<Int>()
-                Row(Modifier.wrapContentHeight()) {
-                    columnSpecs.forEachIndexed { specIndex, spec ->
-                        if (specIndex in skipped) return@forEachIndexed
-                        if (spec.mergeIf != null && spec.mergeIf.invoke(data)) {
-                            val nextSpec = columnSpecs.getOrNull(specIndex + 1) ?: return@forEachIndexed
-                            TableCell(modifier = Modifier.height(cellHeight),
-                                weight = spec.weight + nextSpec.weight,
-                                tooltipText = spec.tooltipText?.invoke(data),
-                                backgroundColor = rowBackground,
-                                foregroundColor = rowForeground) { spec.content(data) }
-                            skipped.add(specIndex + 1)
-                            return@forEachIndexed
-                        }
-                        TableCell(modifier = Modifier.height(cellHeight),
-                            weight = spec.weight,
-                            tooltipText = spec.tooltipText?.invoke(data),
-                            backgroundColor = rowBackground,
-                            foregroundColor = rowForeground) { spec.content(data) }
-                    }
-                }
+    if (searchState != null) {
+        if (showFilterDialogFor != null) {
+            ShowFilterDialog(title = showFilterDialogFor!!,
+                searchState = searchState!!,
+                localizedStrings = localizedStrings) {
+                showFilterDialogFor = null
             }
         }
-        // the indicator for scrolling
-        Carousel(state = lazyListState,
-            colors = CarouselDefaults.colors(cellBorderColor),
-            modifier = Modifier.padding(8.dp).width(8.dp).fillMaxHeight(0.9f))
+
+        Row(modifier = modifier) {
+            Column(Modifier.weight(0.99f).fillMaxHeight()) {
+                SeachStateDisplay(searchState = searchState!!,
+                    localizedStrings = localizedStrings,
+                    foregroundColor = foregroundColor,
+                    countLabel = countLabel)
+                HeaderRow(columnSpecs = columnSpecs,
+                    cellBorderColor = cellBorderColor,
+                    foregroundColor = foregroundColor,
+                    localizedStrings = localizedStrings,
+                    searchState = searchState!!) { showFilterDialogFor = it }
+                HeaderDivider(cellBorderColor)
+                ContentRows(columnSpecs = columnSpecs,
+                    cellHeight = cellHeight,
+                    backgroundColor = backgroundColor,
+                    cellBorderColor = cellBorderColor,
+                    zebraStripingColor = zebraStripingColor,
+                    lazyListState = lazyListState,
+                    searchState = searchState!!,
+                    keyFun = keyFun)
+            }
+            Column(modifier = Modifier.weight(0.01f).fillMaxHeight(),
+                horizontalAlignment = Alignment.End,
+                verticalArrangement = Arrangement.Bottom) {
+                ScrollBar(lazyListState, cellBorderColor)
+            }
+        }
     }
 }
+
+@Composable
+private fun <T> SeachStateDisplay(
+    searchState: SearchState<T>,
+    localizedStrings: LocalizedStrings,
+    foregroundColor: Color,
+    countLabel: (Int) -> String,
+) = Row(Modifier.fillMaxWidth().padding(bottom = 8.dp, top = 2.dp),
+    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+    verticalAlignment = Alignment.CenterVertically) {
+    CountIndicator(searchState = searchState,
+        foregroundColor = foregroundColor,
+        localizedStrings = localizedStrings,
+        countLabel = countLabel)
+    if (searchState.isSearching) {
+        MouseOverPopup(text = localizedStrings.clearSearch) {
+            ResetIconButton(searchState = searchState,
+                foregroundColor = foregroundColor,
+                localizedStrings = localizedStrings)
+        }
+        Text(text = searchState.searchStateLabel!!)
+    }
+}
+
+@Composable
+private fun <T> CountIndicator(
+    searchState: SearchState<T>,
+    foregroundColor: Color,
+    localizedStrings: LocalizedStrings,
+    countLabel: (Int) -> String,
+) {
+    Text(text = buildAnnotatedString {
+        if (searchState.isSearching) {
+            append(searchState.filteredData.size.toString())
+            append(" ")
+            append(localizedStrings.filtered)
+            append(" / ")
+        }
+        withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+            append(searchState.tableData.size.toString())
+            append(" ")
+            append(countLabel.invoke(searchState.tableData.size))
+        }
+    }, color = foregroundColor)
+}
+
+@Composable
+private fun ScrollBar(lazyListState: LazyListState, cellBorderColor: Color) {
+    Carousel(state = lazyListState,
+        colors = CarouselDefaults.colors(cellBorderColor),
+        modifier = Modifier.padding(8.dp).width(2.dp).fillMaxHeight(0.9f))
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun <T> ResetIconButton(
+    searchState: SearchState<T>,
+    foregroundColor: Color,
+    localizedStrings: LocalizedStrings,
+) = CompositionLocalProvider(LocalMinimumTouchTargetEnforcement provides false) {
+    IconButton(onClick = { searchState.clearAllSearch() }, enabled = searchState.isSearching) {
+        Icon(Icons.Default.Backspace,
+            localizedStrings.clearSearch,
+            modifier = Modifier.size(24.dp).padding(1.dp),
+            tint = when (searchState.isSearching) {
+                true -> foregroundColor
+                else -> foregroundColor.copy(alpha = 0.5f)
+            })
+    }
+}
+
+@Composable
+private fun <T> ContentRows(
+    columnSpecs: List<ColumnSpec<T>>,
+    cellHeight: Dp,
+    backgroundColor: Color,
+    cellBorderColor: Color,
+    zebraStripingColor: Color?,
+    lazyListState: LazyListState,
+    searchState: SearchState<T>,
+    keyFun: (T) -> String?,
+) = LazyColumn(state = lazyListState) {
+    itemsIndexed(items = searchState.filteredData, key = { index, _ ->
+        "$keyFun-$index"
+    }) { index, data ->
+        val rowBackground = when (zebraStripingColor) {
+            null -> backgroundColor
+            else -> if (index % 2 == 0) zebraStripingColor else backgroundColor
+        }
+        val rowForeground = colorScheme.contentColorFor(rowBackground)
+        val skipped = mutableListOf<Int>()
+        Row(Modifier.wrapContentHeight()) {
+            columnSpecs.forEachIndexed { specIndex, spec ->
+                if (specIndex in skipped) return@forEachIndexed
+                if (spec.mergeIf != null && spec.mergeIf.invoke(data)) {
+                    val nextSpec = columnSpecs.getOrNull(specIndex + 1) ?: return@forEachIndexed
+                    TableCell(modifier = Modifier.height(cellHeight),
+                        weight = spec.weight + nextSpec.weight,
+                        tooltipText = spec.tooltipText?.invoke(data),
+                        backgroundColor = rowBackground,
+                        foregroundColor = rowForeground,
+                        cellBorderColor = cellBorderColor) { spec.content(data) }
+                    skipped.add(specIndex + 1)
+                    return@forEachIndexed
+                }
+                TableCell(modifier = Modifier.height(cellHeight),
+                    weight = spec.weight,
+                    tooltipText = spec.tooltipText?.invoke(data),
+                    backgroundColor = rowBackground,
+                    cellBorderColor = cellBorderColor,
+                    foregroundColor = rowForeground) { spec.content(data) }
+            }
+        }
+    }
+}
+
+@Composable
+private fun HeaderDivider(cellBorderColor: Color) = Divider(color = cellBorderColor, thickness = 1.dp)
 
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -165,15 +274,35 @@ fun <T> RowScope.HeaderCell(
 }
 
 @Composable
+private fun <T> HeaderRow(
+    columnSpecs: List<ColumnSpec<T>>,
+    cellBorderColor: Color,
+    foregroundColor: Color,
+    localizedStrings: LocalizedStrings,
+    searchState: SearchState<T>,
+    onSearchClick: (String) -> Unit,
+) = Row(Modifier.fillMaxWidth().height(IntrinsicSize.Min)) {
+    columnSpecs.forEach { columnSpec ->
+        HeaderCell(columnSpec = columnSpec,
+            cellBorderColor = cellBorderColor,
+            contentColor = foregroundColor,
+            localizedStrings = localizedStrings,
+            searchState = searchState,
+            onSearchClick = onSearchClick,
+            onSearchClearClick = searchState::clearSearchFor)
+    }
+}
+
+@Composable
 fun RowScope.TableCell(
     modifier: Modifier = Modifier,
     weight: Float,
     tooltipText: String?,
     backgroundColor: Color,
+    cellBorderColor: Color,
     foregroundColor: Color,
     content: @Composable () -> Unit,
-) = Row(modifier = modifier.border(1.dp, colorScheme.onTertiaryContainer).weight(weight).padding(2.dp)
-    .background(backgroundColor),
+) = Row(modifier = modifier.border(1.dp, cellBorderColor).weight(weight).padding(2.dp).background(backgroundColor),
     horizontalArrangement = Arrangement.Center,
     verticalAlignment = Alignment.CenterVertically) {
     CompositionLocalProvider(LocalContentColor provides foregroundColor) {
@@ -228,7 +357,10 @@ open class ColumnSpec<T>(
             mergeIf = mergeIf,
             tooltipText = { it.instanceGetter() },
             content = {
-                SelectableText(text = it.instanceGetter())
+                SelectableText(modifier = Modifier.fillMaxWidth(),
+                    textAlign = TextAlign.Center,
+                    text = it.instanceGetter(),
+                    color = LocalContentColor.current)
             },
         )
     }
@@ -236,7 +368,7 @@ open class ColumnSpec<T>(
 
 class SearchState<T>(
     private val columnSpecs: List<ColumnSpec<T>>,
-    private val tableData: List<T>,
+    val tableData: List<T>,
 ) {
     private val searchableColumns: List<ColumnSpec<T>> by derivedStateOf {
         columnSpecs.filter { it.searchPredicate != null }
@@ -253,7 +385,22 @@ class SearchState<T>(
         searchableColumns.associate { it.title to it.searchPredicate!! }
     }
 
-    fun isFilteringFor(columnTitle: String) = searchQueries.entries.firstOrNull() { it.key == columnTitle }?.let {
+    val isSearching by derivedStateOf {
+        searchQueries.any { it.value != null }
+    }
+
+    val searchStateLabel: String? by derivedStateOf {
+        when (isSearching) {
+            false -> null
+            else -> searchQueries.filterValues { it != null }.entries.sortedBy {
+                it.key
+            }.joinToString(separator = " AND ") {
+                "${it.key} = '${it.value}'"
+            }
+        }
+    }
+
+    fun isFilteringFor(columnTitle: String) = searchQueries.entries.firstOrNull { it.key == columnTitle }?.let {
         it.value != null
     } ?: false
 
@@ -262,10 +409,10 @@ class SearchState<T>(
         else -> tableData.filter { data ->
             val presentFilters = searchQueries.filterValues { it != null }
             val presentPredicates = presentFilters.entries.associate { entry ->
-                val predicate = predicates[entry.key]!!
+                val predicate = predicates[entry.key] ?: return@associate null to null
                 entry.key to { predicate.invoke(data, entry.value!!) }
-            }
-            presentPredicates.all { it.value() }
+            }.filterKeys { it != null }.filterValues { it != null }
+            presentPredicates.all { it.value!!() }
         }
     }
 
@@ -281,6 +428,10 @@ class SearchState<T>(
         searchQueries[columnName] = newValue
     }
 
+    fun clearAllSearch() = searchableColumnTitles.forEach {
+        searchQueries[it] = null
+    }
+
 }
 
 @Composable
@@ -291,27 +442,38 @@ fun <T> ShowFilterDialog(
     onClose: () -> Unit,
 ) {
     var inputText: String by remember { mutableStateOf(searchState.getSearchQueryFor(title)) }
-    Dialog(onCloseRequest = onClose, title = localizedStrings.search) {
-        Column(modifier = Modifier.fillMaxSize().background(colorScheme.primaryContainer),
-            verticalArrangement = Arrangement.SpaceAround,
-            horizontalAlignment = Alignment.CenterHorizontally) {
-            LabeledTextField(value = inputText,
-                onValueChange = { inputText = it },
-                labelText = title,
-                singleLine = true)
-            Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly) {
-                Button(modifier = Modifier.wrapContentSize(),
-                    onClick = onClose,
-                    colors = ButtonDefaults.buttonColors(colorScheme.tertiary, colorScheme.onTertiary)) {
-                    Text(localizedStrings.closeReject, color = colorScheme.onTertiary)
-                }
-                Button(modifier = Modifier.wrapContentSize(), onClick = {
-                    searchState.setSearchQueryFor(title, inputText)
-                    onClose()
-                }, colors = ButtonDefaults.buttonColors(colorScheme.secondary, colorScheme.onSecondary)) {
-                    Text(localizedStrings.closeAccept, color = colorScheme.onSecondary)
-                }
+    TerminodiffDialog(title = localizedStrings.search, onCloseRequest = onClose, size = DpSize(400.dp, 300.dp)) {
+        LabeledTextField(value = inputText, onValueChange = { inputText = it }, labelText = title, singleLine = true)
+        Row(Modifier.fillMaxWidth().padding(top = 8.dp, bottom = 8.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly) {
+            OutlinedButton(modifier = Modifier.wrapContentSize(), onClick = onClose) {
+                Text(localizedStrings.closeCancel)
+            }
+            ElevatedButton(modifier = Modifier.wrapContentSize(), onClick = {
+                searchState.setSearchQueryFor(title, inputText)
+                onClose()
+            }, colors = ButtonDefaults.elevatedButtonColors(containerColor = colorScheme.primaryContainer)) {
+                Text(localizedStrings.closeSearch)
+            }
+        }
+    }
+}
+
+fun <TableData, SubList> columnSpecForMultiRow(
+    title: String,
+    weight: Float,
+    elementListGetter: (TableData) -> List<SubList>,
+    dividerColor: Color,
+    rowContent: @Composable (TableData, SubList) -> Unit,
+) = ColumnSpec<TableData>(title = title, weight = weight) { td ->
+    val elements = elementListGetter.invoke(td)
+    Column(Modifier.fillMaxSize(),
+        verticalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterVertically),
+        horizontalAlignment = Alignment.CenterHorizontally) {
+        elements.forEachIndexed { index, subList ->
+            rowContent(td, subList)
+            if (index < elements.size - 1) {
+                Divider(Modifier.fillMaxWidth(0.9f).height(1.dp), color = dividerColor)
             }
         }
     }

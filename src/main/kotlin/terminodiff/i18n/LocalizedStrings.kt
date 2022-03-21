@@ -1,10 +1,16 @@
 package terminodiff.i18n
 
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.withStyle
 import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.concepts.KeyedListDiffResult
 import terminodiff.engine.concepts.KeyedListDiffResultKind
-import terminodiff.engine.graph.DiffGraphElementKind
 import terminodiff.engine.resources.DiffDataContainer.*
+import terminodiff.terminodiff.engine.graph.GraphSide
 import terminodiff.terminodiff.engine.metadata.MetadataComparisonResult
 import terminodiff.terminodiff.engine.resources.InputResource
 
@@ -13,7 +19,15 @@ import terminodiff.terminodiff.engine.resources.InputResource
  * to recompose when the language changes.
  */
 abstract class LocalizedStrings(
+    val acceptAll: String,
+    val acceptedCount_: (Int) -> String,
+    val actions: String,
+    val addLayer: String,
+    val addTarget: String,
     val anUnknownErrorOccurred: String,
+    val areYouSure: String,
+    val automatic: String,
+    val automappedCount_: (Int) -> String,
     val boolean_: (Boolean?) -> String,
     val bothValuesAreNull: String,
     val calculateDiff: String,
@@ -22,31 +36,41 @@ abstract class LocalizedStrings(
     val changeLanguage: String,
     val clearSearch: String,
     val clickForDetails: String,
-    val closeAccept: String,
-    val closeReject: String,
+    val closeLoad: String,
+    val closeSearch: String,
+    val closeCancel: String,
+    val code: String = "Code",
+    val comments: String,
     val comparison: String,
     val compositional: String,
-    val code: String = "Code",
     val conceptDiff: String,
     val conceptDiffResults_: (ConceptDiffItem.ConceptDiffResultEnum) -> String,
+    val conceptMap: String = "ConceptMap",
+    val concepts_: (Int) -> String,
     val contact: String,
     val content: String = "Content",
-    val count: String,
     val copyright: String = "Copyright",
+    val count: String,
     val date: String,
-    val description: String,
     val definition: String = "Definition",
+    val description: String,
     val designation: String = "Designation",
     val designations: String,
-    val differentValue: String,
     val diffGraph: String,
+    val differentValue: String,
     val display: String = "Display",
-    val displayAndInWhich_: (String?, DiffGraphElementKind) -> String,
+    val displayAndInWhich_: (String?, GraphSide) -> String,
+    val elements_: (Int) -> String,
+    val equivalence: String,
     val experimental: String,
     val fhirTerminologyServer: String,
-    val fileFromPath_: (String) -> String,
-    val fileFromUrl_: (String) -> String,
+    val fileFromPath_: (String) -> AnnotatedString,
+    val fileFromUrl_: (String) -> AnnotatedString,
     val fileSystem: String,
+    val filtered: String,
+    val graph: String = "Graph",
+    val graphFor_: (String) -> String = { c -> "Graph ($c)" },
+    val group: String,
     val hierarchyMeaning: String,
     val id: String = "ID",
     val identical: String,
@@ -54,68 +78,88 @@ abstract class LocalizedStrings(
     val invalid: String,
     val jurisdiction: String,
     val keyedListResult_: (List<KeyedListDiffResult<*, *>>) -> String,
+    val language: String,
+    val layers: String,
+    val leftValue: String,
+    val legend: String,
+    val loadFromFile: String,
     val loadLeft: String,
     val loadRight: String,
-    val loadFromFile: String,
     val loadedResources: String,
-    val leftValue: String,
-    val language: String,
-    val rightValue: String,
+    val mappableCount_: (Int) -> String,
+    val metaVersion: String,
+    val metadata: String,
     val metadataDiff: String,
     val metadataDiffResults_: (MetadataComparisonResult) -> String,
-    val metaVersion: String,
     val name: String = "Name",
+    val no: String,
     val noDataLoaded: String,
+    val notRecommended: String,
     val numberItems_: (Int) -> String = {
         when (it) {
             1 -> "1 item"
             else -> "$it items"
         }
     },
+    val ok: String = "OK",
     val oneValueIsNull: String,
-    val onlyInLeft: String,
     val onlyConceptDifferences: String,
+    val onlyInLeft: String,
     val onlyInRight: String,
-    val overallComparison: String,
+    val open: String,
     val openResources: String,
+    val overallComparison: String,
     val pending: String,
-    val publisher: String,
-    val purpose: String,
-    val property: String,
     val properties: String,
     val propertiesDesignations: String,
     val propertiesDesignationsCount: (Int, Int) -> String,
     val propertiesDesignationsCountDelta: (Pair<Int, Int>, Pair<Int, Int>) -> String,
+    val property: String,
     val propertyDesignationForCode_: (String) -> String,
     val propertyType: String,
+    val publisher: String,
+    val purpose: String,
+    val reallyAcceptAll: String,
     val reload: String,
+    val removeLayer: String,
+    val resourcesIdentical: String,
+    val resourcesIdenticalMessage: String,
+    val rightValue: String,
     val search: String,
     val select: String,
-    val side_: (Side) -> String,
     val showAll: String,
     val showDifferent: String,
     val showIdentical: String,
     val showLeftGraphButton: String,
     val showRightGraphButton: String,
-    val supplements: String,
+    val side_: (Side) -> String,
+    val sourceUri: String,
+    val sourceValueSet: String,
+    val sourceVersion: String,
     val status: String = "Status",
+    val supplements: String,
     val system: String = "System",
-    val toggleDarkTheme: String,
+    val target: String,
+    val targetUri: String,
+    val targetValueSet: String,
+    val targetVersion: String,
+    val terminoDiff: String = "TerminoDiff",
     val text: String = "Text",
     val title: String,
-    val terminoDiff: String = "TerminoDiff",
+    val toggleDarkTheme: String,
     val uniLuebeck: String,
     val use: String,
     val useContext: String,
+    val vread: String = "VRead",
+    val vreadExplanationEnabled_: (Boolean) -> String,
+    val vReadFor_: (InputResource) -> String,
     val valid: String,
     val value: String,
     val valueSet: String = "ValueSet",
     val version: String = "Version",
     val versionNeeded: String,
-    val vRead: String = "VRead",
-    val vReadFor_: (InputResource) -> String,
-    val vReadExplanationEnabled_: (Boolean) -> String,
-    val vreadFromUrlAndMetaVersion_: (String, String) -> String,
+    val vreadFromUrlAndMetaVersion_: (String, String) -> AnnotatedString,
+    val yes: String,
 )
 
 enum class SupportedLocale {
@@ -126,8 +170,15 @@ enum class SupportedLocale {
     }
 }
 
-class GermanStrings : LocalizedStrings(
-    anUnknownErrorOccurred = "Ein unbekannter Fehler ist aufgetrefen",
+class GermanStrings : LocalizedStrings(acceptAll = "Alle akzeptieren",
+    acceptedCount_ = { "$it akzeptiert" },
+    actions = "Aktionen",
+    addLayer = "Ebene hinzufügen",
+    addTarget = "Ziel hinzufügen",
+    anUnknownErrorOccurred = "Ein unbekannter Fehler ist aufgetreten",
+    areYouSure = "Bist Du sicher?",
+    automatic = "Automatik",
+    automappedCount_ = { "$it automatisch gemappt" },
     boolean_ = {
         when (it) {
             null -> "null"
@@ -138,11 +189,13 @@ class GermanStrings : LocalizedStrings(
     bothValuesAreNull = "Beide Werte sind null",
     calculateDiff = "Diff berechnen",
     canonicalUrl = "Kanonische URL",
-    clearSearch = "Suche zurücksetzen",
-    closeAccept = "Akzeptieren",
-    closeReject = "Verwerfen",
     changeLanguage = "Sprache wechseln",
+    clearSearch = "Suche zurücksetzen",
     clickForDetails = "Für Details klicken",
+    closeLoad = "Laden",
+    closeSearch = "Suchen",
+    closeCancel = "Abbrechen",
+    comments = "Kommentare",
     comparison = "Vergleich",
     compositional = "Kompositionell?",
     conceptDiff = "Konzept-Diff",
@@ -152,26 +205,55 @@ class GermanStrings : LocalizedStrings(
             ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identisch"
         }
     },
+    concepts_ = {
+        when (it) {
+            1 -> "Konzept"
+            else -> "Konzepte"
+        }
+    },
     contact = "Kontakt",
     count = "Anzahl",
     date = "Datum",
     description = "Beschreibung",
     designations = "Designationen",
-    differentValue = "Unterschiedliche Werte",
     diffGraph = "Differenz-Graph",
+    differentValue = "Unterschiedliche Werte",
     displayAndInWhich_ = { display, inWhich ->
         val where = when (inWhich) {
-            DiffGraphElementKind.LEFT -> "nur links"
-            DiffGraphElementKind.RIGHT -> "nur rechts"
-            DiffGraphElementKind.BOTH -> "in beiden"
+            GraphSide.LEFT -> "nur links"
+            GraphSide.RIGHT -> "nur rechts"
+            GraphSide.BOTH -> "in beiden"
         }
         "'$display' ($where)"
     },
+    elements_ = {
+        when (it) {
+            1 -> "Elemente"
+            else -> "Elemente"
+        }
+    },
+    equivalence = "Äquivalenz",
     experimental = "Experimentell?",
     fhirTerminologyServer = "FHIR-Terminologieserver",
-    fileFromPath_ = { "Datei von: $it" },
-    fileFromUrl_ = { "FHIR-Server von: $it" },
+    fileFromPath_ = {
+        buildAnnotatedString {
+            append("Datei von: ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(it)
+            }
+        }
+    },
+    fileFromUrl_ = {
+        buildAnnotatedString {
+            append("FHIR-Server von: ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(it)
+            }
+        }
+    },
     fileSystem = "Dateisystem",
+    filtered = "gefiltert",
+    group = "Gruppe",
     hierarchyMeaning = "Hierachie-Bedeutung",
     identical = "Identisch",
     identifiers = "IDs",
@@ -187,14 +269,18 @@ class GermanStrings : LocalizedStrings(
             )
         }.joinToString()
     },
+    language = "Sprache",
+    layers = "Ebenen",
+    leftValue = "Linker Wert",
+    legend = "Legende",
+    loadFromFile = "Vom Dateisystem laden",
     loadLeft = "Links laden",
     loadRight = "Rechts laden",
-    loadFromFile = "Vom Dateisystem laden",
     loadedResources = "Geladene Ressourcen",
-    leftValue = "Linker Wert",
-    language = "Sprache",
-    rightValue = "Rechter Wert",
+    metadata = "Metadaten",
     metadataDiff = "Metadaten-Diff",
+    rightValue = "Rechter Wert",
+    mappableCount_ = { "$it abbildbar" },
     metadataDiffResults_ = {
         when (it) {
             MetadataComparisonResult.IDENTICAL -> "Identisch"
@@ -202,20 +288,22 @@ class GermanStrings : LocalizedStrings(
         }
     },
     metaVersion = "Meta-Version",
+    no = "Nein",
     noDataLoaded = "Keine Daten geladen",
+    notRecommended = "Nicht empfohlen",
     oneValueIsNull = "Ein Wert ist null",
+    onlyConceptDifferences = "Nur Konzeptunterschiede",
     onlyInLeft = "Nur links",
-    onlyConceptDifferences = "Konzeptunterschiede",
     onlyInRight = "Nur rechts",
+    open = "Öffnen",
     openResources = "Ressourcen öffnen",
     overallComparison = "Gesamt",
     pending = "Ausstehend...",
-    publisher = "Herausgeber",
-    purpose = "Zweck",
-    property = "Eigenschaft",
     properties = "Eigenschaften",
     propertiesDesignations = "Eigenschaften / Designationen",
     propertiesDesignationsCount = { p, d -> "$p E / $d D" },
+    property = "Eigenschaft",
+    publisher = "Herausgeber",
     propertiesDesignationsCountDelta = { p, d ->
         when {
             p.second == 0 && d.second != 0 -> "${p.first} E / ${d.first} Δ${d.second} D"
@@ -225,9 +313,17 @@ class GermanStrings : LocalizedStrings(
     },
     propertyDesignationForCode_ = { code -> "Eigenschaften und Designationen für Konzept '$code'" },
     propertyType = "Typ",
+    purpose = "Zweck",
+    reallyAcceptAll = "Möchtest Du wirklich alle atomatisch gemappten Konzepte akzeptieren?\n" + "Dies kann nicht rückgängig gemacht werden.",
     reload = "Neu laden",
+    removeLayer = "Ebene entfernen",
+    resourcesIdentical = "Identische Ressourcen",
+    resourcesIdenticalMessage = "Die Ressourcen sind identisch.",
     search = "Suchen",
     select = "Auswahl",
+    sourceUri = "Quell-URI",
+    sourceValueSet = "Quell-ValueSet",
+    sourceVersion = "Quell-Version",
     side_ = {
         when (it) {
             Side.RIGHT -> "Rechts"
@@ -235,35 +331,52 @@ class GermanStrings : LocalizedStrings(
         }
     },
     showAll = "Alle",
-    showDifferent = "Unterschiedliche",
-    showIdentical = "Identische",
-    showLeftGraphButton = "Linken Graphen zeigen",
-    showRightGraphButton = "Rechten Graphen zeigen",
+    showDifferent = "Alle unterschiedlichen",
+    showIdentical = "Nur identische",
+    showLeftGraphButton = "Linker Graph",
+    showRightGraphButton = "Rechter Graph",
     supplements = "Ergänzt",
-    toggleDarkTheme = "Helles/Dunkles Thema",
+    target = "Ziel",
+    targetUri = "Ziel-URI",
+    targetValueSet = "Ziel-ValueSet",
+    targetVersion = "Ziel-Version",
     title = "Titel",
+    toggleDarkTheme = "Helles/Dunkles Thema",
     uniLuebeck = "Universität zu Lübeck",
     use = "Zweck",
     useContext = "Nutzungskontext",
+    vReadFor_ = { "VRead für ${it.downloadableCodeSystem!!.canonicalUrl}" },
     valid = "Gültig",
     value = "Wert",
     versionNeeded = "Version erforderlich?",
-    vReadFor_ = {
-        "VRead für ${it.downloadableCodeSystem!!.canonicalUrl}"
-    },
-    vReadExplanationEnabled_ = {
+    vreadExplanationEnabled_ = {
         when (it) {
             true -> "Vergleiche Versionen der Ressource mit der \$history-Operation."
             else -> "Es gibt nur eine Ressourcen-Version der gewählten Ressource."
         }
     },
     vreadFromUrlAndMetaVersion_ = { url, meta ->
-        "VRead von $url (Meta-Version: $meta)"
-    }
-)
+        buildAnnotatedString {
+            append("VRead von ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(url)
+            }
+            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                append(" (Meta-Version: $meta)")
+            }
+        }
+    },
+    yes = "Ja")
 
-class EnglishStrings : LocalizedStrings(
+class EnglishStrings : LocalizedStrings(acceptAll = "Accept all",
+    acceptedCount_ = { "$it accepted" },
+    actions = "Actions",
+    addLayer = "Add layer",
+    addTarget = "Add target",
     anUnknownErrorOccurred = "An unknown error occured.",
+    areYouSure = "Are you sure?",
+    automatic = "Automatic",
+    automappedCount_ = { "$it automatically mapped" },
     boolean_ = {
         when (it) {
             null -> "null"
@@ -277,8 +390,10 @@ class EnglishStrings : LocalizedStrings(
     changeLanguage = "Change Language",
     clearSearch = "Clear search",
     clickForDetails = "Click for details",
-    closeAccept = "Accept",
-    closeReject = "Reject",
+    closeLoad = "Load",
+    closeSearch = "Search",
+    closeCancel = "Cancel",
+    comments = "Comments",
     comparison = "Comparison",
     compositional = "Compositional?",
     conceptDiff = "Concept Diff",
@@ -288,30 +403,59 @@ class EnglishStrings : LocalizedStrings(
             ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL -> "Identical"
         }
     },
+    concepts_ = {
+        when (it) {
+            1 -> "concept"
+            else -> "concepts"
+        }
+    },
     contact = "Contact",
     count = "Count",
     date = "Date",
     description = "Description",
     designations = "Designations",
-    differentValue = "Different value",
     diffGraph = "Difference Graph",
+    differentValue = "Different value",
     displayAndInWhich_ = { display, inWhich ->
         val where = when (inWhich) {
-            DiffGraphElementKind.LEFT -> "only left"
-            DiffGraphElementKind.RIGHT -> "only right"
-            DiffGraphElementKind.BOTH -> "in both"
+            GraphSide.LEFT -> "only left"
+            GraphSide.RIGHT -> "only right"
+            GraphSide.BOTH -> "in both"
         }
         "'$display' ($where)"
     },
+    elements_ = {
+        when (it) {
+            1 -> "element"
+            else -> "elements"
+        }
+    },
+    equivalence = "Equivalence",
     experimental = "Experimental?",
     fhirTerminologyServer = "FHIR Terminology Server",
-    fileFromPath_ = { "File from: $it" },
-    fileFromUrl_ = { "FHIR Server from: $it" },
+    fileFromPath_ = {
+        buildAnnotatedString {
+            append("File from ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(it)
+            }
+        }
+    },
+    fileFromUrl_ = {
+        buildAnnotatedString {
+            append("FHIR Server from: ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(it)
+            }
+        }
+    },
     fileSystem = "Filesystem",
+    filtered = "filtered",
+    group = "Group",
     hierarchyMeaning = "Hierarchy Meaning",
     identical = "Identical",
     identifiers = "Identifiers",
-    invalid = "Ungültig",
+    invalid = "Invalid",
     jurisdiction = "Jurisdiction",
     keyedListResult_ = { results ->
         results.map { it.result }.groupingBy { it }.eachCount().let { eachCount ->
@@ -323,13 +467,16 @@ class EnglishStrings : LocalizedStrings(
             )
         }.joinToString()
     },
+    language = "Language",
+    layers = "Layers",
+    leftValue = "Left value",
+    legend = "Legend",
+    loadFromFile = "Load from file",
     loadLeft = "Load left",
     loadRight = "Load right",
-    loadFromFile = "Load from file",
     loadedResources = "Loaded resources",
-    leftValue = "Left value",
-    language = "Language",
-    rightValue = "Right value",
+    mappableCount_ = { "$it mappable" },
+    metadata = "Metadata",
     metadataDiff = "Metadata Diff",
     metadataDiffResults_ = {
         when (it) {
@@ -338,20 +485,23 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     metaVersion = "Meta Version",
+    no = "No",
     noDataLoaded = "No data loaded",
+    notRecommended = "Not recommended",
     oneValueIsNull = "One value is null",
+    onlyConceptDifferences = "Only concept differences",
     onlyInLeft = "Only left",
-    onlyConceptDifferences = "Concept differences",
     onlyInRight = "Only right",
+    open = "Open",
     openResources = "Open Resources",
     overallComparison = "Overall",
     pending = "Pending...",
-    publisher = "Publisher",
-    purpose = "Purpose",
-    property = "Property",
     properties = "Properties",
     propertiesDesignations = "Properties / Designations",
     propertiesDesignationsCount = { p, d -> "$p P / $d D" },
+    property = "Property",
+    publisher = "Publisher",
+    purpose = "Purpose",
     propertiesDesignationsCountDelta = { p, d ->
         when {
             p.second == 0 && d.second != 0 -> "${p.first} P / ${d.first} Δ${d.second} D"
@@ -361,9 +511,17 @@ class EnglishStrings : LocalizedStrings(
     },
     propertyDesignationForCode_ = { code -> "Properties and designations for concept '$code'" },
     propertyType = "Type",
+    reallyAcceptAll = "Do you really want to accept all auto-mapped concepts?\n" + "You can not undo this.",
     reload = "Reload",
+    removeLayer = "Remove layers",
+    resourcesIdentical = "Identical resources",
+    resourcesIdenticalMessage = "The resources provided are identical.",
+    rightValue = "Right value",
     search = "Search",
     select = "Select",
+    sourceUri = "Source URI",
+    sourceValueSet = "Source ValueSet",
+    sourceVersion = "Source version",
     side_ = {
         when (it) {
             Side.RIGHT -> "Right"
@@ -371,31 +529,42 @@ class EnglishStrings : LocalizedStrings(
         }
     },
     showAll = "All",
-    showDifferent = "Different",
-    showIdentical = "Identical",
-    showLeftGraphButton = "Show left graph",
-    showRightGraphButton = "Show right graph",
+    showDifferent = "Only different",
+    showIdentical = "Only identical",
+    showLeftGraphButton = "Left graph",
+    showRightGraphButton = "Right graph",
     supplements = "Supplements",
-    toggleDarkTheme = "Toggle dark theme",
+    target = "Target",
+    targetUri = "Target URI",
+    targetValueSet = "Target ValueSet",
+    targetVersion = "Target version",
     title = "Title",
+    toggleDarkTheme = "Toggle dark theme",
     uniLuebeck = "University of Luebeck",
     use = "Use",
     useContext = "Use context",
+    vReadFor_ = { "VRead for ${it.downloadableCodeSystem!!.canonicalUrl}" },
     valid = "Valid",
     value = "Value",
     versionNeeded = "Version needed?",
-    vReadFor_ = {
-        "VRead for ${it.downloadableCodeSystem!!.canonicalUrl}"
-    },
-    vReadExplanationEnabled_ = {
+    vreadExplanationEnabled_ = {
         when (it) {
             true -> "Compare versions of the resource using the \$history operation."
             else -> "There is only one resource version of the selected resource."
         }
     },
     vreadFromUrlAndMetaVersion_ = { url, meta ->
-        "VRead from $url (Meta version: $meta)"
-    })
+        buildAnnotatedString {
+            append("VRead from ")
+            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                append(url)
+            }
+            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                append(" (Meta version: $meta)")
+            }
+        }
+    },
+    yes = "Yes")
 
 fun getStrings(locale: SupportedLocale = SupportedLocale.defaultLocale): LocalizedStrings = when (locale) {
     SupportedLocale.DE -> GermanStrings()

@@ -1,14 +1,12 @@
 package terminodiff.ui.panes.conceptdiff
 
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.Card
-import androidx.compose.material.Text
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MaterialTheme.colorScheme
+import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,10 +42,11 @@ fun ConceptDiffPanel(
     diffDataContainer: DiffDataContainer,
     localizedStrings: LocalizedStrings,
     useDarkTheme: Boolean,
+    onShowGraph: (String) -> Unit,
 ) {
     val diffColors by remember { mutableStateOf(getDiffColors(useDarkTheme = useDarkTheme)) }
     var activeFilter by remember { mutableStateOf(ToggleableChipSpec.showDifferent) }
-    val tableData by derivedStateOf { filterDiffItems(diffDataContainer, activeFilter) }
+    val chipFilteredTableData by derivedStateOf { filterDiffItems(diffDataContainer, activeFilter) }
     val lazyListState = rememberLazyListState(initialFirstVisibleItemIndex = 0)
     val coroutineScope = rememberCoroutineScope()
     val filterSpecs by derivedStateOf {
@@ -82,41 +81,42 @@ fun ConceptDiffPanel(
                 useDarkTheme = useDarkTheme,
                 onClose = onClose) { it.definition }
         }
-
     }
 
     Card(
         modifier = Modifier.padding(8.dp).fillMaxSize(),
         elevation = 8.dp,
-        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-        contentColor = MaterialTheme.colorScheme.onTertiaryContainer,
+        backgroundColor = colorScheme.surfaceVariant,
+        contentColor = colorScheme.onSurfaceVariant,
     ) {
         Column(Modifier.padding(4.dp).fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally) {
-            Text(localizedStrings.conceptDiff,
-                style = MaterialTheme.typography.headlineSmall,
-                color = MaterialTheme.colorScheme.onTertiaryContainer)
-            FilterGroup(filterSpecs = filterSpecs, filterCounts = counts, activeFilter = activeFilter) {
-                logger.info("changed filter to $it")
-                activeFilter = it
-                coroutineScope.launch {
-                    // scroll has to be invoked from a coroutine
-                    lazyListState.scrollToItem(0)
+            Text(localizedStrings.conceptDiff, style = MaterialTheme.typography.headlineSmall)
+            Row {
+                FilterGroup(filterSpecs = filterSpecs, filterCounts = counts, activeFilter = activeFilter) {
+                    logger.info("changed filter to $it")
+                    activeFilter = it
+                    coroutineScope.launch {
+                        // scroll has to be invoked from a coroutine
+                        lazyListState.scrollToItem(0)
+                    }
                 }
             }
+
             DiffDataTable(diffDataContainer = diffDataContainer,
-                tableData = tableData,
+                tableData = chipFilteredTableData,
                 localizedStrings = localizedStrings,
                 diffColors = diffColors,
                 lazyListState = lazyListState,
-                showPropertyDialog = {
+                onShowPropertyDialog = {
                     dialogData = it to DetailsDialogKind.PROPERTY_DESIGNATION
                 },
-                showDisplayDetailsDialog = {
+                onShowDisplayDetailsDialog = {
                     dialogData = it to DetailsDialogKind.DISPLAY
                 },
-                showDefinitionDetailsDialog = {
+                onShowDefinitionDetailsDialog = {
                     dialogData = it to DetailsDialogKind.DEFINITION
-                })
+                },
+                onShowGraph = onShowGraph)
         }
     }
 }
@@ -182,17 +182,21 @@ fun DiffDataTable(
     localizedStrings: LocalizedStrings,
     diffColors: DiffColors,
     lazyListState: LazyListState,
-    showPropertyDialog: (ConceptTableData) -> Unit,
-    showDisplayDetailsDialog: (ConceptTableData) -> Unit,
-    showDefinitionDetailsDialog: (ConceptTableData) -> Unit,
+    onShowPropertyDialog: (ConceptTableData) -> Unit,
+    onShowDisplayDetailsDialog: (ConceptTableData) -> Unit,
+    onShowDefinitionDetailsDialog: (ConceptTableData) -> Unit,
+    onShowGraph: (String) -> Unit,
 ) {
     if (diffDataContainer.codeSystemDiff == null) throw IllegalStateException("the diff data container is not initialized")
 
-    val columnSpecs = conceptDiffColumnSpecs(localizedStrings,
-        diffColors,
-        showPropertyDialog,
-        showDisplayDetailsDialog,
-        showDefinitionDetailsDialog)
+    val columnSpecs by derivedStateOf {
+        conceptDiffColumnSpecs(localizedStrings = localizedStrings,
+            diffColors = diffColors,
+            onShowPropertyDialog = onShowPropertyDialog,
+            onShowDisplayDetailsDialog = onShowDisplayDetailsDialog,
+            onShowDefinitionDetailsDialog = onShowDefinitionDetailsDialog,
+            onShowGraph = onShowGraph)
+    }
 
     TableScreen(
         tableData = tableData,
@@ -211,6 +215,30 @@ data class ConceptTableData(
     fun isOnlyInLeft() = leftDetails != null && rightDetails == null
     fun isOnlyInRight() = leftDetails == null && rightDetails != null
     fun isInBoth() = diff != null
+
+    fun overallComparison(): OverallComparison {
+        return when (isInBoth()) {
+            true -> when {
+                diff!!.conceptComparison.any {
+                    it.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT
+                } -> OverallComparison.DIFFERENT
+                diff.propertyComparison.any { it.result != KeyedListDiffResultKind.IDENTICAL } -> OverallComparison.DIFFERENT
+                diff.designationComparison.any { it.result != KeyedListDiffResultKind.IDENTICAL } -> OverallComparison.DIFFERENT
+                else -> OverallComparison.IDENTICAL
+            }
+            else -> when (isOnlyInLeft()) {
+                true -> OverallComparison.ONLY_LEFT
+                else -> OverallComparison.ONLY_RIGHT
+            }
+        }
+    }
+
+    enum class OverallComparison {
+        ONLY_LEFT,
+        ONLY_RIGHT,
+        DIFFERENT,
+        IDENTICAL
+    }
 }
 
 @Composable
@@ -220,19 +248,20 @@ fun TableScreen(
     columnSpecs: List<ColumnSpec<ConceptTableData>>,
     localizedStrings: LocalizedStrings,
 ) {
-    val containedData: List<ConceptTableData> = tableData.shownCodes.map { code ->
-        ConceptTableData(code = code,
-            leftDetails = tableData.leftGraphBuilder.nodeTree[code],
-            rightDetails = tableData.rightGraphBuilder.nodeTree[code],
-            diff = tableData.conceptDiff[code])
+    val containedData: List<ConceptTableData> by derivedStateOf {
+        tableData.shownCodes.map { code ->
+            ConceptTableData(code = code,
+                leftDetails = tableData.leftGraphBuilder.nodeTree[code],
+                rightDetails = tableData.rightGraphBuilder.nodeTree[code],
+                diff = tableData.conceptDiff[code])
+        }.toSortedSet(compareBy<ConceptTableData> { it.overallComparison().ordinal }.thenBy { it.code }).toList()
     }
-    LazyTable(
-        columnSpecs = columnSpecs,
-        backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
+    LazyTable(columnSpecs = columnSpecs,
+        backgroundColor = colorScheme.surfaceVariant,
         lazyListState = lazyListState,
-        zebraStripingColor = MaterialTheme.colorScheme.primaryContainer,
+        zebraStripingColor = colorScheme.secondaryContainer,
         tableData = containedData,
+        dataAlreadySorted = true,
         localizedStrings = localizedStrings,
-        keyFun = { it.code },
-    )
+        countLabel = localizedStrings.concepts_) { it.code }
 }

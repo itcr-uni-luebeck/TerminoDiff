@@ -1,8 +1,8 @@
 package terminodiff.ui.util
 
 import androidx.compose.foundation.text.selection.SelectionContainer
-import androidx.compose.material.LocalContentColor
-import androidx.compose.material.LocalTextStyle
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -61,4 +61,4 @@ fun textForValue(
 ) = SelectableText(text = when (value) {
     is List<*> -> value.joinToString(limit = limit)
     else -> value?.toString()
-}, color = androidx.compose.material3.LocalContentColor.current)
+}, color = LocalContentColor.current)

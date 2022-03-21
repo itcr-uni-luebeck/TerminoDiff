@@ -6,7 +6,8 @@ import org.jgrapht.graph.builder.GraphTypeBuilder
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import terminodiff.i18n.LocalizedStrings
-import terminodiff.ui.graphs.EdgeColorRegistry
+import terminodiff.ui.graphs.ColorRegistry
+import terminodiff.ui.graphs.Registry
 import java.awt.Color
 import java.util.*
 
@@ -117,7 +118,7 @@ data class FhirConceptEdge(
 ) {
     fun getLabel(): String = "'$from' -> '$to' [$propertyCode]"
 
-    fun getColor(): Color = EdgeColorRegistry.getColor(propertyCode)
+    val color = ColorRegistry.getColor(Registry.EDGES, propertyCode)
 }
 
 data class FhirConceptDetails(

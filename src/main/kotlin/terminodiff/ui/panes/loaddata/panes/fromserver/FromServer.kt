@@ -3,17 +3,14 @@ package terminodiff.ui.panes.loaddata.panes.fromserver
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.CircularProgressIndicator
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Cancel
 import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Compare
 import androidx.compose.material.icons.filled.Pending
-import androidx.compose.material3.Icon
+import androidx.compose.material3.*
 import androidx.compose.material3.MaterialTheme.colorScheme
-import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -34,12 +31,12 @@ import org.slf4j.LoggerFactory
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
 import terminodiff.terminodiff.engine.resources.InputResource
-import terminodiff.terminodiff.ui.panes.loaddata.panes.LabeledTextField
-import terminodiff.terminodiff.ui.panes.loaddata.panes.LoadListener
 import terminodiff.terminodiff.ui.panes.loaddata.panes.fromserver.VReadDialog
 import terminodiff.terminodiff.ui.panes.loaddata.panes.fromserver.fromServerPaneColumnSpecs
+import terminodiff.terminodiff.ui.util.LabeledTextField
 import terminodiff.ui.AppIconResource
 import terminodiff.ui.ImageRelativePath
+import terminodiff.ui.LoadListener
 import terminodiff.ui.MouseOverPopup
 import terminodiff.ui.util.ColumnSpec
 import terminodiff.ui.util.LazyTable
@@ -202,13 +199,13 @@ fun FromServerScreen(
             fhirContext = fhirContext,
             coroutineScope = coroutineScope,
             localizedStrings = localizedStrings,
-            onCloseReject = { vReadResource = null },
+            onCloseCancel = { vReadResource = null },
             onSelectLeft = onLoadLeftFile,
             onSelectRight = onLoadRightFile)
     }
-    LabeledTextField(value = baseServerUrl,
+    LabeledTextField(modifier = Modifier.fillMaxWidth().padding(horizontal = 12.dp, vertical = 4.dp),
+        value = baseServerUrl,
         onValueChange = onChangeBaseServerUrl,
-        modifier = Modifier.fillMaxWidth().padding(12.dp),
         labelText = localizedStrings.fhirTerminologyServer,
         trailingIconVector = trailingIcon,
         trailingIconDescription = trailingIconDescription)
@@ -273,12 +270,12 @@ fun ListOfResources(
             onLoadFile = onLoadLeftFile)
 
         val vReadDisabled = (selectedItem?.metaVersion?.equals("1")) ?: true
-        LoadButton(text = localizedStrings.vRead,
+        LoadButton(text = localizedStrings.vread,
             selectedItem = selectedItem,
             baseServerUrl = baseServerUrl,
             iconImageVector = Icons.Default.Compare,
             enabled = !vReadDisabled,
-            tooltip = localizedStrings.vReadExplanationEnabled_.invoke(!vReadDisabled),
+            tooltip = localizedStrings.vreadExplanationEnabled_.invoke(selectedItem != null && !vReadDisabled),
             onClick = onShowVReadDialog)
 
         leftRightButton(text = localizedStrings.loadRight,
@@ -286,12 +283,10 @@ fun ListOfResources(
             onLoadFile = onLoadRightFile)
     }
     LazyTable(
-        modifier = Modifier.padding(4.dp),
         columnSpecs = columnSpecs,
-        backgroundColor = colorScheme.tertiaryContainer,
-        foregroundColor = colorScheme.onTertiaryContainer,
+        backgroundColor = colorScheme.surfaceVariant,
         lazyListState = lazyListState,
-        zebraStripingColor = colorScheme.primaryContainer,
+        zebraStripingColor = colorScheme.secondaryContainer,
         tableData = resourceList,
         localizedStrings = localizedStrings,
         keyFun = DownloadableCodeSystem::id,
@@ -309,21 +304,17 @@ private fun LoadButton(
     onClick: (InputResource) -> Unit,
 ) {
     val buttonColors =
-        ButtonDefaults.buttonColors(backgroundColor = colorScheme.primary, contentColor = colorScheme.onPrimary)
+        ButtonDefaults.filledTonalButtonColors(containerColor = colorScheme.secondary, contentColor = colorScheme.onSecondary)
     MouseOverPopup(text = tooltip ?: text) {
-        Button(modifier = Modifier.padding(4.dp),
-            elevation = ButtonDefaults.elevation(defaultElevation = 8.dp),
-            colors = buttonColors,
-            onClick = {
-                selectedItem?.let { item ->
-                    val resource = InputResource(kind = InputResource.Kind.FHIR_SERVER,
-                        resourceUrl = item.physicalUrl,
-                        sourceFhirServerUrl = baseServerUrl,
-                        downloadableCodeSystem = item)
-                    onClick.invoke(resource)
-                }
-            },
-            enabled = enabled) {
+        FilledTonalButton(colors = buttonColors, onClick = {
+            selectedItem?.let { item ->
+                val resource = InputResource(kind = InputResource.Kind.FHIR_SERVER,
+                    resourceUrl = item.physicalUrl,
+                    sourceFhirServerUrl = baseServerUrl,
+                    downloadableCodeSystem = item)
+                onClick.invoke(resource)
+            }
+        }, enabled = enabled) {
             Icon(imageVector = iconImageVector,
                 contentDescription = text,
                 tint = buttonColors.contentColor(enabled).value)

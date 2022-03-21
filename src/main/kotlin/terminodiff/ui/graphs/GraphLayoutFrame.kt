@@ -2,7 +2,9 @@ package terminodiff.ui.graphs
 
 import org.hl7.fhir.r4.model.CodeSystem
 import org.jgrapht.Graph
-import terminodiff.engine.graph.*
+import terminodiff.engine.graph.CodeSystemGraphBuilder
+import terminodiff.engine.graph.DiffEdge
+import terminodiff.engine.graph.DiffNode
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.java.ui.CodeSystemGraphJFrame
 import terminodiff.java.ui.DiffGraphJFrame

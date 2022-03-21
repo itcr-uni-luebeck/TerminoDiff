@@ -1,15 +1,16 @@
+@file:OptIn(ExperimentalMaterial3Api::class)
+
 package terminodiff.ui.panes.conceptdiff
 
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material.OutlinedButton
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Hub
+import androidx.compose.material3.*
+import androidx.compose.material3.MaterialTheme.colorScheme
 import androidx.compose.material3.MaterialTheme.typography
-import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,19 +28,33 @@ import terminodiff.ui.util.*
 fun conceptDiffColumnSpecs(
     localizedStrings: LocalizedStrings,
     diffColors: DiffColors,
-    showPropertyDialog: (ConceptTableData) -> Unit,
-    showDisplayDetailsDialog: (ConceptTableData) -> Unit,
-    showDefinitionDetailsDialog: (ConceptTableData) -> Unit,
+    onShowPropertyDialog: (ConceptTableData) -> Unit,
+    onShowDisplayDetailsDialog: (ConceptTableData) -> Unit,
+    onShowDefinitionDetailsDialog: (ConceptTableData) -> Unit,
+    onShowGraph: (String) -> Unit,
 ) = listOf(codeColumnSpec(localizedStrings),
-    displayColumnSpec(localizedStrings, diffColors, showDisplayDetailsDialog),
-    definitionColumnSpec(localizedStrings, diffColors, showDefinitionDetailsDialog),
-    propertyDesignationColumnSpec(localizedStrings, diffColors, showPropertyDialog),
+    graphColumnSpec(localizedStrings, onShowGraph),
+    displayColumnSpec(localizedStrings, diffColors, onShowDisplayDetailsDialog),
+    definitionColumnSpec(localizedStrings, diffColors, onShowDefinitionDetailsDialog),
+    propertyDesignationColumnSpec(localizedStrings, diffColors, onShowPropertyDialog),
     overallComparisonColumnSpec(localizedStrings, diffColors))
 
 private fun codeColumnSpec(localizedStrings: LocalizedStrings) =
     ColumnSpec.StringSearchableColumnSpec<ConceptTableData>(title = localizedStrings.code,
         weight = 0.1f,
         instanceGetter = { code })
+
+@OptIn(ExperimentalMaterial3Api::class)
+private fun graphColumnSpec(localizedStrings: LocalizedStrings, onShowGraph: (String) -> Unit) =
+    ColumnSpec<ConceptTableData>(title = localizedStrings.graph, weight = 0.08f) { tableData ->
+        CompositionLocalProvider(LocalMinimumTouchTargetEnforcement provides false) {
+            IconButton(onClick = {
+                onShowGraph.invoke(tableData.code)
+            }, modifier = Modifier.size(24.dp)) {
+                Icon(Icons.Default.Hub, localizedStrings.graph)
+            }
+        }
+    }
 
 private fun displayColumnSpec(
     localizedStrings: LocalizedStrings, diffColors: DiffColors, showDisplayDetailsDialog: (ConceptTableData) -> Unit,
@@ -49,8 +64,7 @@ private fun displayColumnSpec(
     labelToFind = localizedStrings.display,
     weight = 0.25f,
     stringValueResolver = FhirConceptDetails::display,
-    onDetailClick = showDisplayDetailsDialog
-)
+    onDetailClick = showDisplayDetailsDialog)
 
 private fun definitionColumnSpec(
     localizedStrings: LocalizedStrings,
@@ -80,9 +94,7 @@ private fun propertyDesignationColumnSpec(
                 when {
                     propertyDifferenceCount == 0 && designationDifferenceCount == 0 -> Button(onClick = {
                         showPropertyDialog(data)
-                    },
-                        elevation = ButtonDefaults.elevation(4.dp),
-                        colors = ButtonDefaults.buttonColors(diffColors.greenPair.first, diffColors.greenPair.second)) {
+                    }, colors = ButtonDefaults.buttonColors(diffColors.greenPair.first, diffColors.greenPair.second)) {
                         Text(text = localizedStrings.propertiesDesignationsCount(data.diff.propertyComparison.count(),
                             data.diff.designationComparison.count()), color = diffColors.yellowPair.second)
                     }
@@ -91,7 +103,6 @@ private fun propertyDesignationColumnSpec(
                             Button(onClick = {
                                 showPropertyDialog(data)
                             },
-                                elevation = ButtonDefaults.elevation(4.dp),
                                 colors = ButtonDefaults.buttonColors(diffColors.yellowPair.first,
                                     diffColors.yellowPair.second)) {
                                 Text(text = localizedStrings.propertiesDesignationsCountDelta.invoke(data.diff.propertyComparison.count() to propertyDifferenceCount,
@@ -106,10 +117,9 @@ private fun propertyDesignationColumnSpec(
                 OutlinedButton(onClick = {
                     showPropertyDialog(data)
                 },
-                    elevation = ButtonDefaults.elevation(4.dp),
-                    colors = ButtonDefaults.outlinedButtonColors(backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-                        contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
-                    border = BorderStroke(1.dp, MaterialTheme.colorScheme.onTertiaryContainer)) {
+//                    colors = ButtonDefaults.outlinedButtonColors(containerColor = colorScheme.tertiaryContainer,
+//                        contentColor = colorScheme.onTertiaryContainer),
+                    border = BorderStroke(1.dp, colorScheme.onTertiaryContainer)) {
                     val text = when (data.isOnlyInLeft()) {
                         true -> data.leftDetails!!
                         else -> data.rightDetails!!
@@ -117,7 +127,7 @@ private fun propertyDesignationColumnSpec(
                         localizedStrings.propertiesDesignationsCount.invoke(details.property.count(),
                             details.designation.count())
                     }
-                    Text(text = text, color = MaterialTheme.colorScheme.onTertiaryContainer)
+                    Text(text = text, color = colorScheme.onTertiaryContainer)
                 }
             }
         }
@@ -130,16 +140,13 @@ private fun overallComparisonColumnSpec(
     weight = 0.25f,
     tooltipText = null,
 ) { data ->
-    when (data.isInBoth()) {
-        true -> {
-            val anyDifferent = data.diff!!.conceptComparison.any {
-                it.result == ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT
-            } || data.diff.propertyComparison.any { it.result != KeyedListDiffResultKind.IDENTICAL } || data.diff.designationComparison.any { it.result != KeyedListDiffResultKind.IDENTICAL }
+    when (val result = data.overallComparison()) {
+        ConceptTableData.OverallComparison.IDENTICAL, ConceptTableData.OverallComparison.DIFFERENT -> {
+            val anyDifferent = result == ConceptTableData.OverallComparison.DIFFERENT
             val colors: Pair<Color, Color> = if (anyDifferent) diffColors.yellowPair else diffColors.greenPair
             val chipLabel: String =
                 if (anyDifferent) localizedStrings.conceptDiffResults_.invoke(ConceptDiffItem.ConceptDiffResultEnum.DIFFERENT)
                 else localizedStrings.identical
-
             DiffChip(colorPair = colors, text = chipLabel, modifier = Modifier.fillMaxWidth(0.8f))
         }
         else -> {
@@ -180,8 +187,7 @@ private fun columnSpecForProperty(
             else -> null
         }
         when {
-            data.isInBoth() -> contentWithText(
-                conceptData = data,
+            data.isInBoth() -> contentWithText(conceptData = data,
                 localizedStrings = localizedStrings,
                 diffColors = diffColors,
                 labelToFind = labelToFind,
@@ -190,23 +196,19 @@ private fun columnSpecForProperty(
             singleConcept != null -> { // else
                 val text = stringValueResolver.invoke(singleConcept)
                 val textDisplay: @Composable (Color) -> Unit = { color ->
-                    NullableText(
-                        text = text,
+                    NullableText(text = text,
                         color = color,
                         style = typography.labelMedium,
                         overflow = TextOverflow.Clip)
                 }
                 when (text != null) {
                     true -> Row(Modifier.padding(2.dp)) {
-                        OutlinedButton(
-                            modifier = Modifier.padding(2.dp),
+                        OutlinedButton(modifier = Modifier.padding(4.dp),
                             onClick = { onDetailClick?.invoke(data) },
-                            elevation = ButtonDefaults.elevation(4.dp),
-                            colors = ButtonDefaults.outlinedButtonColors(backgroundColor = MaterialTheme.colorScheme.tertiaryContainer,
-                                contentColor = MaterialTheme.colorScheme.onTertiaryContainer),
-                            border = BorderStroke(1.dp, MaterialTheme.colorScheme.onTertiaryContainer)
-                        ) {
-                            textDisplay.invoke(MaterialTheme.colorScheme.onTertiaryContainer)
+//                            colors = ButtonDefaults.outlinedButtonColors(containerColor = colorScheme.tertiaryContainer,
+//                                contentColor = colorScheme.onTertiaryContainer),
+                            border = BorderStroke(1.dp, colorScheme.onTertiaryContainer)) {
+                            textDisplay.invoke(colorScheme.onTertiaryContainer)
                         }
                     }
                     else -> Row(modifier = Modifier.padding(2.dp).fillMaxSize(),
@@ -246,8 +248,7 @@ private fun contentWithText(
 ) {
     Row(horizontalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterHorizontally),
         verticalAlignment = Alignment.CenterVertically) {
-        ChipForConceptDiffResult(
-            modifier = Modifier.padding(end = 2.dp),
+        ChipForConceptDiffResult(modifier = Modifier.padding(end = 2.dp),
             conceptData = conceptData,
             labelToFind = labelToFind,
             localizedStrings = localizedStrings,
@@ -278,8 +279,7 @@ private fun ChipForConceptDiffResult(
         else -> Button(onClick = {
             onDetailClick(conceptData)
         },
-            elevation = ButtonDefaults.elevation(4.dp),
-            contentPadding = PaddingValues(1.dp),
+            contentPadding = PaddingValues(vertical = 1.dp, horizontal = 4.dp),
             colors = ButtonDefaults.buttonColors(background, foreground)) {
             Text(text = localizedStrings.conceptDiffResults_.invoke(result.result),
                 style = typography.bodyMedium,

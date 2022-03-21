@@ -1,9 +1,6 @@
 package terminodiff.engine.resources
 
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.setValue
+import androidx.compose.runtime.*
 import ca.uhn.fhir.context.FhirContext
 import ca.uhn.fhir.parser.DataFormatException
 import org.hl7.fhir.r4.model.CodeSystem
@@ -13,6 +10,8 @@ import terminodiff.engine.concepts.ConceptDiffItem
 import terminodiff.engine.graph.CodeSystemDiffBuilder
 import terminodiff.engine.graph.CodeSystemGraphBuilder
 import terminodiff.i18n.LocalizedStrings
+import terminodiff.terminodiff.engine.conceptmap.ConceptMapState
+import terminodiff.terminodiff.engine.graph.CombinedGraphBuilder
 import terminodiff.terminodiff.engine.resources.InputResource
 import java.util.*
 
@@ -31,13 +30,24 @@ class DiffDataContainer(private val fhirContext: FhirContext, strings: Localized
     //all other properties are dependent and flow down from the filename changes
     val leftCodeSystem: CodeSystem? by derivedStateOf { loadCodeSystemResource(leftResource, Side.LEFT) }
     val rightCodeSystem: CodeSystem? by derivedStateOf { loadCodeSystemResource(rightResource, Side.RIGHT) }
-    val leftGraphBuilder: CodeSystemGraphBuilder? by derivedStateOf { buildCsGraph(leftCodeSystem) }
-    val rightGraphBuilder: CodeSystemGraphBuilder? by derivedStateOf { buildCsGraph(rightCodeSystem) }
+    val leftGraphBuilder: CodeSystemGraphBuilder? by derivedStateOf {
+        buildCsGraph(leftCodeSystem)?.also {
+            logger.info("Left graph: ${it.graph.vertexSet().count()} vertices, ${it.graph.edgeSet().count()} edges")
+        }
+    }
+    val rightGraphBuilder: CodeSystemGraphBuilder? by derivedStateOf {
+        buildCsGraph(rightCodeSystem)?.also {
+            logger.info("Right graph: ${it.graph.vertexSet().count()} vertices, ${it.graph.edgeSet().count()} edges")
+        }
+    }
+
+    val allCodes: Set<String> by derivedStateOf {
+        setOf<String>().plus(leftGraphBuilder?.nodeTree?.map { it.key } ?: emptySet())
+            .plus(rightGraphBuilder?.nodeTree?.map { it.key } ?: emptySet())
+    }
 
     val codeSystemDiff: CodeSystemDiffBuilder? by derivedStateOf {
-        buildDiff(
-            leftGraphBuilder, rightGraphBuilder, localizedStrings
-        )
+        buildDiff(leftGraphBuilder, rightGraphBuilder, localizedStrings)
     }
 
     fun reload() {
@@ -84,28 +94,18 @@ class DiffDataContainer(private val fhirContext: FhirContext, strings: Localized
         if (leftGraphBuilder == null || rightGraphBuilder == null) return null
         logger.info("building diff")
         return CodeSystemDiffBuilder(leftGraphBuilder, rightGraphBuilder, localizedStrings).build().also {
-            logger.info(
-                "${it.onlyInLeftConcepts.size} code(-s) only in left: ${
-                    it.onlyInLeftConcepts.joinToString(
-                        separator = ", ", limit = 50
-                    )
-                }"
-            )
-            logger.info(
-                "${it.onlyInRightConcepts.size} code(-s) only in right: ${
-                    it.onlyInRightConcepts.joinToString(
-                        separator = ", ", limit = 50
-                    )
-                }"
-            )
+            logger.info("${it.onlyInLeftConcepts.size} code(-s) only in left: ${
+                it.onlyInLeftConcepts.joinToString(separator = ", ", limit = 50)
+            }")
+            logger.info("${it.onlyInRightConcepts.size} code(-s) only in right: ${
+                it.onlyInRightConcepts.joinToString(separator = ", ", limit = 50)
+            }")
             val differentConcepts =
                 it.conceptDifferences.filterValues { d -> d.conceptComparison.any { c -> c.result != ConceptDiffItem.ConceptDiffResultEnum.IDENTICAL } || d.propertyComparison.size != 0 }
             logger.debug("${differentConcepts.size} concept-level difference(-s): ${
                 differentConcepts.entries.joinToString(separator = "\n - ") { (key, diff) ->
                     "$key -> ${
-                        diff.toString(
-                            localizedStrings
-                        )
+                        diff.toString(localizedStrings)
                     }"
                 }
             }")

@@ -1,14 +1,10 @@
 package terminodiff.terminodiff.ui.panes.metadatadiff
 
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.unit.dp
 import org.hl7.fhir.r4.model.CodeSystem
 import terminodiff.engine.concepts.KeyedListDiffResultKind
 import terminodiff.engine.resources.DiffDataContainer
@@ -39,7 +35,6 @@ private fun propertyColumnSpec(localizedStrings: LocalizedStrings): ColumnSpec.S
     val selectableContent: @Composable (MetadataComparison) -> Unit = { comparison ->
         SelectableText(text.invoke(comparison),
             fontWeight = FontWeight.Bold,
-            color = MaterialTheme.colorScheme.onTertiaryContainer,
             style = MaterialTheme.typography.bodyLarge,
             textAlign = TextAlign.Center)
     }
@@ -84,13 +79,12 @@ private fun resultColumnSpec(
 
     @Composable
     fun renderDiffButton(onShowDetailsClick: (MetadataComparison) -> Unit) {
-        Button(onClick = {
+        FilledTonalButton(onClick = {
             if (comparison.diffItem is MetadataKeyedListDiffItem<*, *>) {
                 onShowDetailsClick(comparison)
             }
         },
-            elevation = ButtonDefaults.elevation(4.dp),
-            colors = ButtonDefaults.buttonColors(backgroundColor, foregroundColor)) {
+            colors = ButtonDefaults.filledTonalButtonColors(backgroundColor, foregroundColor)) {
             Text(text = resultText,
                 style = MaterialTheme.typography.bodyMedium,
                 fontStyle = fontStyle,

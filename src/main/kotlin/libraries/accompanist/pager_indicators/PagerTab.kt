@@ -1,13 +1,13 @@
-package libraries.pager_indicators
+@file:Suppress("KDocUnresolvedReference")
+
+package libraries.accompanist.pager_indicators
 
 import libraries.accompanist.pager.PagerState
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentSize
-import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.TabPosition
-import androidx.compose.material.TabRow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed

@@ -1,12 +1,11 @@
 package terminodiff.terminodiff.ui.panes.loaddata.panes
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.material.Button
-import androidx.compose.material.ButtonDefaults
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.FolderOpen
 import androidx.compose.material.icons.filled.Plagiarism
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Text
+import androidx.compose.material.icons.outlined.FolderOpen
+import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -16,8 +15,10 @@ import org.apache.commons.lang3.SystemUtils
 import terminodiff.i18n.LocalizedStrings
 import terminodiff.preferences.AppPreferences
 import terminodiff.terminodiff.engine.resources.InputResource
+import terminodiff.terminodiff.ui.util.LabeledTextField
 import terminodiff.ui.AppIconResource
 import terminodiff.ui.AppImageIcon
+import terminodiff.ui.LoadListener
 import java.io.File
 import javax.swing.JFileChooser
 import javax.swing.filechooser.FileNameExtensionFilter
@@ -38,8 +39,14 @@ fun FromFileScreenWrapper(
         onChangeFilePath = {
             selectedPath = it ?: ""
         },
-        onLoadLeftFile = onLoadLeft,
-        onLoadRightFile = onLoadRight)
+        onLoadLeftFile = {
+            onLoadLeft(it)
+            selectedPath = ""
+        },
+        onLoadRightFile = {
+            onLoadRight(it)
+            selectedPath = ""
+        })
 }
 
 @Composable
@@ -51,9 +58,8 @@ private fun FromFileScreen(
     onLoadRightFile: (InputResource) -> Unit,
     selectedPath: String,
 ) = Column(modifier = Modifier.fillMaxSize().wrapContentSize(Alignment.Center)) {
-    val buttonColors =
-        ButtonDefaults.buttonColors(backgroundColor = MaterialTheme.colorScheme.primary,
-            contentColor = MaterialTheme.colorScheme.onPrimary)
+    val buttonColors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.primary,
+        contentColor = MaterialTheme.colorScheme.onPrimary)
     val isValidPath by derivedStateOf {
         when {
             selectedFile == null -> false
@@ -61,28 +67,31 @@ private fun FromFileScreen(
             else -> false
         }
     }
-
-    LabeledTextField(
-        value = selectedPath,
-        onValueChange = onChangeFilePath,
-        modifier = Modifier.fillMaxWidth().padding(12.dp),
-        labelText = localizedStrings.fileSystem,
-        trailingIconVector = Icons.Default.Plagiarism,
-        trailingIconDescription = localizedStrings.fileSystem
-    ) {
-        val newFile = showLoadFileDialog(localizedStrings.loadFromFile)
-        newFile?.let {
-            onChangeFilePath.invoke(it.absolutePath)
-            AppPreferences.fileBrowserDirectory = it.toPath().parent.invariantSeparatorsPathString
+    Row(Modifier.fillMaxWidth(),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)) {
+        LabeledTextField(modifier = Modifier.weight(0.6f),
+            value = selectedPath,
+            onValueChange = onChangeFilePath,
+            labelText = localizedStrings.fileSystem)
+        Button(modifier = Modifier.weight(0.15f), onClick = {
+            val newFile = showLoadFileDialog(localizedStrings.loadFromFile)
+            newFile?.let {
+                onChangeFilePath.invoke(it.absolutePath)
+                AppPreferences.fileBrowserDirectory = it.toPath().parent.invariantSeparatorsPathString
+            }
+        }) {
+            Icon(Icons.Default.FolderOpen, localizedStrings.open)
+            Text(localizedStrings.open)
         }
     }
+
 
     Row(Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceEvenly) {
         Button(modifier = Modifier.padding(4.dp),
             colors = buttonColors,
             enabled = isValidPath,
-            onClick = { onLoadLeftFile(InputResource(InputResource.Kind.FILE, selectedFile)) },
-            elevation = ButtonDefaults.elevation(defaultElevation = 8.dp)) {
+            onClick = { onLoadLeftFile(InputResource(InputResource.Kind.FILE, selectedFile)) }) {
             AppImageIcon(relativePath = AppIconResource.icLoadLeftFile,
                 label = localizedStrings.loadLeft,
                 tint = buttonColors.contentColor(enabled = isValidPath).value)
@@ -91,8 +100,7 @@ private fun FromFileScreen(
         Button(modifier = Modifier.padding(4.dp),
             colors = buttonColors,
             enabled = isValidPath,
-            onClick = { onLoadRightFile(InputResource(InputResource.Kind.FILE, selectedFile)) },
-            elevation = ButtonDefaults.elevation(defaultElevation = 8.dp)) {
+            onClick = { onLoadRightFile(InputResource(InputResource.Kind.FILE, selectedFile)) }) {
             AppImageIcon(relativePath = AppIconResource.icLoadRightFile,
                 label = localizedStrings.loadRight,
                 tint = buttonColors.contentColor(enabled = isValidPath).value)
