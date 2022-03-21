@@ -1,6 +1,7 @@
 import org.jetbrains.compose.compose
 import org.jetbrains.compose.desktop.application.dsl.TargetFormat
 import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
+import org.jetbrains.kotlin.util.capitalizeDecapitalize.toLowerCaseAsciiOnly
 
 plugins {
     kotlin("jvm") version "1.6.10"
@@ -91,22 +92,22 @@ compose.desktop {
                 vendor = "IT Center for Clinical Research, University of Lübeck"
                 copyright = "Joshua Wiedekopf / IT Center for Clinical Research, 2022-"
 
-                when (composeBuildOs) {
-                    "ubuntu", "redhat" -> linux {
+                when (composeBuildOs?.toLowerCaseAsciiOnly()) {
+                    "ubuntu", "redhat", "debian", "rpm", "deb" -> linux {
                         iconFile.set(resourceDir.file("common/terminodiff.png"))
                         rpmLicenseType = "GPL-3.0"
                         debMaintainer = "j.wiedekopf@uni-luebeck.de"
                         appCategory = "Development"
                         when (composeBuildOs) {
-                            "ubuntu" -> targetFormats(
+                            "ubuntu", "debian", "deb" -> targetFormats(
                                 TargetFormat.Deb,
                             )
-                            "redhat" -> targetFormats(
+                            "redhat", "rpm" -> targetFormats(
                                 TargetFormat.Rpm
                             )
                         }
                     }
-                    "mac" -> macOS {
+                    "mac", "macos" -> macOS {
                         jvmArgs += listOf("-Dskiko.renderApi=SOFTWARE")
                         bundleID = "de.uzl.itcr.terminodiff"
                         signing {
@@ -117,7 +118,7 @@ compose.desktop {
                             TargetFormat.Dmg
                         )
                     }
-                    "windows" -> windows {
+                    "windows", "win" -> windows {
                         iconFile.set(resourceDir.file("windows/terminodiff.ico"))
                         perUserInstall = true
                         dirChooser = true
