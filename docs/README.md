@@ -7,7 +7,7 @@ compare [HL7 FHIR CodeSystem resources](https://www.hl7.org/fhir/codesystem.html
 
 This work was presented at the Medical Informatics Europe 2022 conference. The paper is available as follows (CC-BY-NC):
 
-> Wiedekopf J, Drenkhahn C, Rosenau L, Ulrich H, Kock-Schoppenhauer AK, Ingenerf J. TerminoDiff - Detecting Semantic Differences in HL7 FHIR CodeSystems. Stud Health Technol Inform. 2022 May 25;294:362-366. doi: 10.3233/SHTI220475. PMID: 35612097.
+> Wiedekopf J, Drenkhahn C, Rosenau L, Ulrich H, Kock-Schoppenhauer AK, Ingenerf J. TerminoDiff - Detecting Semantic Differences in HL7 FHIR CodeSystems. Stud Health Technol Inform. 2022 May 25;294:362-366. doi: [10.3233/SHTI220475](doi.org/10.3233/SHTI220475). PMID: 35612097.
  
 ## Table of Contents
 
@@ -277,7 +277,7 @@ We are looking at implementing the following features (please look at our issue 
 
 Please cite this work as: 
 
-> Wiedekopf J, Drenkhahn C, Rosenau L, Ulrich H, Kock-Schoppenhauer AK, Ingenerf J. TerminoDiff - Detecting Semantic Differences in HL7 FHIR CodeSystems. Stud Health Technol Inform. 2022 May 25;294:362-366. doi: 10.3233/SHTI220475. PMID: 35612097.
+> Wiedekopf J, Drenkhahn C, Rosenau L, Ulrich H, Kock-Schoppenhauer AK, Ingenerf J. TerminoDiff - Detecting Semantic Differences in HL7 FHIR CodeSystems. Stud Health Technol Inform. 2022 May 25;294:362-366. doi: [10.3233/SHTI220475](doi.org/10.3233/SHTI220475). PMID: 35612097.
 
 ## Can I help?
 
