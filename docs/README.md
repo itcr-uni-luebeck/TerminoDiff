@@ -4,6 +4,10 @@
 
 TerminoDiff is a graphical application to quickly
 compare [HL7 FHIR CodeSystem resources](https://www.hl7.org/fhir/codesystem.html).
+
+This work was presented at the Medical Informatics Europe 2022 conference. The paper is available as follows (CC-BY-NC):
+
+> Wiedekopf J, Drenkhahn C, Rosenau L, Ulrich H, Kock-Schoppenhauer AK, Ingenerf J. TerminoDiff - Detecting Semantic Differences in HL7 FHIR CodeSystems. Stud Health Technol Inform. 2022 May 25;294:362-366. doi: 10.3233/SHTI220475. PMID: 35612097.
  
 ## Table of Contents
 
@@ -271,13 +275,9 @@ We are looking at implementing the following features (please look at our issue 
 
 ## How do I cite this?
 
-This work is the subject of a submission to the Medical Informatics Europe 2022 conference.
+Please cite this work as: 
 
-In the meantime, please cite via the [Zenodo DOI](https://doi.org/10.5281/zenodo.5898267) as:
-
-```
-Wiedekopf, Joshua, et al. (2022). TerminoDiff. Zenodo. https://doi.org/10.5281/zenodo.5898267
-```
+> Wiedekopf J, Drenkhahn C, Rosenau L, Ulrich H, Kock-Schoppenhauer AK, Ingenerf J. TerminoDiff - Detecting Semantic Differences in HL7 FHIR CodeSystems. Stud Health Technol Inform. 2022 May 25;294:362-366. doi: 10.3233/SHTI220475. PMID: 35612097.
 
 ## Can I help?
 
